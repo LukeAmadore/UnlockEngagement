@@ -1,0 +1,223 @@
+cat > /home/claude/v4_data.js << 'ENDDATA'
+const DIMS = [
+  {id:'ap',   name:'Action Planning Optimism', icon:'✅', color:'#0d7a5f', pill:'p-ap',   target:70},
+  {id:'grow', name:'Growth',                   icon:'📈', color:'#7c3aed', pill:'p-grow', target:70},
+  {id:'rec',  name:'Recognition',              icon:'🏆', color:'#b45309', pill:'p-rec',  target:70},
+  {id:'comm', name:'Communication',            icon:'📣', color:'#2563a8', pill:'p-comm', target:70},
+  {id:'eng',  name:'Engagement (overall)',     icon:'💡', color:'#0d7a5f', pill:'p-eng',  target:70},
+];
+
+const PILL_LABELS = {
+  'p-ap':'Action Planning','p-grow':'Growth','p-rec':'Recognition',
+  'p-comm':'Communication','p-buyin':'Buy-in','p-part':'Participation','p-eng':'Engagement'
+};
+
+const QUICK_WINS = [
+  {id:'qw-pizza',  name:'Pizza party',              icon:'🍕', posLabel:'+4 engagement predicted',         negLabel:'-5 buy-in', posKey:'eng',  posVal:4, negVal:-5, cost:560,  note:'Employees love it. Leadership questions the ROI.'},
+  {id:'qw-friday', name:'Early Friday release',     icon:'🎉', posLabel:'+4 engagement predicted',         negLabel:'-6 buy-in', posKey:'eng',  posVal:4, negVal:-6, cost:0,    note:'Operations pushes back every time.'},
+  {id:'qw-ysdwd',  name:'"You said, we did" email', icon:'📧', posLabel:'+4 Action Planning predicted',    negLabel:'-2 buy-in', posKey:'ap',   posVal:4, negVal:-2, cost:0,    note:'Feels like progress. Leadership wonders if it counts.'},
+  {id:'qw-qr',     name:'Survey QR on bulletin boards',icon:'📋',posLabel:'+4 participation predicted',   negLabel:'-2 buy-in', posKey:'part', posVal:4, negVal:-2, cost:0,    note:'Low effort signal. Executives notice you noticing.'},
+  {id:'qw-trivia', name:'Team trivia event',         icon:'🎯', posLabel:'+3 engagement predicted',        negLabel:'-4 buy-in', posKey:'eng',  posVal:3, negVal:-4, cost:700,  note:'Fun in the room. Finance sees a line item.'},
+  {id:'qw-gift',   name:'Surprise gift drop',        icon:'🎁', posLabel:'+4 recognition predicted',       negLabel:'-5 buy-in', posKey:'rec',  posVal:4, negVal:-5, cost:800,  note:'Employees smile. Leadership asks what the strategy is.'},
+];
+
+const TABS = {
+  ap: {
+    label:'Action Planning', icon:'✅',
+    tracks:[
+      {name:'Action planning infrastructure track', items:[
+        {id:'ap-webinar',   name:'Action planning webinar',         tier:'C1',icon:'🎤',cost:1200,pills:['p-ap','p-buyin'],    note:'Managers learn how to lead action planning sessions. Foundation of the track.'},
+        {id:'ap-workshop',  name:'Action planning workshop',        tier:'C1',icon:'🏫',cost:3500,pills:['p-ap','p-buyin'],    note:'Deeper skill-building. Requires webinar first.',                         req:'ap-webinar'},
+        {id:'ap-cohort',    name:'Manager cohort program',          tier:'C1',icon:'👥',cost:8000,pills:['p-ap','p-buyin'],    note:'Cohort of managers developing together over two quarters.',              req:'ap-workshop'},
+      ]},
+      {name:'Results sharing track', items:[
+        {id:'site-summaries',name:'Site-level results summaries',   tier:'C1',icon:'📄',cost:800, pills:['p-ap','p-comm'],     note:'Custom one-pagers per site. Managers have something concrete to work with.'},
+        {id:'ap-software',   name:'Action planning software',        tier:'C1',icon:'💻',cost:4000,pills:['p-ap','p-part'],    note:'Tracks manager completion rates. Requires mid-tier survey platform.',req:'survey-platform'},
+      ]},
+    ],
+    recurring:[
+      {id:'followthru',    name:'Follow-through communications',    icon:'📨',cost:120, pills:['p-ap','p-part'],  note:'Regular updates on what actions are being taken. Closes the feedback loop.'},
+      {id:'ap-roundtable', name:'Action planning roundtable',       icon:'🪑',cost:400, pills:['p-ap','p-buyin'], note:'Managers share progress with each other. Builds peer accountability.'},
+      {id:'ap-coaching',   name:'Manager AP coaching',              icon:'🎓',cost:500, pills:['p-ap','p-buyin'], note:'Your team coaches individual managers. High buy-in impact.'},
+      {id:'ap-tracker',    name:'Action commitment tracker',        icon:'✔',cost:0,   pills:['p-ap','p-part'],  note:'You manually track every commitment and report on completion. Free but costs a full slot.'},
+    ],
+    campaigns:[
+      {id:'facilitated-ap', name:'Facilitated action planning',    icon:'🤝',cost:2000,pills:['p-ap','p-buyin'], note:'External facilitator. Not gated by manager skill level. Fades Q+1.'},
+      {id:'leader-story',   name:'Leader storytelling sessions',   icon:'🎙',cost:500, pills:['p-ap','p-buyin'], note:'Managers share what changed since last survey. Fades Q+1.'},
+      {id:'site-visits',    name:'"What changed" site visits',     icon:'🚶',cost:800, pills:['p-ap','p-comm'],  note:'You visit each site to present actions taken. Highly visible. Fades Q+1.'},
+      {id:'ap-recognition', name:'Action planning recognition event',icon:'🌟',cost:600,pills:['p-ap','p-buyin'], note:'Recognize the manager who ran the best AP sessions. Fades Q+1.'},
+    ],
+  },
+  grow: {
+    label:'Growth', icon:'📈',
+    tracks:[
+      {name:'Career development track', items:[
+        {id:'career-toolkit',name:'Career conversation toolkit',    tier:'C1',icon:'🧰',cost:400, pills:['p-grow','p-buyin'],  note:'A resource you create. Gives managers a framework for growth conversations.'},
+        {id:'career-pathing',name:'Career pathing framework',       tier:'C1',icon:'🗺',cost:2000,pills:['p-grow','p-ap'],    note:'Maps development paths across roles. Requires toolkit first.',          req:'career-toolkit'},
+        {id:'mobility',      name:'Internal mobility program',      tier:'C1',icon:'🔄',cost:3000,pills:['p-grow','p-ap'],    note:'Enables lateral moves across sites. Requires career pathing.',          req:'career-pathing'},
+      ]},
+      {name:'Learning infrastructure track', items:[
+        {id:'skills-assess', name:'Skills assessment tool',         tier:'C1',icon:'📝',cost:1200,pills:['p-grow'],            note:'Helps employees identify development areas.'},
+        {id:'learn-library', name:'Learning resource library',      tier:'C1',icon:'📚',cost:1800,pills:['p-grow','p-comm'],  note:'Curated resources employees access on demand. Requires skills assessment.',req:'skills-assess'},
+      ]},
+    ],
+    recurring:[
+      {id:'mentoring-promo',name:'Mentoring program promotion',     icon:'🤝',cost:400, pills:['p-grow'],             note:'Promote existing mentoring connections. You facilitate the matching.'},
+      {id:'growth-newsletter',name:'Growth newsletter',             icon:'📰',cost:100, pills:['p-grow','p-comm'],    note:'Shares development opportunities and stories. Builds culture of growth.'},
+    ],
+    campaigns:[
+      {id:'internal-fair',  name:'Internal job fair',               icon:'🏢',cost:1200,pills:['p-grow'],             note:'Employees see open roles across all three sites. Fades Q+1.'},
+      {id:'skills-bootcamp',name:'Skills bootcamp',                 icon:'🎯',cost:2500,pills:['p-grow','p-buyin'],   note:'Focused skill-building event. High engagement. Fades Q+1.'},
+      {id:'career-panel',   name:'Career panel event',              icon:'🎤',cost:600, pills:['p-grow','p-buyin'],   note:'Employees hear from internal leaders on career paths. Fades Q+1.'},
+    ],
+  },
+  rec: {
+    label:'Recognition', icon:'🏆',
+    tracks:[
+      {name:'Recognition infrastructure track', items:[
+        {id:'shoutout',      name:'Peer shoutout channel',           tier:'C1',icon:'📣',cost:0,   pills:['p-rec','p-eng'],    note:'Free to launch. Permanent. Managers and employees recognize each other publicly.'},
+        {id:'recog-platform',name:'Peer recognition platform',       tier:'C1',icon:'⭐',cost:2000,pills:['p-rec','p-buyin'],  note:'Structured recognition platform. Requires shoutout channel first.',     req:'shoutout'},
+        {id:'recog-coaching',name:'Manager recognition coaching',    tier:'C1',icon:'🎓',cost:1500,pills:['p-rec','p-buyin'],  note:'Coaches managers on recognizing meaningfully, not just frequently.',    req:'recog-platform'},
+      ]},
+      {name:'Compensation equity track', items:[
+        {id:'market-analysis',name:'Market salary analysis',         tier:'C1',icon:'📊',cost:1200,pills:['p-rec','p-buyin'],  note:'Understand where compensation stands versus the market.'},
+        {id:'rewards-comms', name:'Total rewards communication',     tier:'C1',icon:'📨',cost:500, pills:['p-rec','p-comm'],   note:'Help employees understand full value of their compensation.',          req:'market-analysis'},
+      ]},
+    ],
+    recurring:[
+      {id:'eom',           name:'Employee of the month',             icon:'🥇',cost:350, pills:['p-rec'],             note:'Modest cost. Consistent visibility. Easy to maintain.'},
+      {id:'recog-calendar',name:'Recognition calendar',              icon:'📅',cost:0,   pills:['p-rec','p-buyin'],   note:'Structured recognition moments throughout the year. Costs your time.'},
+    ],
+    campaigns:[
+      {id:'spot-bonus',    name:'Spot bonus pool',                   icon:'💰',cost:1000,pills:['p-rec'],             note:'Managers distribute pool as spot recognition. Fades Q+1.'},
+      {id:'awards-event',  name:'Annual awards event',               icon:'🏅',cost:2000,pills:['p-rec','p-buyin'],   note:'Company-wide recognition moment. High visibility. Fades Q+1.'},
+      {id:'gift-cards',    name:'Gift card distribution',            icon:'🎁',cost:600, pills:['p-rec'],             note:'Small tangible gesture. Briefly appreciated. Fades Q+1.'},
+    ],
+  },
+  comm: {
+    label:'Communications', icon:'📣',
+    tracks:[
+      {name:'Results communication track', items:[
+        {id:'survey-launch-kit',name:'Survey launch kit',            tier:'C1',icon:'🚀',cost:500, pills:['p-comm','p-part'],  note:'Templates, talking points, signage. Everything managers need to promote the survey.'},
+        {id:'results-pkg',   name:'Results communication package',   tier:'C1',icon:'📦',cost:800, pills:['p-comm','p-ap'],   note:'Custom materials for each site to share and act on results.',          req:'survey-launch-kit'},
+        {id:'intranet-page', name:'Intranet results page',           tier:'C1',icon:'💻',cost:1200,pills:['p-comm','p-part'], note:'Live page showing themes and actions. Requires mid-tier platform.',    req:'survey-platform'},
+      ]},
+      {name:'Site visibility track', items:[
+        {id:'bulletin-display',name:'Bulletin board results display', tier:'C1',icon:'📌',cost:300, pills:['p-comm','p-part'], note:'Physical presence in break rooms across all three sites.'},
+        {id:'digital-screens',name:'Digital screens at each site',   tier:'C1',icon:'📺',cost:1500,pills:['p-comm','p-part'], note:'Results and actions displayed prominently.',                           req:'bulletin-display'},
+        {id:'site-kits',     name:'Site-specific communication kits', tier:'C1',icon:'🗂',cost:1000,pills:['p-comm','p-ap'],  note:'Custom resources per site based on their scores.',                     req:'digital-screens'},
+      ]},
+    ],
+    recurring:[
+      {id:'cascade-support',name:'Manager cascade support',          icon:'📋',cost:100, pills:['p-comm','p-buyin'],  note:'Templates so managers can share results with their teams each quarter.'},
+      {id:'progress-update',name:'Quarterly progress update',        icon:'📊',cost:0,   pills:['p-comm','p-ap'],    note:'Central communication on action commitments. Costs your time to produce.'},
+      {id:'pre-survey-email',name:'Pre-survey awareness emails',     icon:'📧',cost:0,   pills:['p-comm','p-part'],  note:'Built and sent by you. Simple. Effective participation nudge.'},
+    ],
+    campaigns:[
+      {id:'survey-camp',   name:'Survey launch campaign',            icon:'🎯',cost:500, pills:['p-comm','p-part'],  note:'Posters, emails, site signage. Full participation push. Fades Q+1.'},
+      {id:'results-announce',name:'Company-wide results announcement',icon:'📢',cost:200,pills:['p-comm','p-ap'],   note:'All-employee communication on overall results. Transparency signal. Fades Q+1.'},
+      {id:'ceo-video',     name:'CEO video message on survey',        icon:'🎥',cost:0,  pills:['p-comm','p-buyin','p-part'],note:'CEO records a 2-minute video. Requires 65% buy-in. Fades Q+1.',req:'buyin65'},
+    ],
+  },
+  cap: {
+    label:'Capability', icon:'🔧',
+    tracks:[
+      {name:'Survey platform track', items:[
+        {id:'basic-platform', name:'Basic survey tool',              tier:'C1',icon:'📋',cost:2000, pills:['p-part','p-comm'],               note:'Move off spreadsheets. Basic survey distribution and collection.'},
+        {id:'survey-platform',name:'Mid-tier listening platform',    tier:'C1',icon:'🖥',cost:8000, pills:['p-part','p-ap','p-comm'],         note:'Automated analysis, trend tracking, manager dashboards.',req:'basic-platform'},
+        {id:'adv-platform',   name:'Advanced listening platform',    tier:'C1',icon:'🤖',cost:18000,pills:['p-part','p-ap','p-comm','p-grow'],note:'Predictive analytics and real-time dashboards.',      req:'survey-platform'},
+      ]},
+      {name:'Analytics track', items:[
+        {id:'basic-reporting',name:'Basic reporting templates',       tier:'C1',icon:'📈',cost:400,  pills:['p-comm','p-buyin'],              note:'Standardized reports. Results look professional and credible.'},
+        {id:'analytics-train',name:'People analytics training',      tier:'C1',icon:'🎓',cost:1500, pills:['p-buyin','p-ap'],               note:'Your team trained on interpreting and presenting data.',    req:'basic-reporting'},
+        {id:'exec-dashboard', name:'Executive dashboard',             tier:'C1',icon:'📊',cost:2500, pills:['p-buyin'],                      note:'Leadership sees results in real time. Requires advanced platform.',req:'adv-platform'},
+      ]},
+    ],
+    recurring:[
+      {id:'shrm-membership',name:'SHRM membership',                  icon:'📕',cost:150, pills:['p-buyin'],            note:'Professional credibility. Access to research and benchmarks.'},
+      {id:'research-access',name:'Industry research access',         icon:'📰',cost:50,  pills:['p-buyin','p-comm'],  note:'Stay current. Share insights with leadership. High credibility signal.'},
+    ],
+    campaigns:[
+      {id:'hr-conference',  name:'HR conference attendance',          icon:'✈',cost:800, pills:['p-buyin'],            note:'You attend and bring back insights. Once per year. Fades Q+1.'},
+      {id:'team-cert',      name:'Team certification cohort',         icon:'🏆',cost:1500,pills:['p-buyin','p-ap'],   note:'Your team earns a relevant certification. Credibility with leadership. Fades Q+1.'},
+      {id:'hrbp-consulting',name:'Sr. HRBP consulting engagement',   icon:'🤝',cost:2000,pills:['p-buyin','p-ap'],   note:'Experienced HRBP reviews your listening strategy. Fades Q+1.'},
+    ],
+  },
+  lead: {
+    label:'Leadership', icon:'🎯',
+    tracks:[
+      {name:'Manager development track', items:[
+        {id:'listen-guide',  name:'Manager listening guide',          tier:'C1',icon:'📖',cost:200, pills:['p-buyin','p-ap'],   note:'A resource you create. Framework for team listening conversations.'},
+        {id:'data-skills',   name:'Data literacy workshop',           tier:'C1',icon:'📊',cost:1200,pills:['p-buyin','p-ap'],  note:'Managers learn to interpret their team survey scores.',          req:'listen-guide'},
+        {id:'people-dash',   name:'People leader dashboard access',   tier:'C1',icon:'💻',cost:2000,pills:['p-buyin','p-ap'],  note:'Managers see their own team results in real time.',              req:'survey-platform'},
+      ]},
+      {name:'Communication skills track', items:[
+        {id:'results-train', name:'Results communication training',   tier:'C1',icon:'🗣',cost:800, pills:['p-buyin','p-comm'], note:'Managers learn how to share results with their teams effectively.'},
+        {id:'diff-convos',   name:'Difficult conversations workshop', tier:'C1',icon:'💬',cost:1500,pills:['p-buyin','p-ap'],  note:'Equips managers for tough conversations that surface from survey results.',req:'results-train'},
+        {id:'psych-safety',  name:'Psychological safety training',    tier:'C1',icon:'🛡',cost:2000,pills:['p-buyin','p-ap','p-grow'],note:'Deeper culture work. Requires difficult conversations first.',req:'diff-convos'},
+      ]},
+    ],
+    recurring:[
+      {id:'data-coaching',  name:'Data coaching with managers',       icon:'🎓',cost:600, pills:['p-buyin','p-ap'],   note:'Your team coaches managers on reading and using their survey scores.'},
+      {id:'driver-training',name:'Survey driver training',            icon:'🧠',cost:400, pills:['p-buyin','p-part'], note:'Managers learn what the dimensions mean and how their behavior affects scores.'},
+      {id:'mgr-comm-support',name:'Manager communication support',    icon:'📋',cost:300, pills:['p-buyin','p-comm'], note:'Ongoing templates and support for managers communicating results.'},
+    ],
+    campaigns:[
+      {id:'lead-retreat',   name:'Leadership retreat',                icon:'🏕',cost:3000,pills:['p-buyin'],          note:'Off-site with senior leaders. Big buy-in spike. Requires 60% buy-in. Fades Q+1.',req:'buyin60'},
+      {id:'mgr-recog',      name:'Manager recognition event',         icon:'🌟',cost:1500,pills:['p-buyin','p-ap'],  note:'Recognize managers who ran great action planning. Fades Q+1.'},
+      {id:'guest-speaker',  name:'Guest speaker on engagement',       icon:'🎤',cost:800, pills:['p-buyin'],         note:'External voice on why listening matters. Good for skeptical leaders. Fades Q+1.'},
+    ],
+  },
+};
+
+const EVENTS = {
+  early:[
+    {id:'E01',type:'neg',title:'A shift supervisor at Site B shared last year\'s survey results during a team huddle — and someone laughed out loud.',desc:'The story spread across all three sites by end of week. Two supervisors texted you asking what you plan to do differently. Employees are watching.',impact:'Action Planning Optimism predicted range shifts downward this quarter'},
+    {id:'E02',type:'neg',title:'A plant manager told his team the survey does not change anything. He has seen three of them and nothing has happened.',desc:'Three employees mentioned it to your team during a site walk. Word travels fast in a manufacturing plant.',impact:'Leadership buy-in -6'},
+    {id:'E03',type:'neg',title:'Survey participation at Site C was 51% last year. A vocal skeptic told coworkers it was a waste of time.',desc:'Site C has always been your hardest site. The skeptic is a respected line lead with 12 years at Meridian.',impact:'Participation predicted range drops this quarter'},
+    {id:'E04',type:'neg',title:'Your budget request for a survey platform was denied. Finance says the spreadsheet is fine.',desc:'"We have been doing this for years without special software" was the exact quote. You have a meeting with the CFO next month.',impact:'Capability investments cost +20% this quarter'},
+    {id:'E05',type:'neg',title:'A new production manager says they did not do surveys at their last company and nobody complained.',desc:'He said it in a leadership meeting. Three other managers nodded. Your CHRO looked at you.',impact:'Leadership buy-in -5'},
+    {id:'E06',type:'pos',title:'A line worker at Site A submitted unsolicited feedback saying the last survey was the first time anyone ever asked her opinion.',desc:'She wrote three paragraphs. Her manager forwarded it to the plant director without being asked.',impact:'Action Planning Optimism predicted range improves this quarter'},
+    {id:'E07',type:'pos',title:'Your CHRO mentioned the listening program in a company all-hands as a strategic priority for the year.',desc:'They used the phrase "listening is how we lead" unprompted. You did not write the speech.',impact:'Leadership buy-in +6'},
+    {id:'E08',type:'pos',title:'Participation at Site B jumped 8 points after a supervisor personally encouraged her team to complete the survey.',desc:'She sent a personal video message. 94% of her team responded. Other supervisors are asking what she did.',impact:'Participation predicted range improves significantly'},
+    {id:'E09',type:'choice',title:'A manager wants to see individual employee responses to have real conversations with his team.',desc:'He is well-intentioned and genuinely wants to help. He does not fully understand why this is a confidentiality problem.',optA:'Explain confidentiality and redirect to aggregated themes',optB:'Find a partial accommodation using small group summaries by theme'},
+    {id:'E10',type:'choice',title:'Finance asks you to reduce the survey to once every two years to save costs.',desc:'The proposal is framed as "survey fatigue reduction." You have data that annual surveys produce better outcomes. How do you respond?',optA:'Push back with data on survey frequency and outcomes',optB:'Propose a hybrid — full survey annually, pulse quarterly at lower cost'},
+  ],
+  mid:[
+    {id:'M01',type:'neg',title:'A new SVP of Operations was hired and her first question to you is what the ROI of this survey program is.',desc:'She has a reputation for cutting what she cannot measure. She is meeting with your CHRO next week. You have 7 days to prepare.',impact:'Leadership buy-in -10'},
+    {id:'M02',type:'neg',title:'Survey fatigue is setting in. Three managers told employees to just fill in fives so the team could be done with it.',desc:'You heard about it from two different sources. This is a participation problem, an action planning problem, and a leadership credibility problem all at once.',impact:'Participation predicted drops significantly'},
+    {id:'M03',type:'neg',title:'Results from Site A are significantly worse than Sites B and C. The Site A plant manager is defensive and refuses to share results with his team.',desc:'He told HR his people are not ready to see these numbers. You disagree. But he outranks you.',impact:'Action Planning Optimism predicted -5'},
+    {id:'M04',type:'neg',title:'Your highest-performing manager was poached by a competitor.',desc:'She gave two weeks notice. Her teams across all three sites sent goodbye emails. You have already gotten questions about what happens next.',impact:'Leadership buy-in -6 this quarter'},
+    {id:'M05',type:'pos',title:'A Site B supervisor was featured in an industry article about effective manager listening practices.',desc:'Three managers from other Meridian sites reached out asking what she does differently. The article mentioned Meridian Foods by name.',impact:'Leadership buy-in +4 this quarter'},
+    {id:'M06',type:'pos',title:'Participation hit 82% this year — the highest in company history.',desc:'The CEO mentioned it in the board meeting without being prompted. Your CHRO forwarded you the board deck with a note that just said: well done.',impact:'Leadership buy-in +8'},
+    {id:'M07',type:'choice',title:'The SVP of Operations has reviewed the data and is cautiously interested — but wants results broken down by department rather than company-wide.',desc:'It is a reasonable request strategically. But some departments will feel exposed in ways that could damage trust in the survey process.',optA:'Agree to department-level reporting with clear guardrails on minimum response counts',optB:'Propose site-level reporting as a middle ground that protects confidentiality'},
+    {id:'M08',type:'choice',title:'A manager at Site C wants to share his team\'s raw scores publicly on the break room wall.',desc:'His scores are actually good. But other teams at the same site will compare, and some managers will feel pressure to do the same whether their scores are good or not.',optA:'Support it and help him frame the scores with context',optB:'Redirect to sharing themes and actions rather than raw scores'},
+  ],
+  late:[
+    {id:'L01',type:'neg',title:'The CEO questions the ROI of the entire listening program in a leadership meeting.',desc:'We have been running this for three years. Why is action planning optimism still below 60 percent? The room went quiet. Your CHRO looked at you. You had 90 seconds.',impact:'Leadership buy-in -12'},
+    {id:'L02',type:'neg',title:'Finance proposes eliminating the survey program and replacing it with a quarterly pulse check run by HR generalists.',desc:'The survey platform contract is up for renewal. Finance sent a one-page memo with a table comparing costs. Your program is the most expensive line item.',impact:'Leadership buy-in -5 and capability investments cost +30% this quarter'},
+    {id:'L03',type:'neg',title:'A former employee posted on LinkedIn that the engagement survey at Meridian is just theater and nothing ever changes.',desc:'The post has 400 likes. Two current employees commented in agreement. Your CHRO forwarded it with just a question mark.',impact:'Communication score predicted -5 and participation predicted range drops'},
+    {id:'L04',type:'neg',title:'Overall participation dropped to 61% across all three sites.',desc:'Every dimension score shows a wide uncertainty range. You have been investing for three years and still do not have a clear picture. That is a hard conversation.',impact:'All dimension scores show wider uncertainty ranges this year'},
+    {id:'L05',type:'pos',title:'A site manager who was a vocal skeptic in Year 1 runs an unsolicited recognition event for her team, citing development coaching as the reason she changed.',desc:'She sent you a handwritten note. First one you have received in three years. Her team scores jumped 11 points since Year 1.',impact:'Action Planning Optimism +6 and buy-in +5'},
+    {id:'L06',type:'pos',title:'The board requests a presentation on People outcomes. Your three-year trend data tells a compelling story.',desc:'You have 20 minutes in the board meeting. The trend lines are moving in the right direction. Participation is up. Action planning optimism has improved every year.',impact:'Leadership buy-in +10 and next year budget increases 15%'},
+    {id:'L07',type:'choice',title:'The CEO has challenged your program directly. You have one quarter to make the case.',desc:'You have three years of data. Some of it is good. Some of it shows gaps you have not fully closed yet. How do you respond?',optA:'Defend with three-year trend data and a specific Year 4 investment plan',optB:'Propose a scaled-back version to demonstrate fiscal discipline and buy more time'},
+    {id:'L08',type:'choice',title:'Finance\'s proposal to replace the survey with HR-run pulse checks has reached the board.',desc:'Your CHRO is asking for your recommendation. You have the data. You also have a relationship with the CFO that you have been building for three years.',optA:'Fight to keep the full survey program with a detailed cost-reduction plan',optB:'Accept the pulse check framework but propose running it with significantly more rigor than Finance expects'},
+  ],
+};
+
+const SIGNALS = [
+  '"Nobody told us what happened with last year\'s survey. I assumed they filed it away." — Anonymous, Site A feedback form',
+  'Three managers at Site B signed up for the action planning webinar without being asked.',
+  'A maintenance worker at Site C asked HR when the next survey was coming. First time anyone has asked proactively.',
+  'A Site A team posted their own action commitments on the break room whiteboard. Nobody told them to.',
+  '"I actually filled it out this time. Last year I did not bother." — Anonymous, end-of-quarter pulse',
+  'A manager forwarded your results communication email to her team with a personal note attached. She wrote four paragraphs.',
+  'Two managers from different sites were overheard comparing action planning approaches in the parking lot.',
+  '"My team asked me in our one-on-one when the survey results were coming. That has never happened before." — Site C supervisor',
+];
+ENDDATA
+echo "data: $(wc -l < /home/claude/v4_data.js) lines"
+Output
+
+data: 216 lines
+Done
