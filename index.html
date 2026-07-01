@@ -283,6 +283,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
   .track-nodes{grid-template-columns:repeat(2,1fr)}
   .reveal-scores{gap:20px}
   .rv-val{font-size:38px}
+  .game-shell{padding-bottom:32px}
+  .screen{padding-bottom:32px}
 }
 @media(min-width:681px){.mob-toggle{display:none}}
 </style>
@@ -291,9 +293,9 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 <div id="app"></div>
 <script>
 var DIFF = {
-  easy:{label:'Inherited Momentum',color:'#4CAF50',eng:68,ap:65,part:79,trust:52,budget:90000,cap:4,polcap:40,tree:[],voice:'You inherited a program that mostly works. Leadership tolerates it. Employees fill it out. Your job is to make it mean something.'},
-  normal:{label:'Fixer Upper',color:'#FFC107',eng:62,ap:48,part:74,trust:28,budget:45000,cap:3,polcap:25,tree:[],voice:'Three surveys. Three years of the same scores. Nobody acted on anything. You have $45,000 and one year to change that narrative.'},
-  hard:{label:'Post-Reorg Culture',color:'#F44336',eng:51,ap:38,part:58,trust:12,budget:28000,cap:2,polcap:10,tree:[],voice:'You were brought in after a restructuring. The CFO asked in your first week why Meridian even does a survey. You have $28,000 and almost no goodwill. Go.'}
+  easy:{label:'Inherited Momentum',color:'#4CAF50',eng:68,ap:65,part:79,trust:52,budget:50000,cap:4,polcap:40,tree:[],voice:'You inherited a program that mostly works. Leadership tolerates it. Employees fill it out. Your job is to make it mean something.'},
+  normal:{label:'Fixer Upper',color:'#FFC107',eng:62,ap:48,part:74,trust:28,budget:40000,cap:3,polcap:25,tree:[],voice:'Three surveys. Three years of the same scores. Nobody acted on anything. You have $40,000 and one year to change that narrative.'},
+  hard:{label:'Post-Reorg Culture',color:'#F44336',eng:51,ap:38,part:58,trust:12,budget:25000,cap:2,polcap:10,tree:[],voice:'You were brought in after a restructuring. The CFO asked in your first week why Meridian even does a survey. You have $25,000 and almost no goodwill. Go.'}
 };
 
 var ZONES = [
@@ -340,23 +342,21 @@ var PRE_SURVEY = [
   }
 ];
 
-var ANNUAL_BUDGETS = {
-  easy:   [90000,85000,80000,75000,70000],
-  normal: [45000,42000,40000,38000,35000],
-  hard:   [28000,26000,24000,22000,20000]
-};
+// Fixed annual budgets — same each year, grade bonus/cut applied as flat addition
+var BASE_BUDGETS = {easy:50000, normal:40000, hard:25000};
 
-function calcNextBudget(diff, year, grade, trustZone) {
-  var base = (ANNUAL_BUDGETS[diff]||ANNUAL_BUDGETS.normal)[Math.min(year,4)];
-  var mult = 1.0;
-  if(grade==='S'&&trustZone==='champion') mult=1.30;
-  else if(grade==='A'&&(trustZone==='engaged'||trustZone==='champion')) mult=1.20;
-  else if(grade==='B'&&trustZone!=='skeptical') mult=1.10;
-  else if(grade==='C') mult=1.00;
-  else if(grade==='D') mult=0.85;
-  else if(grade==='F') mult=0.75;
-  if(trustZone==='skeptical') mult=Math.max(0,mult-0.10);
-  return Math.round(base*mult);
+// Grade flat bonus/cut applied to next year's budget
+var GRADE_BUDGET_DELTA = {S:8000,A:5000,B:2000,C:0,D:-3000,F:-6000};
+
+function calcNextBudget(diff, year, grade, trustZone, currentBudget) {
+  var base = BASE_BUDGETS[diff]||BASE_BUDGETS.normal;
+  // Carry over 10% of unspent budget (rest went to overhead)
+  var carryover = currentBudget ? Math.round(currentBudget * 0.10) : 0;
+  // Grade bonus/cut
+  var gradeDelta = GRADE_BUDGET_DELTA[grade]||0;
+  // Skeptical zone: additional -$2K penalty (leadership questioning the program)
+  var zonePenalty = trustZone==='skeptical' ? -2000 : 0;
+  return Math.max(5000, base + carryover + gradeDelta + zonePenalty);
 }
 
 function calcGrade(ap, part, eng) {
@@ -928,21 +928,21 @@ var YEAR_PRESURVEY = {
 
 
 var POS_EVENTS = [
-  {char:'yolanda',text:'Yolanda mentioned the listening program in a leadership forum. Delia noticed.',d:2,cond:null},
+  {char:'yolanda',text:'Yolanda mentioned the listening program in a leadership forum. Delia noticed.',d:1,cond:null},
   {char:null,text:'A new hire said she chose Meridian because she heard they actually use their survey results.',d:1,cond:null},
   {char:'raj',text:'Raj mentioned the program positively in a budget meeting — briefly, but he mentioned it.',d:1,cond:null},
-  {char:null,text:'Three managers signed up for the action planning roundtable before the reminder went out.',d:2,cond:{node:'mgr-l1'}},
+  {char:null,text:'Three managers signed up for the action planning roundtable before the reminder went out.',d:1,cond:{node:'mgr-l1'}},
   {char:null,text:'A line worker asked when the next survey was. First time anyone has asked proactively.',d:1,cond:null},
-  {char:'delia',text:'Delia forwarded your results summary to the board with a note: "Good work."',d:3,cond:null},
-  {char:null,text:'Site B participation is the highest it has been. Word is spreading.',d:2,cond:{node:'comms-l1'}},
-  {char:'marcus',text:'Marcus attended the data literacy workshop without being asked.',d:2,cond:{node:'mgr-l2'}}
+  {char:'delia',text:'Delia forwarded your results summary to the board with a note: "Good work."',d:2,cond:null},
+  {char:null,text:'Site B participation is the highest it has been. Word is spreading.',d:1,cond:{node:'comms-l1'}},
+  {char:'marcus',text:'Marcus attended the data literacy workshop without being asked.',d:1,cond:{node:'mgr-l2'}}
 ];
 var NEG_EVENTS = [
   {char:null,text:'A manager told employees the survey is mandatory but their answers do not matter.',d:-2,cond:null},
   {char:'raj',text:'Raj mentioned a competitor\'s simpler, cheaper pulse tool in a meeting.',d:-1,cond:null},
   {char:null,text:'Three managers submitted their action plans late. Delia noticed.',d:-2,cond:null},
   {char:null,text:'An anonymous comment on the internal portal called the survey a waste of time.',d:-1,cond:null},
-  {char:'raj',text:'Raj asked Delia what the CoE\'s headcount justification is.',d:-3,cond:null},
+  {char:'raj',text:'Raj asked Delia what the CoE\'s headcount justification is.',d:-2,cond:null},
   {char:null,text:'Finance flagged the platform subscription as an area for cost review.',d:-2,cond:{node:'infra-l2'}}
 ];
 var PULSES = {
@@ -1231,7 +1231,7 @@ var S = {
 
   genAmbient:function(){
     var z=this.getZone();
-    var pw=z.id==='champion'?.80:z.id==='engaged'?.70:z.id==='cautious'?.55:.25;
+    var pw=z.id==='champion'?.65:z.id==='engaged'?.55:z.id==='cautious'?.45:.20;
     var arcEvents=this.getCharAmbientEvents();
     var posPool=POS_EVENTS.concat(arcEvents.filter(function(e){return e.isPos;}));
     var negPool=NEG_EVENTS.concat(arcEvents.filter(function(e){return !e.isPos;}));
@@ -1328,7 +1328,7 @@ var R = {
       html+='<div class="diff-stats">';
       html+='<div><div class="dstat-v">'+d.eng+'</div><div class="dstat-l">Engagement</div></div>';
       html+='<div><div class="dstat-v">'+d.part+'%</div><div class="dstat-l">Participation</div></div>';
-      html+='<div><div class="dstat-v amber">$'+d.budget/1000+'K</div><div class="dstat-l">Budget</div></div>';
+      html+='<div><div class="dstat-v amber">$'+Math.floor(d.budget/1000)+'K</div><div class="dstat-l">Budget</div></div>';
       html+='<div><div class="dstat-v">'+d.cap+'</div><div class="dstat-l">Capacity</div></div>';
       html+='</div><div class="diff-voice">"'+d.voice+'"</div>';
       html+='<button class="btn-p">Begin &#8594;</button></div>';
@@ -1354,7 +1354,7 @@ var R = {
     html+='<div class="ob-trust-hdr"><div class="ob-trust-nm">ORGANIZATIONAL TRUST &#8212; your standing</div><div class="ob-trust-zn" style="color:'+z.color+'">'+z.label+'</div></div>';
     html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+z.color+'"></div></div>';
     html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
-    html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. You cannot spend it &#8212; you build or lose it through decisions and results.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable currency. You use it to unlock high-leverage situation options and to issue recommendations to other functions. Saving it for the right moment matters more than spending it fast. Earned through positive outcomes &#8212; <em>'+z.label+'</em> earns +'+z.rate+' per quarter. Grade bonuses add more at year end.</div>';
+    html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. Cannot be spent &#8212; only built or lost.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable. Use it for high-leverage situation options and recommendations to other functions. Saving it for the right moment matters more than spending it fast. <em>'+z.label+'</em> earns +'+z.rate+' PC per quarter; grade bonuses add more at year end.<br><br><strong style="color:var(--t2)">Navigation:</strong> Budget, Capacity, and PC are always visible in the strip below the Trust bar. Current survey scores appear below that on mobile. The left panel (Dashboard) shows scores, last survey results, your investment tree, and the four people whose arcs respond to your decisions.</div>';
     html+='</div>';
     html+='<div class="ob-actions"><button class="btn-p" onclick="C.skipY0()">Start Year 1 &#8594;</button><button class="btn-g" onclick="C.startY0()">Run tutorial first</button></div>';
     html+='</div>';
@@ -1384,13 +1384,20 @@ var R = {
     html+='<div class="trust-zmarks"><span class="trust-zm">Skeptical</span><span class="trust-zm">Cautious</span><span class="trust-zm">Engaged</span><span class="trust-zm">Champion</span></div>';
     html+='</div>';
     // Unified resource strip — always visible, shows live pending cost
-    var budDisplay=pendingBud>0?'$'+Math.floor((S.budget-pendingBud)/1000)+'K <span style="color:var(--red);font-size:10px">(-$'+Math.floor(pendingBud/1000)+'K)</span>':'$'+Math.floor(S.budget/1000)+'K';
+    var budDisplay='$'+Math.floor(S.budget/1000)+'K'+(pendingBud>0?' <span style="color:var(--red);font-size:10px">(-$'+Math.floor(pendingBud/1000)+'K pending)</span>':'');
     html+='<div class="res-strip">';
     html+='<div class="res-strip-item"><span class="res-strip-lbl">BUDGET</span><span class="res-strip-val amber">'+budDisplay+'</span></div>';
     html+='<div class="res-strip-item"><span class="res-strip-lbl">CAPACITY</span><span class="res-strip-val">'+capDots+'</span></div>';
     html+='<div class="res-strip-item"><span class="res-strip-lbl">POLITICAL CAPITAL</span><span class="res-strip-val" style="color:var(--purple)">&#10024;'+S.polcap+' <span style="font-size:10px;color:'+z.color+'">+'+z.rate+'/qtr</span></span></div>';
     html+='</div>';
     html+='<button class="mob-toggle" onclick="C.mobToggle()">&#128202; Dashboard</button>';
+    // Mobile score strip — always visible on mobile below resource strip
+    html+='<div class="mob-strip">';
+    html+='<div class="mob-strip-item"><span style="color:var(--amber);font-family:var(--mono);font-weight:600">'+S.ap+'</span><span style="font-size:9px;color:var(--tm)">&nbsp;AP</span></div>';
+    html+='<div class="mob-strip-item"><span style="color:var(--blue);font-family:var(--mono);font-weight:600">'+S.part+'%</span><span style="font-size:9px;color:var(--tm)">&nbsp;Part</span></div>';
+    html+='<div class="mob-strip-item"><span style="font-family:var(--mono);font-weight:600">'+S.eng+'</span><span style="font-size:9px;color:var(--tm)">&nbsp;Eng</span></div>';
+    html+='<div class="mob-strip-item" style="margin-left:auto"><span style="font-size:10px;color:var(--tm);font-family:var(--mono)">Y'+S.year+' Q'+S.q+'</span></div>';
+    html+='</div>';
     html+='<div class="game-body"><div class="panel-l" id="panel-l">'+this.leftPanel()+'</div>';
     html+='<div class="panel-r" id="panel-r">'+this.rightPanel()+'</div></div></div>';
     this.app().innerHTML=html;
@@ -1446,8 +1453,21 @@ var R = {
       html+='</div></div>';
     }
     html+='</div><button class="tree-view-btn" onclick="C.openTree()">View full tree &#8594;</button></div>';
-    html+='<div class="ls"><div class="ls-lbl">Resources</div>';
-    html+='<div style="font-size:11px;color:var(--tm);line-height:1.6">Budget, Capacity, and Political Capital are shown in the strip above. Changes update as you make selections.</div>';
+    // Characters section — replaces Resources
+    html+='<div class="ls"><div class="ls-lbl">People</div>';
+    Object.keys(CHAR_ARCS).forEach(function(charId){
+      var arc=CHAR_ARCS[charId];
+      var ch=CHARS[charId];
+      var stage=S.charArcs[charId]||0;
+      var stageInfo=arc.stages[stage];
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px">';
+      html+='<span style="font-size:18px;flex-shrink:0">'+ch.av+'</span>';
+      html+='<div>';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+      html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
+      html+='<div style="font-size:10px;color:var(--green);margin-top:1px">'+stageInfo.label+'</div>';
+      html+='</div></div>';
+    });
     html+='</div>';
     return html;
   },
@@ -1627,21 +1647,14 @@ var R = {
       if(parts.length)causeHtml+='<div style="font-family:var(--mono);font-size:11px;color:'+(allPos?'var(--green)':'var(--red)')+';margin-top:3px">'+parts.join(' &#183; ')+'</div>';
       causeHtml+='</div></div>';
     }
-    // Tree investments - show what was built and its direct payoff
-    for(var k=0;k<S.qTree.length;k++){
-      var t=S.qTree[k];
+    // Tree investments - show compact chip only (full detail in tree panel)
+    if(S.qTree.length>0){
       anyItems=true;
-      var effParts=[];
-      var eff=t.node.effect||{};
-      if(eff.trust)effParts.push('Trust +'+eff.trust);
-      if(eff.ap)effParts.push('AP +'+eff.ap);
-      if(eff.part)effParts.push('Part +'+eff.part);
-      causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
-      causeHtml+='<span class="cause-tag" style="flex-shrink:0;margin-top:1px;background:rgba(76,175,80,.12);color:var(--green);border-color:rgba(76,175,80,.3)">BUILT</span>';
-      causeHtml+='<div style="flex:1">';
-      causeHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+t.node.icon+' <strong style="color:var(--t1)">'+t.node.name+'</strong> &#8212; '+t.node.unlocks+'</div>';
-      if(effParts.length)causeHtml+='<div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:3px">'+effParts.join(' &#183; ')+'</div>';
-      causeHtml+='</div></div>';
+      var builtNames=S.qTree.map(function(t){return t.node.icon+' '+t.node.name;}).join(', ');
+      causeHtml+='<div style="display:flex;gap:9px;align-items:center">';
+      causeHtml+='<span class="cause-tag" style="flex-shrink:0;background:rgba(76,175,80,.12);color:var(--green);border-color:rgba(76,175,80,.3)">BUILT</span>';
+      causeHtml+='<span style="font-size:11px;color:var(--green)">'+builtNames+'</span>';
+      causeHtml+='</div>';
     }
     // Tree skip note: if nothing built this quarter, explain why
     if(S.qTree.length===0&&S.qPhase==='resolve'&&!S.isTut){
@@ -1781,9 +1794,16 @@ var R = {
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:2px">Year-End Consequences</div>';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
-    html+='<div><div style="font-size:12px;font-weight:600">Next year budget</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Grade '+g+' + '+z.label+' Trust</div></div>';
-    html+='<div style="text-align:right"><div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--amber)">$'+Math.floor(nb/1000)+'K</div>';
-    html+='<div style="font-family:var(--mono);font-size:11px;color:'+(budPos?'var(--green)':'var(--red)')+'">'+(budPos?'+':'')+Math.floor(budDelta/1000)+'K vs this year</div></div>';
+    var carryAmt=Math.round(S.budget*0.10);
+    var gradeDeltaDisp=GRADE_BUDGET_DELTA[g]||0;
+    html+='<div>';
+    html+='<div style="font-size:12px;font-weight:600">Next year budget</div>';
+    html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.6">';
+    html+='$'+Math.floor((BASE_BUDGETS[S.diff]||40000)/1000)+'K base';
+    if(carryAmt>0)html+='<br>+$'+Math.floor(carryAmt/1000)+'K carry (10% of $'+Math.floor(S.budget/1000)+'K unspent)';
+    if(gradeDeltaDisp!==0)html+='<br>'+(gradeDeltaDisp>0?'+':'')+Math.floor(gradeDeltaDisp/1000)+'K grade '+g;
+    html+='</div></div>';
+    html+='<div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)">$'+Math.floor(nb/1000)+'K</div>';
     html+='</div>';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
     html+='<div><div style="font-size:12px;font-weight:600">Organizational Trust</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Current standing</div></div>';
@@ -1812,26 +1832,26 @@ var R = {
     }
 
     // Character arc moments - show if anyone advanced this year
-    var arcMoments=[];
+    // People — always show all four characters with current stage
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
     Object.keys(CHAR_ARCS).forEach(function(charId){
       var arc=CHAR_ARCS[charId];
+      var ch=CHARS[charId];
       var stage=S.charArcs[charId]||0;
-      if(stage>0){arcMoments.push({name:arc.name,av:arc.stages[stage]?arc.stages[stage].desc:'',stage:stage,label:arc.stages[stage]?arc.stages[stage].label:''});}
+      var stageInfo=arc.stages[stage];
+      var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
+      html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start">';
+      html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
+      html+='<div>';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+      html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
+      html+='<div style="font-size:10px;color:'+stageColors[stage]+';margin-top:2px;font-weight:600">'+stageInfo.label+'</div>';
+      html+='<div style="font-size:10px;color:var(--tm);margin-top:2px;line-height:1.4">'+stageInfo.desc+'</div>';
+      html+='</div></div>';
     });
-    if(arcMoments.length){
-      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
-      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
-      arcMoments.forEach(function(m){
-        html+='<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">';
-        html+='<span style="font-size:20px;flex-shrink:0">'+CHARS[Object.keys(CHAR_ARCS).find(function(k){return CHAR_ARCS[k].name===m.name;})].av+'</span>';
-        var charId2=Object.keys(CHAR_ARCS).find(function(k){return CHAR_ARCS[k].name===m.name;});
-        var charRole=charId2&&CHARS[charId2]?CHARS[charId2].role:'';
-        html+='<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+m.name+(charRole?' <span style="color:var(--tm);font-weight:400;font-size:10px">'+charRole+'</span>':'')+' &#8212; <span style="color:var(--green)">'+m.label+'</span></div>';
-        html+='<div style="font-size:11px;color:var(--tm);margin-top:2px">'+m.av+'</div></div>';
-        html+='</div>';
-      });
-      html+='</div>';
-    }
+    html+='</div></div>';
 
     // Recommendations UI — tiered costs, diagnostic signals, skip option
     if(S.year<5){
@@ -2100,18 +2120,12 @@ var R = {
   },
 
   animUnlock:function(id){
+    // Keep node highlight animation only — built detail shown in resolve summary
     var el=this.$('node-'+id);
     if(el){
       el.classList.add('unlocking');
       setTimeout(function(){el.classList.remove('unlocking','avail','locked');el.classList.add('built');},650);
     }
-    var n=NODES[id];if(!n)return;
-    var t=document.createElement('div');
-    t.className='toast';
-    t.innerHTML='<span class="toast-icon">'+n.icon+'</span><div><div class="toast-name">'+n.name+'</div><div class="toast-sub">'+n.unlocks+'</div></div>';
-    document.body.appendChild(t);
-    requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
-    setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},300);},2600);
   },
 
   processUnlocks:function(){
@@ -2132,7 +2146,7 @@ var C = {
     R.go();
   },
 
-  skipY0:function(){S.year=0;S.nextBudget=DIFF[S.diff].budget;C.beginNextYear();},
+  skipY0:function(){S.year=0;S.nextBudget=BASE_BUDGETS[S.diff]||40000;C.beginNextYear();},
 
   choose:function(sitId,optId){
     AUDIO.init();
@@ -2208,8 +2222,8 @@ var C = {
   goPostSurvey:function(){
     var g=calcGrade(S.ap,S.part,S.eng);
     S.grade=g;
-    S.nextBudget=calcNextBudget(S.diff,S.year+1,g,S.getZone().id);
-    var trustShift={S:15,A:10,B:6,C:1,D:-3,F:-7};
+    S.nextBudget=calcNextBudget(S.diff,S.year+1,g,S.getZone().id,S.budget);
+    var trustShift={S:10,A:7,B:4,C:1,D:-2,F:-5};
     var shift=trustShift[g]||0;
     S.trust=Math.max(5,Math.min(100,S.trust+shift));
     // Resolve pending recommendations from last year
