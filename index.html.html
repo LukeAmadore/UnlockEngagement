@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engagement Unlocked</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1419;--panel:#1C2333;--card:#242D42;--hover:#2D3855;
+  --border:#2E3A55;--borderl:#3D4F72;
+  --amber:#F5A623;--amberd:#C4841A;--blue:#4A9EFF;--green:#4CAF50;--red:#E74C3C;
+  --purple:#B39DDB;--teal:#26C6DA;
+  --t1:#E8EDF5;--t2:#B0C4DE;--tm:#7A90B0;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
+  --r:8px;--rs:4px;--rl:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh}
+.mono{font-family:var(--mono)}.amber{color:var(--amber)}.blue{color:var(--blue)}.green{color:var(--green)}
+
+/* SCREENS */
+.screen{max-width:700px;margin:0 auto;padding:48px 24px;min-height:100vh;display:flex;flex-direction:column;gap:28px}
+
+/* DIFFICULTY */
+.g-title-main{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.5px;text-align:center}
+.g-title-sub{font-size:12px;color:var(--tm);letter-spacing:.15em;text-transform:uppercase;margin-top:5px;text-align:center}
+.diff-ctx{font-size:13px;color:var(--t2);text-align:center;line-height:1.7}
+.diff-cards{display:flex;flex-direction:column;gap:14px}
+.diff-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:14px}
+.diff-card:hover{border-color:var(--borderl);background:var(--card)}
+.diff-hdr{display:flex;align-items:center;gap:10px}
+.diff-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.diff-lbl{font-weight:600;font-size:14px}
+.diff-stats{display:flex;gap:20px;flex-wrap:wrap}
+.dstat-v{font-family:var(--mono);font-size:18px;font-weight:600}
+.dstat-l{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+.diff-voice{font-size:12px;color:var(--t2);font-style:italic;line-height:1.6;padding-left:10px;border-left:2px solid var(--border)}
+
+/* ONBOARDING */
+.ob-badge{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase}
+.ob-title{font-size:24px;font-weight:700;line-height:1.3}
+.ob-body{font-size:13px;color:var(--t2);line-height:1.7}
+.ob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ob-metric{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.ob-mv{font-family:var(--mono);font-size:24px;font-weight:600}
+.ob-mn{font-size:12px;color:var(--t2);font-weight:600;margin-bottom:6px}
+.ob-md{font-size:12px;color:var(--tm);line-height:1.5;margin-top:6px}
+.ob-trust{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.ob-trust-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ob-trust-nm{font-size:12px;font-weight:600;color:var(--t2)}
+.ob-trust-zn{font-family:var(--mono);font-size:11px;font-weight:600}
+.ob-bar{height:6px;background:var(--bg);border-radius:3px;margin-bottom:6px;overflow:hidden}
+.ob-bar-fill{height:100%;border-radius:3px}
+.ob-zones{display:flex;justify-content:space-between}
+.ob-zl{font-size:9px;color:var(--tm);font-family:var(--mono)}
+.ob-trust-desc{font-size:12px;color:var(--tm);line-height:1.55;margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.ob-actions{display:flex;gap:12px;align-items:center}
+
+/* GAME SHELL */
+.game-shell{display:flex;flex-direction:column;min-height:100vh}
+.g-topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center}
+.g-topbar-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t2)}
+.g-topbar-period{font-family:var(--mono);font-size:11px;color:var(--tm)}
+
+/* TRUST BAR */
+.trust-wrap{background:var(--panel);border-bottom:1px solid var(--border);padding:8px 16px 10px}
+.trust-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.trust-left{display:flex;align-items:center;gap:8px}
+.trust-title{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase}
+.trust-zone{font-family:var(--mono);font-size:11px;font-weight:600}
+.trust-capital{display:flex;align-items:center;gap:6px}
+.cap-lbl{font-size:10px;color:var(--tm);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em}
+.cap-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--purple)}
+.cap-rate{font-size:10px;font-family:var(--mono)}
+.trust-track{height:5px;background:var(--bg);border-radius:3px;position:relative;overflow:hidden}
+.trust-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1),background .4s;position:relative}
+.trust-fill::after{content:'';position:absolute;right:-1px;top:-3px;width:11px;height:11px;border-radius:50%;background:inherit;opacity:.4;animation:tpulse 2s ease-in-out infinite}
+@keyframes tpulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.6);opacity:.1}}
+.trust-zmarks{display:flex;justify-content:space-between;margin-top:3px}
+.trust-zm{font-size:9px;color:var(--tm);font-family:var(--mono)}
+
+/* BODY GRID */
+.mob-strip{display:none}
+.res-strip{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--panel)}
+.res-strip-item{flex:1;padding:6px 14px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.res-strip-item:last-child{border-right:none}
+.res-strip-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase}
+.res-strip-val{font-family:var(--mono);font-size:13px;font-weight:600}
+.cap-dot.pending{color:var(--amber)}
+.mob-toggle{display:none;margin:8px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--t2);cursor:pointer;width:calc(100% - 32px)}
+.game-body{display:grid;grid-template-columns:220px 1fr;flex:1}
+.panel-l{border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;max-height:100vh;overflow-y:auto}
+.ls{padding:12px 14px;border-bottom:1px solid var(--border)}
+.ls:last-child{border-bottom:none}
+.ls-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:9px}
+
+/* SCORES */
+.score-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.score-row:last-child{margin-bottom:0}
+.score-name{font-size:11px;color:var(--t2);flex:1;cursor:help;border-bottom:1px dashed var(--border)}
+.score-val{font-family:var(--mono);font-size:15px;font-weight:600}
+.score-warn{color:var(--amber);font-size:11px}
+.tip{position:relative;display:inline-block}
+.tip:hover .tip-box{opacity:1;pointer-events:auto;transform:translateY(0)}
+.tip-box{position:absolute;bottom:calc(100% + 6px);left:0;background:#1a2540;border:1px solid var(--borderl);border-radius:var(--rs);padding:8px 10px;font-size:11px;color:var(--t2);line-height:1.5;min-width:200px;max-width:240px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:50;transform:translateY(4px);font-family:var(--sans);font-weight:400}
+
+/* TREE SUMMARY */
+.tree-summary{display:flex;flex-direction:column;gap:10px}
+.ts-track{display:flex;flex-direction:column;gap:4px}
+.ts-track-name{font-size:10px;color:var(--tm);font-family:var(--mono)}
+.ts-nodes{display:flex;gap:3px}
+.ts-node{width:22px;height:22px;border-radius:3px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .3s;position:relative}
+.ts-node.built{background:var(--amberd);border-color:var(--amber)}
+.ts-node.avail{border-color:var(--borderl);background:var(--card)}
+.ts-node.locked{opacity:.2}
+@keyframes node-unlock{0%{transform:scale(.7);opacity:.3}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+@keyframes node-ring{0%{box-shadow:0 0 0 0 rgba(245,166,35,.7)}100%{box-shadow:0 0 0 14px rgba(245,166,35,0)}}
+.ts-node.unlocking{animation:node-unlock .55s ease-out forwards,node-ring .7s ease-out forwards;background:var(--amberd);border-color:var(--amber)}
+.tree-view-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;text-align:left;padding:2px 0;font-family:var(--sans);margin-top:4px;text-decoration:underline}
+
+/* RESOURCES */
+.res-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.res-row:last-child{margin-bottom:0}
+.res-lbl{font-size:11px;color:var(--t2)}
+.res-val{font-family:var(--mono);font-size:13px;font-weight:600}
+.cap-dot{font-size:12px;margin-left:1px}
+.cap-dot.full{color:var(--blue)}.cap-dot.empty{color:var(--border)}
+
+/* RIGHT PANEL */
+.panel-r{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* SITUATION CARD */
+.sit-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:18px;display:flex;flex-direction:column;gap:13px}
+.sit-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.char-badge{display:flex;align-items:center;gap:9px}
+.char-av{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:50%;border:1px solid var(--border);flex-shrink:0}
+.char-name{font-weight:600;font-size:12px}
+.char-role{font-size:10px;color:var(--tm)}
+.tut-badge{font-size:10px;color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:20px;padding:2px 9px;white-space:nowrap}
+.sit-title{font-weight:700;font-size:14px;line-height:1.3}
+.sit-scenario{font-size:13px;color:var(--t2);line-height:1.65}
+.sit-opts{display:flex;flex-direction:column;gap:9px}
+.sit-opt{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:7px}
+.sit-opt:hover:not(.lk){border-color:var(--amber);background:var(--hover)}
+.sit-opt.lk{opacity:.5;cursor:not-allowed}
+.opt-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.opt-badge{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);border-radius:3px;padding:2px 7px;white-space:nowrap}
+.opt-badge.lk{color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)}
+.opt-costs{display:flex;gap:4px;flex-wrap:wrap}
+.cc{font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:3px;white-space:nowrap}
+.cc.slot{color:var(--blue);background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25)}
+.cc.bud{color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25)}
+.cc.pc{color:var(--purple);background:rgba(179,157,219,.1);border:1px solid rgba(179,157,219,.25)}
+.cc.unlock{color:var(--green);background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.25)}
+.opt-text{font-size:12px;color:var(--t2);line-height:1.55}
+.opt-lock{font-size:10px;color:var(--tm);font-family:var(--mono)}
+.opt-preview{font-size:11px;color:var(--green);font-style:italic;padding-top:5px;border-top:1px solid var(--border);line-height:1.5}
+
+/* BUILD MODE */
+.build-mode{background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;flex-direction:column;gap:14px}
+.build-hdr{display:flex;justify-content:space-between;align-items:center}
+.build-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase}
+.build-skip{background:transparent;color:var(--t2);border:1px solid var(--border);border-radius:var(--rs);padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--sans);transition:border-color .15s}
+.build-skip:hover{border-color:var(--borderl);color:var(--t1)}
+.build-done{font-size:13px;color:var(--green)}
+
+/* BASKET */
+.basket{background:var(--card);border:1px solid var(--borderl);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.basket-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1}
+.basket-empty{font-size:11px;color:var(--tm);font-style:italic}
+.basket-chip{font-size:11px;background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.3);border-radius:3px;padding:2px 7px;cursor:pointer}
+.basket-chip:hover{background:rgba(245,166,35,.2)}
+.basket-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.basket-cost{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.btn-commit{background:var(--amber);color:#0F1419;border:none;border-radius:var(--rs);padding:6px 14px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-commit:hover:not([disabled]){background:#FFB733}
+.btn-commit[disabled]{opacity:.4;cursor:not-allowed;background:var(--amber)}
+
+/* TRACKS GRID */
+.tracks-grid{display:flex;flex-direction:column;gap:12px}
+.track-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.track-hdr{padding:10px 14px;border-bottom:1px solid var(--border)}
+.track-name{font-weight:700;font-size:13px}
+.track-focus{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin:3px 0}
+.track-when{font-size:11px;color:var(--t2);line-height:1.5}
+.track-nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.tn{background:var(--panel);padding:10px 8px;display:flex;flex-direction:column;gap:5px;transition:background .15s;position:relative}
+.tn.built{background:rgba(196,132,26,.1)}
+.tn.avail{cursor:pointer}
+.tn.avail:hover{background:var(--hover)}
+.tn.sel{cursor:pointer}
+.tn.dimmed{opacity:.35}
+.tn.locked{opacity:.35;cursor:not-allowed}
+.tn-check{font-size:14px;font-weight:700;position:absolute;top:6px;right:6px}
+.tn-icon{font-size:16px}
+.tn-name{font-size:11px;font-weight:600;line-height:1.3}
+.tn-unlocks{font-size:10px;color:var(--green);line-height:1.4;margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,.06)}
+.tn-costs{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.tn-built{font-size:9px;font-family:var(--mono);margin-top:2px}
+.tn-locked-msg{font-size:9px;color:var(--tm);font-family:var(--mono);margin-top:2px}
+.tn-cross{font-size:9px;color:var(--teal);font-family:var(--mono);margin-top:1px}
+.tn-blocked{font-size:10px;color:var(--red);font-family:var(--mono);margin-top:2px}
+
+/* RESOLVE */
+.resolve-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.resolve-card.show{opacity:1;transform:none}
+.resolve-trust-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.resolve-trust-lbl{font-family:var(--mono);font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em}
+.resolve-trust-delta{font-family:var(--mono);font-size:12px;font-weight:600}
+.resolve-bar{height:8px;background:var(--bg);border-radius:4px;position:relative;overflow:hidden;margin-bottom:4px}
+.resolve-bar-trail{position:absolute;top:0;height:100%;border-radius:4px}
+.resolve-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.resolve-zone-lbl{font-family:var(--mono);font-size:10px;font-weight:600;margin-top:4px}
+.cause-list{display:flex;flex-direction:column;gap:8px}
+.cause-item{display:flex;gap:10px;align-items:flex-start}
+.cause-tag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.cause-tag.dec{background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
+.cause-tag.org{background:rgba(74,158,255,.1);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.cause-tag.tree{background:rgba(76,175,80,.1);color:var(--green);border:1px solid rgba(76,175,80,.25)}
+.cause-body{flex:1}
+.cause-note{font-size:12px;color:var(--t2);line-height:1.5}
+.cause-result{font-size:11px;color:var(--green);margin-top:3px;font-family:var(--mono)}
+.cause-result.neg{color:var(--red)}
+
+/* PULSE */
+.pulse-card{border-left:3px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:flex-start;background:var(--panel);border-radius:0 var(--r) var(--r) 0;border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.pulse-card.pos{border-left-color:var(--green)}.pulse-card.neg{border-left-color:var(--red)}.pulse-card.neu{border-left-color:var(--amber)}
+.pulse-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase;flex-shrink:0;margin-top:2px}
+.pulse-ind{font-size:14px;font-weight:700;flex-shrink:0}
+.pulse-card.pos .pulse-ind{color:var(--green)}.pulse-card.neg .pulse-ind{color:var(--red)}.pulse-card.neu .pulse-ind{color:var(--amber)}
+.pulse-txt{font-size:12px;color:var(--t2);line-height:1.5;flex:1}
+
+/* ADVANCE */
+.adv-wrap{padding-top:2px}
+.btn-adv{background:var(--card);color:var(--amber);border:1px solid var(--amber);border-radius:var(--r);padding:10px 18px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;letter-spacing:.05em;width:100%}
+.btn-adv:hover{background:rgba(245,166,35,.1)}
+
+/* REVEAL */
+.reveal-badge{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase}
+.reveal-scores{display:flex;gap:36px;justify-content:center;padding:28px 0;flex-wrap:wrap}
+.rv-item{display:flex;flex-direction:column;gap:6px;align-items:center}
+.rv-val{font-family:var(--mono);font-size:48px;font-weight:600;line-height:1}
+.rv-lbl{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em}
+.reveal-narr{font-size:13px;color:var(--t2);line-height:1.7;max-width:480px}
+.reveal-note{font-size:12px;color:var(--amber);font-style:italic;border:1px solid rgba(245,166,35,.3);border-radius:var(--r);padding:12px 16px;max-width:480px;line-height:1.6;background:rgba(245,166,35,.04)}
+
+/* Y1 STUB */
+.y1-stats{display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.y1-stat{font-size:12px;color:var(--t2);display:flex;gap:8px;align-items:center}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel);border:1px solid var(--green);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;gap:9px;font-size:12px;color:var(--t1);opacity:0;transition:opacity .25s,transform .25s;z-index:1000;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-icon{font-size:18px;flex-shrink:0}
+.toast-name{font-weight:600;font-size:12px}
+.toast-sub{font-size:10px;color:var(--green)}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
+.modal-box{background:var(--panel);border:1px solid var(--borderl);border-radius:var(--rl);padding:22px;width:100%;max-width:820px;display:flex;flex-direction:column;gap:16px}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase}
+.modal-close{background:none;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:12px;padding:4px 10px;cursor:pointer;font-family:var(--sans)}
+.modal-close:hover{border-color:var(--borderl);color:var(--t1)}
+
+/* BUTTONS */
+.btn-p{background:var(--amber);color:#0F1419;border:none;border-radius:var(--r);padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-p:hover{background:#FFB733}
+.btn-g{background:transparent;color:var(--t2);border:1px solid var(--border);border-radius:var(--r);padding:10px 18px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:border-color .15s,color .15s}
+.btn-g:hover{border-color:var(--borderl);color:var(--t1)}
+
+/* MOBILE */
+@media(max-width:680px){
+  .mob-strip{display:flex;gap:14px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .mob-strip-item{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:4px}
+  .game-body{grid-template-columns:1fr}
+  .panel-l{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border);display:none}
+  .panel-l.mob-show{display:flex}
+  .mob-toggle{display:block}
+  .track-nodes{grid-template-columns:repeat(2,1fr)}
+  .reveal-scores{gap:20px}
+  .rv-val{font-size:38px}
+}
+@media(min-width:681px){.mob-toggle{display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var DIFF = {
+  easy:{label:'Inherited Momentum',color:'#4CAF50',eng:68,ap:65,part:79,trust:52,budget:90000,cap:4,polcap:40,tree:[],voice:'You inherited a program that mostly works. Leadership tolerates it. Employees fill it out. Your job is to make it mean something.'},
+  normal:{label:'Fixer Upper',color:'#FFC107',eng:62,ap:48,part:74,trust:28,budget:45000,cap:3,polcap:25,tree:[],voice:'Three surveys. Three years of the same scores. Nobody acted on anything. You have $45,000 and one year to change that narrative.'},
+  hard:{label:'Post-Reorg Culture',color:'#F44336',eng:51,ap:38,part:58,trust:12,budget:28000,cap:2,polcap:10,tree:[],voice:'You were brought in after a restructuring. The CFO asked in your first week why Meridian even does a survey. You have $28,000 and almost no goodwill. Go.'}
+};
+
+var ZONES = [
+  {id:'skeptical',label:'Skeptical',min:0,max:24,color:'#E74C3C',rate:1},
+  {id:'cautious', label:'Cautious', min:25,max:49,color:'#F5A623',rate:3},
+  {id:'engaged',  label:'Engaged',  min:50,max:74,color:'#4A9EFF',rate:5},
+  {id:'champion', label:'Champion', min:75,max:100,color:'#4CAF50',rate:8}
+];
+
+var NODES = {
+  'infra-l1':{track:'infra',level:1,icon:'📋',name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:2000,phase:1,pre:[],effect:{part:2}},
+  'infra-l2':{track:'infra',level:2,icon:'📊',name:'Listening Platform',unlocks:'Managers can see their own team data. The ceiling on AP Optimism improvement lifts.',cost:15000,phase:2,pre:['infra-l1'],effect:{ap:2}},
+  'infra-l3':{track:'infra',level:3,icon:'🔬',name:'Analytics Dashboard',unlocks:'Your recommendations become harder to ignore. Leadership starts seeing patterns, not just numbers.',cost:35000,phase:3,pre:['infra-l2'],effect:{trust:2}},
+  'infra-l4':{track:'infra',level:4,icon:'🔗',name:'Integrated System',unlocks:'Five years of connected data. You can show what changed, why, and what it cost not to act sooner.',cost:50000,phase:4,pre:['infra-l3'],effect:{ap:3,part:2}},
+  'mgr-l1':{track:'mgr',level:1,icon:'📖',name:'Manager Listening Guide',unlocks:'Managers have a framework. Action planning conversations can actually happen.',cost:2500,phase:1,pre:[],effect:{ap:2}},
+  'mgr-l2':{track:'mgr',level:2,icon:'🎓',name:'Data Literacy Workshop',unlocks:'Managers can read their scores and have productive conversations about them. Skeptics start to shift.',cost:6000,phase:2,pre:['mgr-l1'],effect:{ap:3}},
+  'mgr-l3':{track:'mgr',level:3,icon:'🎯',name:'Action Planning Coaching',unlocks:'Your team coaches managers through action planning. The primary driver of AP Optimism.',cost:12000,phase:3,pre:['mgr-l2'],effect:{ap:4}},
+  'mgr-l4':{track:'mgr',level:4,icon:'👥',name:'Manager Cohort',unlocks:'Managers no longer need prompting. They run their own sessions and bring you the findings.',cost:20000,phase:4,pre:['mgr-l3'],effect:{ap:4,trust:2}},
+  'comms-l1':{track:'comms',level:1,icon:'📢',name:'Results Comms Kit',unlocks:'Managers have something to share. Employees start hearing what happened to their feedback.',cost:2000,phase:1,pre:[],effect:{part:2}},
+  'comms-l2':{track:'comms',level:2,icon:'📦',name:'Site Results Packages',unlocks:'Each site gets results that feel relevant to them. Participation responds.',cost:4000,phase:2,pre:['comms-l1'],effect:{part:3}},
+  'comms-l3':{track:'comms',level:3,icon:'🖥️',name:'Employee Dashboard',unlocks:'Employees can see what themes were raised and what actions followed. Their belief that the survey matters grows.',cost:8000,phase:3,pre:['comms-l2','infra-l2'],effect:{ap:3}},
+  'comms-l4':{track:'comms',level:4,icon:'🔄',name:'Closed-Loop System',unlocks:'Employees can track what changed from survey to action. The loop is visible and closed.',cost:16000,phase:4,pre:['comms-l3'],effect:{part:4,ap:2}},
+  'se-l1':{track:'se',level:1,icon:'📅',name:'Executive Briefing Cadence',unlocks:'Leadership is briefed before results land publicly. Surprises go down. Trust in the process goes up.',cost:3000,phase:1,pre:[],effect:{trust:2}},
+  'se-l2':{track:'se',level:2,icon:'🌐',name:'Listening Champions Network',unlocks:'Site advocates carry the program without being asked. Momentum builds where you cannot be.',cost:6000,phase:2,pre:['se-l1'],effect:{trust:3}},
+  'se-l3':{track:'se',level:3,icon:'🗺️',name:'Stakeholder Alignment Map',unlocks:'You stop being reactive. Trust shifts become visible before they hit the thermometer.',cost:10000,phase:3,pre:['se-l2'],effect:{trust:3}},
+  'se-l4':{track:'se',level:4,icon:'🤝',name:'Cross-functional Alignment',unlocks:'Cross-functional partners are committed not just consulted. Recommendations have somewhere to land.',cost:15000,phase:4,pre:['se-l3'],effect:{trust:4}}
+};
+
+var TRACKS = {
+  infra:{name:'Listening Infrastructure',focus:'Data credibility',when:'Invest here when leadership questions your numbers or recommendations are not landing.',color:'#4A9EFF',icon:'🔧'},
+  mgr:  {name:'Manager Capacity',focus:'AP Optimism engine',when:'Invest here when employees do not believe action will happen — because managers are not acting.',color:'#F5A623',icon:'👥'},
+  comms:{name:'Communications',focus:'Participation & visibility',when:'Invest here when employees do not know what happened to their feedback.',color:'#26C6DA',icon:'📢'},
+  se:   {name:'Stakeholder Engagement',focus:'Organizational Trust',when:'Invest here when doors are closing — options are locked and leadership is skeptical.',color:'#B39DDB',icon:'🤝'}
+};
+
+var PRE_SURVEY = [
+  {year:0,
+   prompt:'One decision before the survey opens. Site C participation was low last year and trust is fragile. How do you launch?',
+   opts:[
+    {id:'a',badge:'MANAGER CONVERSATIONS',text:'Equip every manager with a 5-minute team conversation guide before the survey opens. Personal, but scalable.',req:null,effect:{part:3,note:'Managers set the tone. Employees hear about the survey from someone they know, not an email.'}},
+    {id:'b',badge:'PLANT DIRECTOR VIDEO',text:'Ask the Site C plant director to record a short personal ask for honest feedback. High visibility.',req:{zone:'cautious'},effect:{part:5,note:'A face and a name asking for input. Site C employees feel specifically seen.'}},
+    {id:'c',badge:'STANDARD LAUNCH',text:'Email and posters. No special effort this quarter.',req:null,effect:{part:0,note:'Standard launch. Nothing extra spent, nothing extra gained.'}}
+   ]
+  }
+];
+
+var ANNUAL_BUDGETS = {
+  easy:   [90000,85000,80000,75000,70000],
+  normal: [45000,42000,40000,38000,35000],
+  hard:   [28000,26000,24000,22000,20000]
+};
+
+function calcNextBudget(diff, year, grade, trustZone) {
+  var base = (ANNUAL_BUDGETS[diff]||ANNUAL_BUDGETS.normal)[Math.min(year,4)];
+  var mult = 1.0;
+  if(grade==='S'&&trustZone==='champion') mult=1.30;
+  else if(grade==='A'&&(trustZone==='engaged'||trustZone==='champion')) mult=1.20;
+  else if(grade==='B'&&trustZone!=='skeptical') mult=1.10;
+  else if(grade==='C') mult=1.00;
+  else if(grade==='D') mult=0.85;
+  else if(grade==='F') mult=0.75;
+  if(trustZone==='skeptical') mult=Math.max(0,mult-0.10);
+  return Math.round(base*mult);
+}
+
+function calcGrade(ap, part, eng) {
+  if(ap>=72&&part>=82&&eng>=72) return 'S';
+  if(ap>=65&&part>=76&&eng>=66) return 'A';
+  if(ap>=58&&part>=70&&eng>=60) return 'B';
+  if(ap>=50&&part>=62&&eng>=54) return 'C';
+  if(ap>=42) return 'D';
+  return 'F';
+}
+
+function focusSignal(ap, part, grade) {
+  if(grade==='S'||grade==='A'){
+    if(ap>=70) return 'Employees believe leadership will act. The program has credibility. Protect what built it.';
+    return 'Strong results. AP Optimism is moving. Keep the infrastructure that got you here running.';
+  }
+  if(ap<50&&part<65) return 'Employees are not filling it out and do not believe it matters. Participation comes first. You cannot move AP Optimism on data nobody submitted.';
+  if(ap<50) return 'Participation is holding but employees still do not believe anything will change. The data exists. The follow-through does not yet feel real to them.';
+  if(part<65) return 'Employees are not showing up. Something is eroding their sense that this is worth their time. That is the signal to chase before anything else.';
+  if(grade==='C') return 'Holding steady is not enough at this stage. Something in the chain is not connecting the survey to visible action.';
+  return 'Difficult year. The gap between data collected and action taken is what employees are measuring. That is the problem to solve.';
+}
+
+
+var CHARS = {
+  marcus: {name:'Marcus', role:'Site A Plant Manager',av:'👷'},
+  delia:  {name:'Delia',  role:'CHRO',av:'👩‍💼'},
+  raj:    {name:'Raj',    role:'CFO',av:'👨‍💼'},
+  yolanda:{name:'Yolanda',role:'Site B Supervisor',av:'👩‍🔧'}
+};
+
+// ============================================================
+// CHARACTER ARC SYSTEM
+// ============================================================
+// Arc stages per character: 0=skeptical, 1=cautious, 2=engaged, 3=champion
+// Advancement driven by tree investment + specific decisions
+// Each stage changes ambient event behavior and postsurvey narrative
+
+var CHAR_ARCS = {
+  marcus: {
+    name:'Marcus', role:'Site A Plant Manager', av:'👷',
+    stages:[
+      {label:'Skeptical', desc:'Marcus has told his team surveys change nothing. He is a friction point.'},
+      {label:'Cautious',  desc:'Marcus is less vocal in his skepticism. He attended one session without being asked.'},
+      {label:'Engaged',   desc:'Marcus runs his own pre-meeting before sharing results. Something shifted.'},
+      {label:'Champion',  desc:'Marcus is the strongest management voice for the program. He mentors other managers.'}
+    ],
+    // What drives advancement: tree track investments and decision IDs
+    advanceOn:{track:'mgr', decisions:['y1-a','y2-a','y3-a','y4-a','y5-a']},
+    // Positive ambient events unlocked per stage
+    posEvents:[
+      [],
+      [{text:"Marcus attended the data literacy workshop without being asked.",d:2}],
+      [{text:"Marcus ran his own listening session with his team between surveys.",d:2}],
+      [{text:"Marcus spoke positively about the survey program in a leadership meeting. Delia noticed.",d:3}]
+    ],
+    // Negative ambient events (more frequent at lower stages)
+    negEvents:[
+      [{text:"Marcus told employees the survey does not change anything. Word spread.",d:-2}],
+      [{text:"Marcus submitted his action plan template late. No explanation.",d:-1}],
+      [],
+      []
+    ]
+  },
+  delia: {
+    name:'Delia', role:'CHRO', av:'👩‍💼',
+    stages:[
+      {label:'Watching',  desc:'Delia is supportive but watching closely.'},
+      {label:'Supportive',desc:'Delia forwards your results to leadership with positive framing.'},
+      {label:'Advocate',  desc:'Delia mentions the program unprompted in board conversations.'},
+      {label:'Champion',  desc:'Delia actively protects the program budget and advocates publicly.'}
+    ],
+    advanceOn:{track:'se', decisions:['y1-d','y2-a','y3-d','y4-b','y5-d']},
+    posEvents:[
+      [{text:"Delia forwarded your results summary to the board with a note: 'Good work.'",d:3}],
+      [{text:"Delia mentioned the program positively in a leadership offsite.",d:2}],
+      [{text:"Delia defended the program budget in a meeting you were not invited to.",d:3}],
+      [{text:"Delia told the incoming VP that the listening program is one of Meridian&#39;s strengths.",d:3}]
+    ],
+    negEvents:[
+      [{text:"Delia forwarded a competitor benchmark to you with a question mark.",d:-1}],
+      [],
+      [],
+      []
+    ]
+  },
+  raj: {
+    name:'Raj', role:'CFO', av:'👨‍💼',
+    stages:[
+      {label:'Skeptical', desc:'Raj questions the ROI of the program. He is a budget risk.'},
+      {label:'Neutral',   desc:'Raj has stopped actively questioning the program. He watches numbers.'},
+      {label:'Cautious',  desc:'Raj acknowledged the data in a meeting. First time without prompting.'},
+      {label:'Pragmatic', desc:'Raj is not a champion, but he is no longer a threat. He makes the case on cost.'}
+    ],
+    advanceOn:{track:'infra', decisions:['y1-c','y2-c','y2-d','y4-d','y5-c']},
+    posEvents:[
+      [],
+      [{text:"Raj mentioned the program positively in a budget meeting — briefly, but he mentioned it.",d:1}],
+      [{text:"Raj asked for a copy of the results deck to share with the finance team.",d:2}],
+      [{text:"Raj told the new VP that the listening program pays for itself in retention.",d:2}]
+    ],
+    negEvents:[
+      [{text:"Raj sent a memo questioning whether the survey platform cost is justified.",d:-2},{text:"Raj mentioned a cheaper competitor tool in a leadership meeting.",d:-1}],
+      [{text:"Raj flagged the platform subscription as an area for cost review.",d:-1}],
+      [{text:"Raj asked what the headcount justification is for the CoE.",d:-1}],
+      []
+    ]
+  },
+  yolanda: {
+    name:'Yolanda', role:'Site B Supervisor', av:'👩‍🔧',
+    stages:[
+      {label:'Interested', desc:'Yolanda is curious about the program and doing small things proactively.'},
+      {label:'Active',     desc:'Yolanda runs her own listening sessions. She asks good questions.'},
+      {label:'Champion',   desc:'Yolanda is the most visible manager advocate for the program at Site B.'},
+      {label:'Model',      desc:'Yolanda is cited as an example by other sites. She mentors managers.'}
+    ],
+    advanceOn:{track:'comms', decisions:['y1-b','y2-b','y3-b','y4-b','y5-b']},
+    posEvents:[
+      [{text:"Yolanda asked when the next survey results would be shared. First time a manager asked proactively.",d:1}],
+      [{text:"Yolanda ran her own listening session at Site B without being asked.",d:2}],
+      [{text:"Yolanda mentioned the listening program in a leadership forum. Delia noticed.",d:2}],
+      [{text:"A manager at Site C asked Yolanda for coaching on how she handles action planning.",d:3}]
+    ],
+    negEvents:[
+      [],
+      [],
+      [],
+      []
+    ]
+  }
+};
+
+
+// ============================================================
+// RECOMMENDATIONS SYSTEM
+// ============================================================
+// Two slots per year, issued at postsurvey review
+// Cost PC, land probability by Trust zone
+// Consequence appears in NEXT year's postsurvey narrative
+
+var REC_DIMENSIONS = [
+  {id:'growth',    label:'Growth & Development',  owner:'L&D',            score:'eng',   delta:4},
+  {id:'recognition',label:'Recognition',          owner:'Total Rewards',  score:'ap',    delta:3},
+  {id:'comms',     label:'Communication',         owner:'HR Business Partners', score:'part', delta:3},
+  {id:'safety',    label:'Psychological Safety',  owner:'Operations',     score:'ap',    delta:4},
+  {id:'mgr',       label:'Manager Effectiveness', owner:'People Managers',score:'ap',    delta:5},
+];
+
+var REC_LAND_PROB = {skeptical:0.20, cautious:0.45, engaged:0.70, champion:0.90};
+
+// Tiered recommendation costs based on diagnostic match
+// High-impact (matches what's actually broken): 18 PC, full landing prob
+// Medium-impact (partial signal): 12 PC, landing prob x0.85
+// Low-impact (no clear signal, risky): 6 PC, landing prob x0.60, trust dip if lands but score doesn't move
+var REC_TIERS = {
+  high:  {cost:18, probMod:1.00, label:'High Impact',  desc:'Addresses what the data actually shows. Costly, but the right move.'},
+  medium:{cost:12, probMod:0.85, label:'Moderate',     desc:'Related to the signal but not the primary driver. A reasonable bet.'},
+  low:   {cost:6,  probMod:0.60, label:'Low Signal',   desc:'No clear evidence this is what employees need. Cheap, but risks backfiring if it lands without follow-through.'}
+};
+
+// Diagnostic signal: maps dimensions to which game conditions make them high/medium/low signal
+// Signal is computed at postsurvey review based on current game state
+// Returns 'high'|'medium'|'low' per dimension
+function getRecDiagnostic(dimId, ap, part, year, charArcs, treeBuilt){
+  // Growth & Development: high signal when AP is low AND we're mid-game (managers exist but aren't acting)
+  if(dimId==='growth'){
+    if(ap<55&&year>=2) return 'high';
+    if(ap<65) return 'medium';
+    return 'low';
+  }
+  // Recognition: high signal when AP is low AND participation is decent (people show up but don't believe)
+  if(dimId==='recognition'){
+    if(ap<52&&part>=65) return 'high';
+    if(ap<62) return 'medium';
+    return 'low';
+  }
+  // Communication: high signal when participation is low (people not filling it out = they don't hear results)
+  if(dimId==='comms'){
+    if(part<68) return 'high';
+    if(part<76) return 'medium';
+    return 'low';
+  }
+  // Psychological Safety: high signal when AP is very low early game (fear of speaking up)
+  if(dimId==='safety'){
+    if(ap<50&&year<=3) return 'high';
+    if(ap<60) return 'medium';
+    return 'low';
+  }
+  // Manager Effectiveness: high signal when Manager Capacity tree is underdeveloped
+  if(dimId==='mgr'){
+    var mgrBuilt=Object.keys(treeBuilt).filter(function(id){return id.indexOf('mgr')===0;}).length;
+    if(mgrBuilt<2&&year>=2) return 'high';
+    if(mgrBuilt<3) return 'medium';
+    return 'low';
+  }
+  return 'medium';
+}
+
+
+var SITS = [
+  {id:'y0-q1',q:1,tut:true,title:'The Floor Supervisor Question',char:'delia',
+   scenario:'Delia forwarded an email from a Site B floor supervisor asking why last year\'s survey "went nowhere." She added one line: "Worth addressing?"',
+   opts:[
+    {id:'a',badge:'SEND UPDATE',text:'Draft a plain-language update for Delia to share with Site B. Acknowledges the gap honestly.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Delia notices the transparency. Site B employees get something concrete.'}},
+    {id:'b',badge:'ASK MANAGER',text:'Suggest Delia ask the Site B manager to hold a brief team conversation. Takes it off your plate.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. Nothing moves — but nothing costs either.'}},
+    {id:'c',badge:'PRESENT DIRECTLY',text:'Ask Delia to let you present directly to Site B. Higher exposure, higher trust signal if it lands.',slots:1,bud:0,pc:0,req:{zone:'engaged'},con:{trust:5,ap:2,part:1,note:'Employees at Site B feel seen. Delia is impressed by the initiative.'}}
+   ]},
+  {id:'y0-q2',q:2,tut:false,title:'The Confidentiality Request',char:'marcus',
+   scenario:'Marcus asked for his team\'s individual survey responses. He wants to "have real conversations" with people who raised concerns. His intent is genuine.',
+   opts:[
+    {id:'a',badge:'EXPLAIN',text:'Walk Marcus through why individual responses are not shared. Offer themes and his team\'s aggregate picture instead.',slots:0,bud:0,pc:0,req:null,con:{trust:-1,ap:1,part:0,note:'Marcus is mildly frustrated but respects it. Employee trust holds.'}},
+    {id:'b',badge:'FACILITATE SESSION',text:'Offer small-group listening sessions you facilitate. Gives Marcus the conversations without breaching confidentiality.',slots:1,bud:400,pc:0,req:null,con:{trust:2,ap:2,part:0,note:'Marcus feels supported. Site A teams feel heard.'}},
+    {id:'c',badge:'ESCALATE',text:'Flag to Delia that a manager is requesting individual data. Protects the program but strains the relationship.',slots:0,bud:0,pc:0,req:{pc:25},con:{trust:-3,ap:0,part:0,note:'Delia backs you. Marcus feels managed, not supported.'}}
+   ]},
+  {id:'y0-q3',q:3,tut:false,title:'The Platform Question',char:'raj',
+   scenario:'Raj sent an email to Delia, cc\'d to you, asking whether the survey platform cost could be reduced. He attached a comparison sheet for a free tool.',
+   opts:[
+    {id:'a',badge:'ACKNOWLEDGE',text:'Acknowledge the question, say you\'ll review options, and move on. Preserves the relationship.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Raj feels heard. Nothing changes yet.'}},
+    {id:'b',badge:'RUN COMPARISON',text:'Offer to run a one-quarter comparison. Buys time, signals responsiveness.',slots:1,bud:300,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj approves. You now have data for next quarter.'}},
+    {id:'c',badge:'MAKE THE CASE',text:'Present a direct cost-benefit response with data on what the platform enables and what would be lost switching.',slots:1,bud:0,pc:0,req:{node:'infra-l1',pc:30},con:{trust:5,ap:0,part:0,note:'Raj respects the directness. The case lands.'}}
+   ]},
+  {id:'y0-q4',q:4,tut:false,title:'The Capability Gap',char:'yolanda',
+   scenario:'Three managers — including Yolanda at Site B — say they do not know what to do when survey results land. They\'re not resistant. They\'re just lost.',
+   opts:[
+    {id:'a',badge:'COACH PERSONALLY',text:'Spend time with each manager walking them through their results. Not scalable, but immediate.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:2,part:0,note:'Managers feel supported. Yolanda is grateful.'}},
+    {id:'b',badge:'HOLD THE LINE',text:'Tell them you\'re developing something structured. Ask them to sit tight this quarter.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:-1,part:0,note:'Managers wait. AP Optimism signal turns amber. Needs to resolve next year.'}},
+    {id:'c',badge:'BUILD THE GUIDE',text:'This is exactly what Manager Capacity L1 is for. Invest now at a reduced cost — the need is right in front of you.',slots:1,bud:100,pc:0,req:{noNode:'mgr-l1'},con:{trust:3,ap:3,part:0,note:'The guide lands immediately. Yolanda uses it that week.'},treeUnlock:'mgr-l1'}
+   ]}
+];
+
+// ============================================================
+// YEAR 1-4 SITUATION POOLS
+// Built on 4 balance-tested shapes, 2 narrative skins each = 8 per year
+// Drawn randomly: 4 of 8 appear each playthrough (P(same Q1 across 2 plays)=12%)
+// ============================================================
+
+var YEAR_POOLS = {
+  1: [
+    // RELATIONSHIP shape x2
+    {id:'y1-a',shape:'relationship',title:'The Manager Who Went Off-Script',char:'marcus',
+     scenario:'A manager at Site A — one of Marcus\'s direct reports — told her team that "corporate doesn\'t actually read these surveys." Marcus heard secondhand and is annoyed on your behalf, but hasn\'t said anything to her.',
+     opts:[
+      {id:'a',badge:'TALK TO HER DIRECTLY',text:'Go around Marcus and address it with the manager yourself.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Quick fix. Marcus notices you went around him.'}},
+      {id:'b',badge:'ASK MARCUS TO HANDLE IT',text:'It\'s his report. Let him manage his own team.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Respects the chain of command.'}},
+      {id:'c',badge:'FACILITATE TOGETHER',text:'Bring Marcus and the manager together. Slower, but builds his standing as a leader.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'Marcus leads the conversation. His confidence grows.'}}
+     ]},
+    {id:'y1-b',shape:'relationship',title:'Yolanda\'s Unsolicited Initiative',char:'yolanda',
+     scenario:'Yolanda ran her own mini listening session with her team — without asking you first. The results were good, but it wasn\'t sanctioned, and another supervisor is asking why Yolanda gets to "make up her own process."',
+     opts:[
+      {id:'a',badge:'ADDRESS THE OTHER SUPERVISOR',text:'Explain why Yolanda\'s initiative is a good thing, directly to the supervisor.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Smooths the tension but centers you, not Yolanda.'}},
+      {id:'b',badge:'LET IT PLAY OUT',text:'Don\'t intervene. Let the supervisors work it out themselves.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Low effort. Slight risk Yolanda feels unsupported.'}},
+      {id:'c',badge:'FORMALIZE WHAT SHE DID',text:'Turn Yolanda\'s approach into something other sites can use too.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s arc advances. Her approach becomes the model.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x2
+    {id:'y1-c',shape:'resource_tradeoff',title:'The Budget Reallocation',char:'raj',
+     scenario:'Raj is finalizing next quarter\'s departmental budgets. He asks whether the listening program\'s budget could flex down this quarter to cover a finance system upgrade. He frames it as temporary.',
+     opts:[
+      {id:'a',badge:'HOLD THE LINE',text:'Explain the budget is already committed to this year\'s plan.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. The budget stays yours.'}},
+      {id:'b',badge:'AGREE TO FLEX',text:'Give up part of this quarter\'s budget. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj appreciates the flexibility.'}},
+      {id:'c',badge:'PROPOSE A TRADE',text:'Offer the flex in exchange for Raj\'s support on your next recommendation.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land, regardless of Trust zone.'},guaranteeNextRec:true}
+     ]},
+    {id:'y1-d',shape:'resource_tradeoff',title:'The HRBP Survey Request',char:'delia',
+     scenario:'HR Business Partners want to add four questions to the survey covering topics outside the CoE\'s scope. Delia is sympathetic to them but defers to you.',
+     opts:[
+      {id:'a',badge:'DECLINE',text:'Keep the survey focused. Explain why scope matters for data quality.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:1,note:'Participation holds steady. HRBPs are mildly annoyed.'}},
+      {id:'b',badge:'NEGOTIATE',text:'Accept two of their four questions in exchange for trimming two of your own.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A workable compromise.'}},
+      {id:'c',badge:'TRADE FOR INFLUENCE',text:'Accept their questions in exchange for HRBP support on your next recommendation.',slots:0,bud:0,pc:15,req:{pc:15},con:{trust:1,ap:0,part:-2,note:'Survey dilutes slightly, but your next recommendation is guaranteed to land.'},guaranteeNextRec:true}
+     ]},
+    // DATA_INTEGRITY shape x2
+    {id:'y1-e',shape:'data_integrity',title:'The Premature Announcement',char:'delia',
+     scenario:'Delia mentions in a leadership meeting — before you\'ve finished analyzing the mid-year pulse — that "early signals look really positive." You haven\'t seen anything that confirms that yet.',
+     opts:[
+      {id:'a',badge:'CORRECT IT QUIETLY',text:'Tell Delia privately the data doesn\'t support that claim yet.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Protects integrity. Outcome depends on what the real data shows.'},variance:true},
+      {id:'b',badge:'LET IT STAND',text:'She\'s building momentum for the program. Don\'t undercut her.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Preserves the relationship. Risk if reality disappoints.'},variance:true},
+      {id:'c',badge:'GET HER REAL DATA FAST',text:'Rush the pulse analysis so her claim has something behind it.',slots:1,bud:0,pc:0,req:{node:'infra-l1'},con:{trust:4,ap:1,part:0,note:'Removes the gamble. Whatever the data shows, it\'s now true.'}}
+     ]},
+    {id:'y1-f',shape:'data_integrity',title:'The Confident Forecast',char:'raj',
+     scenario:'Raj tells the executive team he expects this year\'s engagement scores to be "significantly higher" based on a conversation he had with two managers. You have no data suggesting that yet.',
+     opts:[
+      {id:'a',badge:'STAY QUIET',text:'Don\'t correct him publicly. Address it with him one-on-one later.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Risk depends on what the real numbers show.'},variance:true},
+      {id:'b',badge:'TEMPER EXPECTATIONS NOW',text:'Gently set realistic expectations with the room before he overcommits.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Safer, smaller variance either way.'},variance:true},
+      {id:'c',badge:'PULL THE REAL NUMBERS',text:'Get an early, credible read so the forecast is grounded in something real.',slots:1,bud:0,pc:0,req:{node:'infra-l1'},con:{trust:4,ap:1,part:0,note:'Raj\'s forecast becomes accurate because you made it so.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x2
+    {id:'y1-g',shape:'capacity_mechanic',title:'The Capacity Question',char:null,
+     scenario:'You\'re stretched. There\'s an opportunity to bring on a contractor for the next two quarters — more hands, modest cost — but it also means training someone temporary right when things are getting busy.',
+     opts:[
+      {id:'a',badge:'HIRE THE CONTRACTOR',text:'Add capacity for two quarters.',slots:0,bud:1500,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Temporary capacity boost.'},contractorHire:true},
+      {id:'b',badge:'STAY LEAN',text:'Make do with current capacity. Save the budget.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'No change, no cost.'}},
+      {id:'c',badge:'WAIT FOR FTE APPROVAL',text:'Hold out for a permanent hire instead of a temp.',slots:0,bud:0,pc:0,req:{zone:'engaged'},con:{trust:1,ap:0,part:0,note:'Permanent capacity, but only available at Engaged Trust or above.'}}
+     ]},
+    {id:'y1-h',shape:'capacity_mechanic',title:'The Quiet Win',char:'delia',
+     scenario:'A small thing happened this quarter that nobody asked you to track: a manager who was skeptical last year now runs his own pre-meeting before sharing results. Delia mentions it in passing.',
+     opts:[
+      {id:'a',badge:'LET IT BE',text:'Some wins do not need a spotlight. Note it and move on.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Quiet, but real progress.'}},
+      {id:'b',badge:'THANK HIM DIRECTLY',text:'A short note to the manager, acknowledging the shift.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Small gesture, genuine impact.'}},
+      {id:'c',badge:'BANK THE GOODWILL',text:'Use the moment to build a quiet reserve of trust with Delia for later.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+8 Political Capital. Delia remembers who delivers results without asking for credit.'},pcGain:8}
+     ]}
+  ],
+
+  2: [
+    {id:'y2-a',shape:'relationship',title:'The Star Manager Leaves',char:'marcus',
+     scenario:'Your highest-performing manager champion was poached by a competitor. She ran the best action planning sessions in the company. Marcus, who learned from her, seems shaken.',
+     opts:[
+      {id:'a',badge:'CHECK IN WITH MARCUS',text:'Make sure he doesn\'t lose momentum because she\'s gone.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Marcus appreciates the support.'}},
+      {id:'b',badge:'LET THE TEAM ADJUST',text:'Don\'t make a big deal of it. People move on.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'No disruption, no specific support either.'}},
+      {id:'c',badge:'NAME MARCUS HER SUCCESSOR',text:'Formally position Marcus to carry her work forward.',slots:1,bud:0,pc:0,req:{node:'mgr-l2'},con:{trust:4,ap:3,part:0,note:'Marcus steps into a real leadership role. His arc accelerates.'}}
+     ]},
+    {id:'y2-b',shape:'relationship',title:'Yolanda Goes Public',char:'yolanda',
+     scenario:'Yolanda wants to post her team\'s raw scores on the Site B break room wall. Scores are good. She\'s proud and wants to be transparent.',
+     opts:[
+      {id:'a',badge:'SUPPORT IT AS-IS',text:'Let her post the raw numbers. She knows her team.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:1,note:'Bold and effective, since her scores are good.'}},
+      {id:'b',badge:'DECLINE',text:'Raw scores create comparison pressure across sites.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Cautious. Yolanda is a little disappointed.'}},
+      {id:'c',badge:'HELP HER FRAME IT WELL',text:'Work with her to post themes and actions instead of raw numbers.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:1,note:'Sustainable, systemic, and Yolanda still gets her moment.'}}
+     ]},
+    {id:'y2-c',shape:'resource_tradeoff',title:'The ROI Spreadsheet',char:'raj',
+     scenario:'Raj asks in a leadership meeting what the measurable ROI of the listening program is. He has a spreadsheet. Your costs on one side. A blank column labeled "outcomes" on the other.',
+     opts:[
+      {id:'a',badge:'ACKNOWLEDGE THE GAP',text:'Admit the measurement framework needs work. Commit to building one.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Honest. Doesn\'t resolve Raj\'s skepticism yet.'}},
+      {id:'b',badge:'SPEND TO BUILD THE CASE',text:'Commission a quick internal analysis connecting your data to retention trends.',slots:0,bud:2500,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj sees something concrete, even if imperfect.'}},
+      {id:'c',badge:'TRADE FOR PATIENCE',text:'Ask Raj directly for one more year before judging ROI, in exchange for committing to deliver hard numbers next cycle.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land.'},guaranteeNextRec:true}
+     ]},
+    {id:'y2-d',shape:'resource_tradeoff',title:'The Survey Frequency Memo',char:'raj',
+     scenario:'Raj is proposing reducing survey frequency to every two years to reduce "survey fatigue." You have data that annual cadence produces better outcomes.',
+     opts:[
+      {id:'a',badge:'PUSH BACK WITH EVIDENCE',text:'Present the annual-vs-biennial data directly.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Outcome depends on whether Raj is convinced.'},variance:true},
+      {id:'b',badge:'PROPOSE A HYBRID',text:'Annual full survey, plus a lightweight quarterly pulse.',slots:0,bud:1500,pc:0,req:null,con:{trust:2,ap:0,part:1,note:'Reframes as more value, not less.'}},
+      {id:'c',badge:'TRADE FOR THE WIN',text:'Use Political Capital to make this a non-issue.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:3,ap:0,part:0,note:'Annual cadence guaranteed. Resolved cleanly.'}}
+     ]},
+    {id:'y2-e',shape:'data_integrity',title:'Score Coaching',char:'marcus',
+     scenario:'A manager at Site A told his team to "fill in fives across the board" so they could finish the survey faster. Two employees told you independently.',
+     opts:[
+      {id:'a',badge:'NOTE IT AND MONITOR',text:'Watch next year\'s data for patterns without confronting directly.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Avoids conflict. Data integrity risk persists.'},variance:true},
+      {id:'b',badge:'ADDRESS IT DIRECTLY',text:'Talk to the manager and his plant director.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Politically costly, but the right call.'}},
+      {id:'c',badge:'BUILD THE CASE FOR TRAINING',text:'Use this as the reason to invest in Manager Capacity\'s data literacy track.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:3,ap:1,part:0,note:'Reframes a problem into momentum for the tree.'}}
+     ]},
+    {id:'y2-f',shape:'data_integrity',title:'The Unsolicited Benchmark',char:'delia',
+     scenario:'A manager found an industry benchmark showing your scores are below sector average and shared it in a team meeting. Delia forwarded it to you with one question mark.',
+     opts:[
+      {id:'a',badge:'EXPLAIN WHY BENCHMARKS MISLEAD',text:'Make the case that internal trends matter more than external comparison.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Defensible, but may feel evasive.'},variance:true},
+      {id:'b',badge:'USE IT AS LEVERAGE',text:'Turn the benchmark into a case for increased investment.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Delia appreciates the reframe.'}},
+      {id:'c',badge:'GET AHEAD WITH REAL ANALYSIS',text:'Present a contextualized benchmark analysis to leadership directly.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:4,ap:0,part:0,note:'Demonstrates real sophistication. Removes the doubt entirely.'}}
+     ]},
+    {id:'y2-g',shape:'capacity_mechanic',title:'The Department Data Request',char:'raj',
+     scenario:'Raj wants results broken down by department rather than just by site. More granular data, more risk of confidentiality issues if not handled carefully.',
+     opts:[
+      {id:'a',badge:'PROPOSE SITE-LEVEL INSTEAD',text:'Offer the safer middle ground.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Safe compromise.'}},
+      {id:'b',badge:'PUSH BACK ON CONFIDENTIALITY',text:'Decline on the grounds that smaller groups risk anonymity.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Costs a little with Raj.'}},
+      {id:'c',badge:'AGREE WITH GUARDRAILS',text:'Allow it, but only with minimum group sizes enforced.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:4,ap:0,part:0,note:'Raj gets what he wants safely. Strong trust signal.'}}
+     ]},
+    {id:'y2-h',shape:'capacity_mechanic',title:'The Slow Quarter',char:null,
+     scenario:'Nothing urgent landed this quarter. No fires, no asks, no pushback. It is tempting to coast.',
+     opts:[
+      {id:'a',badge:'USE THE QUIET TIME',text:'Get ahead on planning for next quarter instead of reacting.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Quiet quarters are when real groundwork happens.'}},
+      {id:'b',badge:'TAKE THE BREATHER',text:'Let the team rest. Not every quarter needs to be a push.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Sustainable, if unremarkable.'}},
+      {id:'c',badge:'BUILD RESERVE CAPITAL',text:'Use the calm to strengthen relationships before the next storm.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+10 Political Capital banked for when you need it.'},pcGain:10}
+     ]}
+  ],
+
+  3: [
+    {id:'y3-a',shape:'relationship',title:'Marcus Turns',char:'marcus',
+     scenario:'Marcus ran an unsolicited recognition event for his team after results came back, citing his coaching as the reason. His team scores are up 11 points since Year 1.',
+     opts:[
+      {id:'a',badge:'ACKNOWLEDGE PRIVATELY',text:'Thank him directly. Keep it low-key.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Understated, but genuine.'}},
+      {id:'b',badge:'USE IT IN A PRESENTATION',text:'Cite his data in the next executive conversation.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Strategic use of a good story.'}},
+      {id:'c',badge:'FEATURE HIM TO ALL MANAGERS',text:'With his permission, share Marcus\'s story as a model for others &#8212; a full feature, not a mention.',slots:2,bud:0,pc:0,req:{node:'comms-l2'},con:{trust:6,ap:4,part:0,note:'Marcus becomes a visible champion. Arc complete.'}}
+     ]},
+    {id:'y3-b',shape:'relationship',title:'Yolanda\'s Cohort Idea',char:'yolanda',
+     scenario:'Yolanda wants to start an informal peer group for managers across all three sites to share what\'s working. She\'s asking for your blessing, not your budget.',
+     opts:[
+      {id:'a',badge:'APPROVE INFORMALLY',text:'Let her run it without making it official.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Low cost, modest impact.'}},
+      {id:'b',badge:'GIVE IT STRUCTURE',text:'Help her set an agenda and cadence for the group.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'More likely to stick.'}},
+      {id:'c',badge:'FORMALIZE AS PART OF THE TREE',text:'Turn this into the foundation for Manager Cohort investment.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s initiative becomes systemic. Her arc nears completion.'}}
+     ]},
+    {id:'y3-c',shape:'resource_tradeoff',title:'The Budget Threat',char:'raj',
+     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Your program is the most expensive line item under review.',
+     opts:[
+      {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability.'}},
+      {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Agree to the change, but run it with far more rigor than expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows.'}},
+      {id:'c',badge:'FIGHT TO KEEP THE PROGRAM',text:'Present a detailed cost-reduction plan and make the case directly.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'High stakes. If it lands, the program is secured.'}}
+     ]},
+    {id:'y3-d',shape:'resource_tradeoff',title:'The LinkedIn Problem',char:'delia',
+     scenario:'A former employee posted that the survey is "theater" and nothing ever changes. Hundreds of likes. Two current employees commented in agreement. Delia forwarded it with a question mark.',
+     opts:[
+      {id:'a',badge:'DO NOTHING',text:'Responding to social media criticism often amplifies it.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:-1,part:0,note:'May be tactically right, but feels evasive internally.'}},
+      {id:'b',badge:'BRIEF DELIA PRIVATELY',text:'Let her decide how to respond externally.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Passes the decision up.'}},
+      {id:'c',badge:'COMMUNICATE TRANSPARENTLY',text:'Issue an internal acknowledgment naming specific actions taken.',slots:1,bud:0,pc:0,req:{node:'comms-l3'},con:{trust:3,ap:3,part:0,note:'Brave and effective, with the infrastructure to back it up.'}}
+     ]},
+    {id:'y3-e',shape:'data_integrity',title:'The Board Question',char:null,
+     scenario:'The CEO questioned the program\'s ROI in a leadership meeting. "We\'ve been running this for three years. Why is AP Optimism still below 60?" The room went quiet.',
+     opts:[
+      {id:'a',badge:'DEFER TO DELIA',text:'Request a private meeting to present the case later.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Delays the reckoning.'},variance:true},
+      {id:'b',badge:'ACKNOWLEDGE THE GAP HONESTLY',text:'Admit it directly and propose a focused reset strategy.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Honest. Credibility for candor.'}},
+      {id:'c',badge:'DEFEND WITH TREND DATA',text:'Build and present a full three-year data package with a specific Year 4-5 investment plan.',slots:2,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:6,ap:2,part:0,note:'High risk, high reward. The data has to be solid.'},riskConsequence:{trust:-4}}
+     ]},
+    {id:'y3-f',shape:'data_integrity',title:'The Participation Plateau',char:null,
+     scenario:'Participation has been flat for two years despite communications investment. A vendor suggests gift cards for completing the survey.',
+     opts:[
+      {id:'a',badge:'DECLINE',text:'Incentivized participation produces less honest data.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Data quality protected.'}},
+      {id:'b',badge:'PILOT AT ONE SITE',text:'Test it narrowly at the lowest-participation site only.',slots:1,bud:1200,pc:0,req:null,con:{trust:0,ap:0,part:2,note:'Experimental, contained.'}},
+      {id:'c',badge:'FIX THE ROOT CAUSE',text:'Invest in understanding why participation plateaued instead of incentivizing around it.',slots:1,bud:0,pc:0,req:{node:'comms-l2'},con:{trust:3,ap:1,part:3,note:'Slower, but addresses the actual problem.'}}
+     ]},
+    {id:'y3-g',shape:'capacity_mechanic',title:'The Executive Briefing Opportunity',char:null,
+     scenario:'You\'re offered a quarterly slot in the leadership meeting to brief on listening data. One slot per quarter for the rest of the year.',
+     opts:[
+      {id:'a',badge:'TAKE THE SLOT',text:'Commit to the quarterly briefing. One slot per quarter going forward this year.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Ongoing visibility. Costs capacity every quarter until year end.'}},
+      {id:'b',badge:'DECLINE FOR NOW',text:'Your plate is full. Pass on the opportunity this year.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Conserves capacity.'}},
+      {id:'c',badge:'DELEGATE IT',text:'Send a team member instead, building their visibility too.',slots:1,bud:0,pc:0,req:{node:'se-l2'},con:{trust:1,ap:0,part:0,note:'Builds team capability without costing you ongoing time.'}}
+     ]},
+    {id:'y3-h',shape:'capacity_mechanic',title:'The Survey Platform Renewal',char:null,
+     scenario:'Your survey platform contract is up for renewal. You can lock in a multi-year rate now for savings, or stay flexible year-to-year.',
+     opts:[
+      {id:'a',badge:'LOCK IN MULTI-YEAR',text:'Commit budget now for savings later.',slots:0,bud:3000,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Saves money long-term, costs more now.'}},
+      {id:'b',badge:'STAY FLEXIBLE',text:'Renew year-to-year. Costs more over time but keeps options open.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'No upfront cost, less long-term savings.'}},
+      {id:'c',badge:'NEGOTIATE WITH LEVERAGE',text:'Use your program\'s track record to negotiate better terms.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:1,ap:0,part:0,note:'Best of both — savings without the upfront cost.'}}
+     ]}
+  ],
+
+  4: [
+    {id:'y4-a',shape:'relationship',title:'The Succession Question',char:'marcus',
+     scenario:'Delia tells you she\'s leaving Meridian in six months. The program\'s future depends partly on whether her replacement inherits credibility or a fight. Marcus offers to speak on the program\'s behalf if needed.',
+     opts:[
+      {id:'a',badge:'KEEP IT INTERNAL',text:'Handle the transition yourself without involving Marcus.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Contained, but misses a chance to show external support.'}},
+      {id:'b',badge:'ASK MARCUS TO BE READY',text:'Have him on standby if his perspective is useful.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Modest preparation.'}},
+      {id:'c',badge:'BRIEF MARCUS TO ADVOCATE',text:'Prepare him to speak directly to the new CHRO about what changed for his team.',slots:1,bud:0,pc:0,req:{node:'mgr-l4'},con:{trust:4,ap:0,part:0,note:'Marcus becomes a credible external voice for the program.'}}
+     ]},
+    {id:'y4-b',shape:'relationship',title:'Yolanda Gets Recognized',char:'yolanda',
+     scenario:'Yolanda\'s site has been cited in an internal newsletter as a model for engagement. She\'s being asked to present at a company-wide town hall.',
+     opts:[
+      {id:'a',badge:'LET HER PRESENT SOLO',text:'She earned it. Let her own the moment.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Yolanda shines independently.'}},
+      {id:'b',badge:'HELP HER PREPARE',text:'Coach her on the framing so the message lands well.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Polished, supported.'}},
+      {id:'c',badge:'CO-PRESENT WITH HER',text:'Join her on stage, connecting her story to the broader program.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:4,ap:2,part:1,note:'Yolanda\'s arc reaches its peak. The program gets visible proof.'}}
+     ]},
+    {id:'y4-c',shape:'resource_tradeoff',title:'The Scope Expansion Temptation',char:null,
+     scenario:'HR leadership wants the CoE to take on a broader culture measurement mandate — quarterly pulses, manager 360s, exit interview analysis. It would double the team\'s scope.',
+     opts:[
+      {id:'a',badge:'DECLINE',text:'Depth over breadth. Stay focused on listening and AP Optimism.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Program integrity maintained.'}},
+      {id:'b',badge:'ACCEPT SELECTIVELY',text:'Take on exit interview analysis only — it directly feeds your strategy.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Smart, manageable expansion.'}},
+      {id:'c',badge:'ACCEPT THE FULL MANDATE',text:'Take it all on. More influence, more budget, more risk to the core mission.',slots:0,bud:0,pc:0,req:{zone:'engaged'},con:{trust:4,ap:-2,part:0,note:'Capacity is stretched thin. Core work may suffer.'}}
+     ]},
+    {id:'y4-d',shape:'resource_tradeoff',title:'The Measurement Challenge',char:'raj',
+     scenario:'Raj asks you to prove that your Manager Capacity investment directly caused the AP Optimism improvement. He wants a causal link, not a correlation.',
+     opts:[
+      {id:'a',badge:'ACKNOWLEDGE THE LIMITATION',text:'Be honest that attribution is genuinely hard in this field.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Credible honesty.'}},
+      {id:'b',badge:'COMMISSION A STUDY',text:'Pay for external validation of the causal link.',slots:1,bud:3000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Buys credibility directly.'}},
+      {id:'c',badge:'PRESENT THE STRONGEST CASE',text:'Build a site-level cohort analysis showing the connection.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:1,part:0,note:'If convincing, this resolves the question for good.'}}
+     ]},
+    {id:'y4-e',shape:'data_integrity',title:'The Five-Year Pattern',char:null,
+     scenario:'Someone on the executive team notices that scores always improve right before budget review and asks if the timing is a coincidence.',
+     opts:[
+      {id:'a',badge:'EXPLAIN THE TIMING',text:'Clarify that the survey cycle, not strategy, drives the pattern.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Defensible. May not fully land.'},variance:true},
+      {id:'b',badge:'INVITE SCRUTINY',text:'Offer to walk anyone through the raw methodology.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Transparency builds confidence.'}},
+      {id:'c',badge:'SHOW THE FULL DATA TRAIL',text:'Build and present the unedited quarter-by-quarter data trail, not just the survey-cycle peaks.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:6,ap:1,part:0,note:'Removes the doubt entirely with hard evidence.'}}
+     ]},
+    {id:'y4-f',shape:'data_integrity',title:'The Comparison Trap',char:'raj',
+     scenario:'Raj compares your program\'s cost-per-employee to a much cheaper vendor solution he saw at a conference. He\'s not being hostile, just curious.',
+     opts:[
+      {id:'a',badge:'EXPLAIN WHAT\'S DIFFERENT',text:'Walk through what the cheaper tool doesn\'t do.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable, but comparative claims are hard to fully resolve.'},variance:true},
+      {id:'b',badge:'OFFER A SIDE-BY-SIDE',text:'Propose a structured comparison over one quarter.',slots:1,bud:1000,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Fair test, takes time.'}},
+      {id:'c',badge:'SHOW FIVE YEARS OF ROI',text:'Build the full longitudinal case the cheaper tool could never have produced.',slots:2,bud:0,pc:0,req:{node:'infra-l4'},con:{trust:6,ap:1,part:0,note:'The comparison becomes obviously unfair, in your favor.'}}
+     ]},
+    {id:'y4-g',shape:'capacity_mechanic',title:'The Final Hire Decision',char:null,
+     scenario:'You have approval for one more team member before the final year. The question is whether to hire for depth (another analyst) or breadth (someone who can run sessions independently).',
+     opts:[
+      {id:'a',badge:'HIRE FOR DEPTH',text:'Add an analyst. Stronger data, better evidence heading into Year 5.',slots:1,bud:8000,pc:0,req:{zone:'engaged'},con:{trust:0,ap:1,part:0,note:'Strengthens your data game for Year 5.'}},
+      {id:'b',badge:'HIRE FOR BREADTH',text:'Add someone who can run sessions independently and free up your time.',slots:1,bud:8000,pc:0,req:{zone:'engaged'},con:{trust:1,ap:0,part:0,note:'More direct support capacity heading into the final year.'}},
+      {id:'c',badge:'HOLD THE HEADCOUNT',text:'Decline the hire. Keep the budget flexible for Year 5 priorities.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'No cost, no new capacity. Budget stays flexible.'}}
+     ]},
+    {id:'y4-h',shape:'capacity_mechanic',title:'The Legacy Planning Nudge',char:'delia',
+     scenario:'Delia asks, almost offhand, what happens to the program if you left tomorrow. It\'s Year 4. The question lands differently than it would have in Year 1.',
+     opts:[
+      {id:'a',badge:'SAY IT\'S TOO EARLY TO PLAN',text:'Deflect for now. Focus on Year 5.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Avoids the question.'}},
+      {id:'b',badge:'START LIGHT DOCUMENTATION',text:'Begin writing down what\'s worked, just in case.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Modest insurance.'}},
+      {id:'c',badge:'NAME IT AS A PRIORITY',text:'Tell Delia succession planning will be a real focus in Year 5.',slots:0,bud:0,pc:0,req:{node:'se-l2'},con:{trust:3,ap:0,part:0,note:'Delia feels reassured the program will outlast you.'}}
+     ]}
+  ],
+  5: [
+    {id:'y5-a',shape:'relationship',title:'Marcus\'s Last Word',char:'marcus',
+     scenario:'Marcus asks if he can speak at the final year-end leadership review. Not about his team\'s scores — about what changed in how he leads.',
+     opts:[
+      {id:'a',badge:'LET HIM SPEAK',text:'Give him the floor. No script, no prep.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Authentic, unpolished, real.'}},
+      {id:'b',badge:'HELP HIM PREPARE',text:'Coach him so the message lands with maximum impact.',slots:1,bud:0,pc:0,req:null,con:{trust:3,ap:1,part:0,note:'Polished and powerful.'}},
+      {id:'c',badge:'MAKE IT THE CLOSING STORY',text:'Build the entire leadership review around Marcus\'s transformation.',slots:2,bud:0,pc:0,req:{node:'mgr-l4'},con:{trust:6,ap:3,part:0,note:'Marcus\'s arc becomes the program\'s defining proof point.'}}
+     ]},
+    {id:'y5-b',shape:'relationship',title:'Yolanda\'s Next Chapter',char:'yolanda',
+     scenario:'Yolanda is being considered for a regional role that would take her beyond Site B. She asks what you think.',
+     opts:[
+      {id:'a',badge:'ENCOURAGE HER TO GO',text:'She has outgrown what you can offer here. Tell her honestly.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Generous, even if it means losing her.'}},
+      {id:'b',badge:'STAY NEUTRAL',text:'It is her decision. Offer support either way.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Respectful distance.'}},
+      {id:'c',badge:'DOCUMENT HER IMPACT FOR THE RECORD',text:'Make sure her contribution to the program is formally recognized before she moves on.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:3,ap:0,part:0,note:'Yolanda\'s legacy is secured regardless of where she goes next.'}}
+     ]},
+    {id:'y5-c',shape:'resource_tradeoff',title:'The Final Budget Conversation',char:'raj',
+     scenario:'Raj asks what the program would need to keep running at this level after you are gone. It is the first time he has asked a forward-looking question instead of a skeptical one.',
+     opts:[
+      {id:'a',badge:'GIVE A MODEST NUMBER',text:'Lowball it to make continuation feel easy.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Easier to approve, harder to sustain.'}},
+      {id:'b',badge:'GIVE THE REAL NUMBER',text:'Be honest about what it actually takes.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Credible, even if it is a harder ask.'}},
+      {id:'c',badge:'BUILD THE FULL CASE',text:'Present a complete five-year cost-benefit model for continuation.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:5,ap:0,part:0,note:'Raj has everything he needs to make the case upward.'}}
+     ]},
+    {id:'y5-d',shape:'resource_tradeoff',title:'The Replacement Question',char:'delia',
+     scenario:'Delia wants to know if there is someone internal who could take over the program after you leave.',
+     opts:[
+      {id:'a',badge:'NAME SOMEONE INFORMALLY',text:'Mention a candidate without making it official.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A start, but not a plan.'}},
+      {id:'b',badge:'SAY YOU ARE NOT SURE YET',text:'Honest. The bench is not as deep as it should be.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Candid, if not reassuring.'}},
+      {id:'c',badge:'PROPOSE A FORMAL HANDOFF PLAN',text:'Lay out exactly how a transition would work, with a named successor.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:3,ap:0,part:0,note:'Delia feels the program will outlast any one person.'}}
+     ]},
+    {id:'y5-e',shape:'data_integrity',title:'The Five-Year Question',char:null,
+     scenario:'Someone in leadership asks, simply: "Did this work?" Not hostile. Genuinely curious, after five years.',
+     opts:[
+      {id:'a',badge:'GIVE THE SHORT ANSWER',text:'Yes, broadly — and explain why in one sentence.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Confident, if thin on detail.'},variance:true},
+      {id:'b',badge:'WALK THROUGH THE ARC',text:'Tell the story of where things started and where they are now.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Compelling narrative, well received.'}},
+      {id:'c',badge:'SHOW THE FULL FIVE-YEAR TREND',text:'Present the complete data arc from Year 0 to now, unfiltered.',slots:2,bud:0,pc:0,req:{node:'infra-l4'},con:{trust:6,ap:1,part:0,note:'The data speaks for itself. No question left unanswered.'}}
+     ]},
+    {id:'y5-f',shape:'data_integrity',title:'The Skeptic Who Came Around',char:'raj',
+     scenario:'Raj mentions, almost reluctantly, that he was wrong about the program five years ago. He does not want it to be a big moment.',
+     opts:[
+      {id:'a',badge:'LET IT PASS QUIETLY',text:'Respect that he does not want to make it a thing.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Quiet respect, mutually felt.'}},
+      {id:'b',badge:'ACKNOWLEDGE IT BRIEFLY',text:'A short, genuine thank you — nothing more.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Warm, understated.'}},
+      {id:'c',badge:'USE HIS WORDS IN THE FINAL CASE',text:'With his permission, cite his change of heart as part of the program\'s legacy case.',slots:1,bud:0,pc:0,req:{node:'se-l4'},con:{trust:4,ap:0,part:0,note:'The most skeptical voice becomes the strongest evidence.'}}
+     ]},
+    {id:'y5-g',shape:'capacity_mechanic',title:'The Last Investment Decision',char:null,
+     scenario:'You have one final stretch of capacity before the year closes out. Spend it building, or spend it documenting what you built.',
+     opts:[
+      {id:'a',badge:'KEEP BUILDING',text:'There is still time. Push for one more gain.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'One last push before the close.'}},
+      {id:'b',badge:'DOCUMENT EVERYTHING',text:'Make sure what worked is written down for whoever comes next.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Institutional memory, secured.'}},
+      {id:'c',badge:'DO BOTH',text:'Split the effort between one final build and documentation.',slots:2,bud:0,pc:0,req:{node:'mgr-l2'},con:{trust:3,ap:1,part:0,note:'A strong close on both fronts.'}}
+     ]},
+    {id:'y5-h',shape:'capacity_mechanic',title:'The Final Pulse',char:null,
+     scenario:'Before the last survey closes, you get one read on how the organization feels about the five years behind it.',
+     opts:[
+      {id:'a',badge:'TAKE IT AT FACE VALUE',text:'Whatever the pulse says, that is the read.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Simple, unfiltered.'}},
+      {id:'b',badge:'DIG ONE LAYER DEEPER',text:'Follow up with a few people directly before drawing conclusions.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'More texture, more confidence in the read.'}},
+      {id:'c',badge:'CROSS-REFERENCE FIVE YEARS OF DATA',text:'Compare this pulse against every prior year\'s pattern.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:2,ap:1,part:0,note:'The clearest possible picture of where things stand.'}}
+     ]}
+  ]
+};
+
+var YEAR_PRESURVEY = {
+  1: {prompt:'After last year\'s low Site C participation, how much do you push transparency about what changed?',
+   opts:[
+    {id:'a',badge:'SHOW WHAT CHANGED',text:'Lead the launch by naming specific things that happened because of last year\'s results.',req:{node:'comms-l1'},effect:{part:4,note:'Concrete proof the survey mattered.'}},
+    {id:'b',badge:'KEEP IT SIMPLE',text:'Standard launch messaging, no special framing.',req:null,effect:{part:0,note:'Standard launch.'}},
+    {id:'c',badge:'ASK WHAT WOULD MATTER',text:'Send a 1-question pulse asking what would make this year\'s survey feel worth it.',req:null,effect:{part:2,note:'Employees feel asked, not just told.'}}
+   ]},
+  2: {prompt:'A department head wants advance notice of which teams will see results first. How do you handle the rollout order?',
+   opts:[
+    {id:'a',badge:'EQUAL ROLLOUT',text:'All sites get results at the same time, no exceptions.',req:null,effect:{part:0,note:'Fair and simple.'}},
+    {id:'b',badge:'PRIORITIZE LOW-TRUST SITES',text:'Sites with lower scores get results and support first.',req:{node:'comms-l2'},effect:{part:3,note:'Targeted support where it\'s needed most.'}},
+    {id:'c',badge:'LET DEPARTMENT HEADS CHOOSE',text:'Give leaders control over their own rollout timing.',req:null,effect:{part:1,note:'Flexible, but inconsistent.'}}
+   ]},
+  3: {prompt:'You can invest your remaining pre-survey capacity in manager readiness or employee awareness. Which matters more right now?',
+   opts:[
+    {id:'a',badge:'MANAGER READINESS',text:'Ensure every manager knows what to do when results land.',req:{node:'mgr-l2'},effect:{part:2,note:'Action planning is ready to go the moment scores arrive.'}},
+    {id:'b',badge:'EMPLOYEE AWARENESS',text:'Remind employees what changed since last survey.',req:{node:'comms-l2'},effect:{part:4,note:'Employees walk in already believing it matters.'}},
+    {id:'c',badge:'SPLIT THE EFFORT',text:'A lighter touch on both fronts.',req:null,effect:{part:2,note:'Balanced, but neither lands as strongly.'}}
+   ]},
+  4: {prompt:'Participation has been flat. A vendor offers a direct-to-employee reminder tool.',
+   opts:[
+    {id:'a',badge:'USE IT EVERYWHERE',text:'Direct reminders are proven to lift participation.',req:null,effect:{part:6,note:'Budget -$1,200. Reliable lift.'},bud:1200},
+    {id:'b',badge:'TARGET THE WEAKEST SITE',text:'Use it only where participation is lowest.',req:null,effect:{part:4,note:'Budget -$400. Focused impact.'},bud:400},
+    {id:'c',badge:'DECLINE',text:'Participation should come from belief the survey matters, not reminders.',req:null,effect:{part:0,note:'Principled. No bonus.'}}
+   ]},
+  5: {prompt:'The final survey. One message before it opens, to a workforce that has seen four cycles of this before.',
+   opts:[
+    {id:'a',badge:'A PERSONAL REFLECTION',text:'Record a short message reflecting on five years and asking employees to tell the truth one more time.',req:null,effect:{part:3,note:'Personal and direct.'}},
+    {id:'b',badge:'LET THE CHAMPIONS LAUNCH IT',text:'Ask Marcus and Yolanda to co-create the final launch message.',req:{node:'mgr-l4'},effect:{part:5,note:'The people closest to the work make the final ask.'}},
+    {id:'c',badge:'STANDARD CLOSE',text:'No special send-off. Let the work speak for itself.',req:null,effect:{part:0,note:'Quiet, consistent with how it started.'}}
+   ]}
+};
+
+
+var POS_EVENTS = [
+  {char:'yolanda',text:'Yolanda mentioned the listening program in a leadership forum. Delia noticed.',d:2,cond:null},
+  {char:null,text:'A new hire said she chose Meridian because she heard they actually use their survey results.',d:1,cond:null},
+  {char:'raj',text:'Raj mentioned the program positively in a budget meeting — briefly, but he mentioned it.',d:1,cond:null},
+  {char:null,text:'Three managers signed up for the action planning roundtable before the reminder went out.',d:2,cond:{node:'mgr-l1'}},
+  {char:null,text:'A line worker asked when the next survey was. First time anyone has asked proactively.',d:1,cond:null},
+  {char:'delia',text:'Delia forwarded your results summary to the board with a note: "Good work."',d:3,cond:null},
+  {char:null,text:'Site B participation is the highest it has been. Word is spreading.',d:2,cond:{node:'comms-l1'}},
+  {char:'marcus',text:'Marcus attended the data literacy workshop without being asked.',d:2,cond:{node:'mgr-l2'}}
+];
+var NEG_EVENTS = [
+  {char:null,text:'A manager told employees the survey is mandatory but their answers do not matter.',d:-2,cond:null},
+  {char:'raj',text:'Raj mentioned a competitor\'s simpler, cheaper pulse tool in a meeting.',d:-1,cond:null},
+  {char:null,text:'Three managers submitted their action plans late. Delia noticed.',d:-2,cond:null},
+  {char:null,text:'An anonymous comment on the internal portal called the survey a waste of time.',d:-1,cond:null},
+  {char:'raj',text:'Raj asked Delia what the CoE\'s headcount justification is.',d:-3,cond:null},
+  {char:null,text:'Finance flagged the platform subscription as an area for cost review.',d:-2,cond:{node:'infra-l2'}}
+];
+var PULSES = {
+  pos:['A manager at Site B asked more questions after the results summary. Something is shifting.','Yolanda sent a message at 7am: her team is already asking about the next survey.','Three managers from different sites were overheard comparing action planning approaches.','A new hire said during onboarding she\'d heard Meridian actually does something with its survey results.'],
+  neu:['Things feel steady at Site A. No news, which is its own kind of news.','The quarter is quiet. Hard to tell if that means things are good or people have stopped paying attention.','Managers are submitting action plans on time. Whether they\'re doing anything with them is harder to know.'],
+  neg:['Employees at Site C have not heard anything about the survey since it closed.','A manager mentioned the action plan was just something HR makes them do.','Someone wrote "nothing ever changes" on a break room whiteboard near the survey poster.','Participation in the mid-year pulse was low. Employees may be losing faith.']
+};
+
+// ── STATE ──
+var S = {
+  phase:'diff',diff:null,year:0,q:1,isTut:true,
+  grade:null,nextBudget:0,preSurveyNote:'',
+  trust:0,budget:0,cap:0,capUsed:0,polcap:0,
+  eng:0,ap:0,part:0,
+  tree:null,
+  sit:null,sitDone:false,
+  yearDraw:[], // 4 randomly drawn situations for current year
+  qPhase:'decision',
+  sel:null,
+  qCons:[],qTree:[],
+  trustAtQStart:0,
+  apAtYearStart:0,partAtYearStart:0,engAtYearStart:0,
+  decisionLog:[], // [{year,q,title,badge,note}] full game history for closing summary
+  charArcs:{marcus:0,delia:0,raj:0,yolanda:0}, // arc stage per character 0-3
+  pendingRecs:[], // [{dim,year,signal,probMod}] recs issued this year, resolved next postsurvey
+  recSkippedNote:'',
+  recResults:[], // [{dim,landed,year}] resolved rec results for narrative
+  recsIssued:0,  // how many recs issued this postsurvey review (max 2)
+  soundOn:true,
+  showLastSurvey:false,
+  ambEv:null,pulse:null,pulseV:null,
+  pendingUnlocks:[],
+
+  init:function(key){
+    var d=DIFF[key];
+    this.diff=key; this.year=0; this.q=1; this.isTut=true;
+    this.trust=d.trust; this.budget=d.budget; this.cap=d.cap;
+    this.capUsed=0; this.polcap=d.polcap;
+    this.eng=d.eng; this.ap=d.ap; this.part=d.part;
+    this.tree={}; var self=this;
+    d.tree.forEach(function(id){self.tree[id]=true;});
+    this.sit=null; this.sitDone=false; this.qPhase='decision';
+    this.sel={}; this.qCons=[]; this.qTree=[];
+    this.trustAtQStart=d.trust;
+    this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
+    this.decisionLog=[];
+    this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
+    this.pendingRecs=[];this.recResults=[];this.recsIssued=0;
+    this.soundOn=true;
+    this.ambEv=null; this.pulse=null; this.pulseV=null;
+    this.pendingUnlocks=[];
+    this.phase='ob';
+  },
+
+  getZone:function(){
+    for(var i=0;i<ZONES.length;i++){var z=ZONES[i];if(this.trust>=z.min&&this.trust<=z.max)return z;}
+    return ZONES[0];
+  },
+  adjTrust:function(d){
+    var oldZone=this.getZone().id;
+    this.trust=Math.max(5,Math.min(100,this.trust+d));
+    var newZone=this.getZone().id;
+    if(newZone!==oldZone)setTimeout(function(){AUDIO.zoneShift(newZone);},200);
+  },
+  remCap:function(){return this.cap-this.capUsed;},
+  spendCap:function(n){this.capUsed=Math.min(this.cap,this.capUsed+n);},
+  spendBud:function(n){this.budget=Math.max(0,this.budget-n);},
+  hasNode:function(id){return !!this.tree[id];},
+
+  checkReq:function(opt){
+    // Capacity check applies to every option regardless of req
+    if(opt.slots&&this.remCap()<opt.slots){
+      return{met:false,why:'Requires '+opt.slots+' capacity (have '+this.remCap()+')'};
+    }
+    if(!opt.req)return{met:true,why:null};
+    var r=opt.req;
+    var zo=['skeptical','cautious','engaged','champion'];
+    if(r.zone&&zo.indexOf(this.getZone().id)<zo.indexOf(r.zone))return{met:false,why:'Requires '+r.zone+' Organizational Trust'};
+    if(r.pc&&this.polcap<r.pc)return{met:false,why:'Requires '+r.pc+' PC &#8212; earn through strong decisions, grades, and positive events'};
+    if(r.node&&!this.hasNode(r.node))return{met:false,why:'Requires '+(NODES[r.node]?NODES[r.node].name:r.node)};
+    if(r.noNode&&this.hasNode(r.noNode))return{met:false,why:null};
+    return{met:true,why:null};
+  },
+
+  findSitById:function(sitId){
+    // Search tutorial SITS, current year draw, and all pools (for safety)
+    for(var i=0;i<SITS.length;i++){if(SITS[i].id===sitId)return SITS[i];}
+    for(var j=0;j<this.yearDraw.length;j++){if(this.yearDraw[j]&&this.yearDraw[j].id===sitId)return this.yearDraw[j];}
+    var yrs=Object.keys(YEAR_POOLS);
+    for(var y=0;y<yrs.length;y++){
+      var pool=YEAR_POOLS[yrs[y]];
+      for(var k=0;k<pool.length;k++){if(pool[k].id===sitId)return pool[k];}
+    }
+    return null;
+  },
+
+  resolveOpt:function(sitId,optId){
+    var sit=this.findSitById(sitId);
+    var opt=null;
+    if(sit){for(var j=0;j<sit.opts.length;j++){if(sit.opts[j].id===optId){opt=sit.opts[j];break;}}}
+    if(!opt)return;
+    if(opt.slots)this.spendCap(opt.slots);
+    if(opt.bud)this.spendBud(opt.bud);
+    if(opt.pc)this.polcap=Math.max(0,this.polcap-opt.pc);
+
+    var trustDelta=opt.con.trust||0;
+    var noteText=opt.con.note||'';
+
+    // VARIANCE: outcome has randomness layered on the base consequence
+    if(opt.variance){
+      var roll=Math.random();
+      var varianceBonus=roll<0.5?-1:1; // simple +/-1 swing
+      trustDelta+=varianceBonus;
+      noteText+=(varianceBonus>0?' It worked out.':' It did not quite land.');
+    }
+
+    this.qCons.push({trust:trustDelta,ap:opt.con.ap||0,part:opt.con.part||0,pc:(opt.pc?-opt.pc:0),note:noteText,badge:opt.badge,source:'decision'});
+    this.decisionLog.push({year:this.year,q:this.q,title:sit.title,badge:opt.badge,note:noteText});
+    // Check if this decision advances a character arc
+    this.checkArcAdvance(sit.char, sitId);
+
+    // PC GAIN: some options grant Political Capital instead of spending it
+    if(opt.pcGain){
+      this.polcap=Math.min(100,this.polcap+opt.pcGain);
+    }
+
+    // GUARANTEE NEXT REC: flag for recommendation system (future)
+    if(opt.guaranteeNextRec){
+      this.guaranteedRec=true;
+    }
+
+    // CONTRACTOR HIRE: temp capacity boost for 2 quarters
+    if(opt.contractorHire){
+      this.cap+=1;
+      this.contractorQuartersLeft=2;
+    }
+
+    if(opt.treeUnlock&&!this.hasNode(opt.treeUnlock)){
+      this.qTree.push({id:opt.treeUnlock,node:NODES[opt.treeUnlock]});
+    }
+    this.sitDone=true; this.qPhase='build';
+  },
+
+  canBuild:function(id){
+    var n=NODES[id]; if(!n||this.hasNode(id))return false;
+    if(this.budget<n.cost)return false;
+    if(this.remCap()<1)return false;
+    // Phase lock: L1 available Year 0+, L2 Year 2+, L3 Year 3+, L4 Year 4+
+    var minYear=(n.phase||1)-1;
+    if(this.year<minYear)return false;
+    for(var i=0;i<n.pre.length;i++){if(!this.hasNode(n.pre[i]))return false;}
+    return true;
+  },
+
+  toggleSel:function(id){
+    if(!NODES[id]||this.hasNode(id))return;
+    if(this.sel[id]){delete this.sel[id];}
+    else{
+      var selIds=Object.keys(this.sel);
+      var selCost=0;
+      for(var i=0;i<selIds.length;i++){selCost+=(NODES[selIds[i]]?NODES[selIds[i]].cost:0);}
+      var selSlots=selIds.length;
+      if(selSlots+1>this.remCap())return;
+      if(selCost+(NODES[id].cost)>this.budget)return;
+      var n=NODES[id];
+      var ok=true;
+      for(var j=0;j<n.pre.length;j++){if(!this.hasNode(n.pre[j])){ok=false;break;}}
+      if(!ok)return;
+      this.sel[id]=true;
+    }
+  },
+
+  commitSel:function(){
+    var ids=Object.keys(this.sel);
+    for(var i=0;i<ids.length;i++){
+      var id=ids[i];
+      if(this.canBuild(id)){
+        this.spendBud(NODES[id].cost);
+        this.spendCap(1);
+        this.tree[id]=true;
+        this.qTree.push({id:id,node:NODES[id]});
+        this.pendingUnlocks.push(id);
+      }
+    }
+    this.checkTreeArcAdvance();
+    AUDIO.nodeClick();
+    this.sel={};
+  },
+
+  applyQueued:function(){
+    this.trustAtQStart=this.trust;
+    for(var i=0;i<this.qCons.length;i++){
+      var c=this.qCons[i];
+      if(c.trust)this.adjTrust(c.trust);
+      if(c.ap)this.ap=Math.max(0,Math.min(100,this.ap+c.ap));
+      if(c.part)this.part=Math.max(0,Math.min(100,this.part+c.part));
+    }
+    for(var j=0;j<this.qTree.length;j++){
+      var t=this.qTree[j];
+      if(!this.tree[t.id]){this.tree[t.id]=true;this.pendingUnlocks.push(t.id);}
+      var eff=t.node.effect;
+      if(eff){
+        if(eff.trust)this.adjTrust(eff.trust);
+        if(eff.ap)this.ap=Math.max(0,Math.min(100,this.ap+eff.ap));
+        if(eff.part)this.part=Math.max(0,Math.min(100,this.part+eff.part));
+      }
+    }
+    // Recalc engagement every quarter: weighted composite of ap and part
+    this.eng=Math.max(0,Math.min(100,Math.round(this.ap*0.55+this.part*0.45)));
+  },
+
+  checkArcAdvance:function(charId, sitId){
+    if(!charId||!CHAR_ARCS[charId])return;
+    var arc=CHAR_ARCS[charId];
+    var stage=this.charArcs[charId]||0;
+    if(stage>=3)return; // already at champion
+    var decisions=arc.advanceOn.decisions||[];
+    var track=arc.advanceOn.track;
+    // Advance if: this decision is one of their key decisions, AND track has at least (stage+1) nodes built
+    var decisionMatch=decisions.indexOf(sitId)>=0;
+    var builtCount=Object.keys(this.tree).filter(function(id){return id.indexOf(track)===0;}).length;
+    if(decisionMatch&&builtCount>stage){
+      this.charArcs[charId]=stage+1;
+    }
+  },
+
+  checkTreeArcAdvance:function(){
+    // Called after building a node - check if any arc should advance based on tree progress alone
+    var self=this;
+    Object.keys(CHAR_ARCS).forEach(function(charId){
+      var arc=CHAR_ARCS[charId];
+      var stage=self.charArcs[charId]||0;
+      if(stage>=3)return;
+      var track=arc.advanceOn.track;
+      var builtCount=Object.keys(self.tree).filter(function(id){return id.indexOf(track)===0;}).length;
+      // Advance one stage per 2 nodes built in the relevant track, max based on decisions too
+      var treeStage=Math.min(3,Math.floor(builtCount/2));
+      if(treeStage>stage)self.charArcs[charId]=treeStage;
+    });
+  },
+
+  getCharAmbientEvents:function(){
+    // Return arc-appropriate ambient events for each character
+    var self=this;
+    var events=[];
+    Object.keys(CHAR_ARCS).forEach(function(charId){
+      var arc=CHAR_ARCS[charId];
+      var stage=self.charArcs[charId]||0;
+      var pos=arc.posEvents[stage]||[];
+      var neg=arc.negEvents[stage]||[];
+      pos.forEach(function(e){events.push({char:charId,text:e.text,d:e.d,isPos:true});});
+      neg.forEach(function(e){events.push({char:charId,text:e.text,d:e.d,isPos:false});});
+    });
+    return events;
+  },
+
+  checkStagnation:function(){
+    if(this.year===0)return; // no penalty in tutorial
+    // Was anything buildable this quarter?
+    var anyBuildable=false;
+    var ts=this.treeStatus();
+    var tracks=['infra','mgr','comms','se'];
+    for(var ti=0;ti<tracks.length;ti++){
+      var nodes=ts[tracks[ti]];
+      for(var ni=0;ni<nodes.length;ni++){
+        if(nodes[ni].avail&&this.canBuild(nodes[ni].id)){anyBuildable=true;break;}
+      }
+      if(anyBuildable)break;
+    }
+    if(!anyBuildable)return; // nothing to build = no penalty (budget/phase constrained)
+    // Did they build anything?
+    var builtThisQ=this.qTree.length>0;
+    if(builtThisQ)return; // invested = no penalty
+    // Didn't build. Check if they also chose a zero-slot decision
+    var decisionCons=this.qCons.filter(function(c){return c.source==='decision';});
+    var choseFreePath=decisionCons.length>0&&decisionCons.every(function(c){return !c.slots;});
+    var penalty=choseFreePath?-2:-1;
+    this.adjTrust(penalty);
+    this.qCons.push({trust:penalty,ap:0,part:0,pc:0,
+      note:'Nothing invested or actioned this quarter. The organization noticed.',
+      badge:'STAGNATION',source:'ambient'});
+  },
+
+  genAmbient:function(){
+    var z=this.getZone();
+    var pw=z.id==='champion'?.80:z.id==='engaged'?.70:z.id==='cautious'?.55:.25;
+    var arcEvents=this.getCharAmbientEvents();
+    var posPool=POS_EVENTS.concat(arcEvents.filter(function(e){return e.isPos;}));
+    var negPool=NEG_EVENTS.concat(arcEvents.filter(function(e){return !e.isPos;}));
+    var pool=Math.random()<pw?posPool:negPool;
+    var self=this;
+    var el=pool.filter(function(e){return !e.cond||(e.cond.node?self.hasNode(e.cond.node):true);});
+    if(!el.length)return;
+    var ev=el[Math.floor(Math.random()*el.length)];
+    this.ambEv=ev;
+    this.qCons.push({trust:ev.d,ap:0,part:0,pc:0,note:ev.text,badge:'ORG',source:'ambient',char:ev.char||null});
+    this.polcap=Math.min(100,this.polcap+z.rate);
+  },
+
+  genPulse:function(){
+    var start=DIFF[this.diff].ap;
+    var delta=this.ap-start;
+    var pool,v;
+    if(delta>3){pool=PULSES.pos;v='pos';}
+    else if(delta<-2){pool=PULSES.neg;v='neg';}
+    else if(this.getZone().id==='skeptical'&&Math.random()<.6){pool=PULSES.neg;v='neg';}
+    else{pool=PULSES.neu;v='neu';}
+    this.pulse=pool[Math.floor(Math.random()*pool.length)];
+    this.pulseV=v;
+  },
+
+  getPreSurvey:function(yr){
+    if(yr===0){
+      for(var i=0;i<PRE_SURVEY.length;i++){if(PRE_SURVEY[i].year===0)return PRE_SURVEY[i];}
+      return null;
+    }
+    return YEAR_PRESURVEY[yr]||null;
+  },
+
+  drawYearSituations:function(yr){
+    var pool=YEAR_POOLS[yr];
+    if(!pool||!pool.length){this.yearDraw=[];return;}
+    // Fisher-Yates shuffle, take first 4
+    var arr=pool.slice();
+    for(var i=arr.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+    }
+    this.yearDraw=arr.slice(0,4);
+  },
+
+  treeStatus:function(){
+    var t={infra:[],mgr:[],comms:[],se:[]};
+    var self=this;
+    Object.keys(NODES).forEach(function(id){
+      var n=NODES[id];
+      var preOk=true;
+      for(var i=0;i<n.pre.length;i++){if(!self.hasNode(n.pre[i])){preOk=false;break;}}
+      var phaseOk=(self.year>=((n.phase||1)-1));
+      var built=self.hasNode(id);
+      var avail=!built&&preOk&&phaseOk;
+      var phaseLocked=!built&&phaseOk===false;
+      var locked=!built&&!preOk;
+      t[n.track].push({id:id,icon:n.icon,name:n.name,unlocks:n.unlocks,cost:n.cost,
+        phase:n.phase||1,pre:n.pre,level:n.level,
+        built:built,avail:avail,locked:locked||phaseLocked,
+        phaseLocked:phaseLocked,prereqLocked:locked});
+    });
+    Object.keys(t).forEach(function(k){t[k].sort(function(a,b){return a.level-b.level;});});
+    return t;
+  }
+};
+
+// ── RENDER ──
+var R = {
+  go:function(){
+    var p=S.phase;
+    if(p==='diff')this.diff();
+    else if(p==='ob')this.onboard();
+    else if(p==='game')this.game();
+    else if(p==='presurvey')this.presurvey();
+    else if(p==='reveal')this.reveal();
+    else if(p==='postsurvey')this.postsurvey();
+    else if(p==='closing')this.closing();
+    else if(p==='y1')this.y1();
+  },
+
+  $:function(id){return document.getElementById(id);},
+  app:function(){return this.$('app');},
+  h:function(s){return s;}, // passthrough
+
+  diff:function(){
+    var html='<div class="screen"><div><div class="g-title-main">Engagement <span class="amber">Unlocked</span></div><div class="g-title-sub">Listen and Lead</div></div>';
+    html+='<p class="diff-ctx">You lead the Employee Listening Center of Excellence at Meridian Foods — a food and beverage manufacturer with 3 sites and 1,400 employees. Five annual survey cycles. Make listening mean something.</p>';
+    html+='<div class="diff-cards">';
+    var keys=['easy','normal','hard'];
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i];var d=DIFF[k];
+      html+='<div class="diff-card" onclick="C.pick(\''+k+'\')"><div class="diff-hdr"><div class="diff-dot" style="background:'+d.color+'"></div><div class="diff-lbl">'+d.label+'</div></div>';
+      html+='<div class="diff-stats">';
+      html+='<div><div class="dstat-v">'+d.eng+'</div><div class="dstat-l">Engagement</div></div>';
+      html+='<div><div class="dstat-v">'+d.part+'%</div><div class="dstat-l">Participation</div></div>';
+      html+='<div><div class="dstat-v amber">$'+d.budget/1000+'K</div><div class="dstat-l">Budget</div></div>';
+      html+='<div><div class="dstat-v">'+d.cap+'</div><div class="dstat-l">Capacity</div></div>';
+      html+='</div><div class="diff-voice">"'+d.voice+'"</div>';
+      html+='<button class="btn-p">Begin &#8594;</button></div>';
+    }
+    html+='</div></div>';
+    this.app().innerHTML=html;
+  },
+
+  onboard:function(){
+    var z=S.getZone();
+    var html='<div class="screen">';
+    html+='<div class="ob-badge">YEAR 0 &#8212; ORIENTATION</div>';
+    html+='<h2 class="ob-title">Before the first survey</h2>';
+    html+='<p class="ob-body">You\'re learning the organization and it is learning you. Three metrics define whether you succeed. One resource determines what you can do. The first decision shows you consequences openly &#8212; after that, read the room.</p>';
+    html+='<div class="ob-metrics">';
+    html+='<div class="ob-metric"><div class="ob-mv amber">'+S.ap+'</div><div class="ob-mn">AP Optimism</div><div class="ob-md">Your north star. Do employees believe leadership will act on survey results?</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.part+'%</div><div class="ob-mn">Participation</div><div class="ob-md">The prerequisite. Below 65% data gets noisy; below 50% it is unreliable.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv">'+S.eng+'</div><div class="ob-mn">Engagement</div><div class="ob-md">Summary metric. Moves gradually as AP Optimism and Participation improve.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv amber">$'+S.budget/1000+'K</div><div class="ob-mn">Budget</div><div class="ob-md">Annual allocation for investments and decisions. Grows with strong grades, shrinks with weak ones.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.cap+'</div><div class="ob-mn">Capacity</div><div class="ob-md">Slots per quarter. Each decision or tree investment costs one. Hard mode has fewer &#8212; every choice matters.</div></div>';
+    html+='</div>';
+    html+='<div class="ob-trust">';
+    html+='<div class="ob-trust-hdr"><div class="ob-trust-nm">ORGANIZATIONAL TRUST &#8212; your standing</div><div class="ob-trust-zn" style="color:'+z.color+'">'+z.label+'</div></div>';
+    html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+z.color+'"></div></div>';
+    html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
+    html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. You cannot spend it &#8212; you build or lose it through decisions and results.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable currency. You use it to unlock high-leverage situation options and to issue recommendations to other functions. Saving it for the right moment matters more than spending it fast. Earned through positive outcomes &#8212; <em>'+z.label+'</em> earns +'+z.rate+' per quarter. Grade bonuses add more at year end.</div>';
+    html+='</div>';
+    html+='<div class="ob-actions"><button class="btn-p" onclick="C.skipY0()">Start Year 1 &#8594;</button><button class="btn-g" onclick="C.startY0()">Run tutorial first</button></div>';
+    html+='</div>';
+    this.app().innerHTML=html;
+  },
+
+  game:function(){
+    var z=S.getZone();
+    var sit=S.sit;
+    var html='<div class="game-shell">';
+    // Top bar
+    html+='<div class="g-topbar"><div class="g-topbar-title">Engagement <span class="amber">Unlocked</span></div><div class="g-topbar-period">Year '+S.year+' &#183; Q'+S.q+(S.isTut?' &#183; Orientation':'')+'</div><div style="display:flex;gap:8px"><button onclick="C.showHelp()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">? Guide</button><button onclick="C.toggleSound()" id="snd-btn" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#128266; Sound</button><button onclick="C.restart()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#8635; New Game</button></div></div>';
+    // Trust bar
+    // Pending basket cost (for live feedback while selecting investments)
+    var selIds=S.sel?Object.keys(S.sel):[];
+    var pendingBud=0,pendingSlots=selIds.length;
+    selIds.forEach(function(id){pendingBud+=(NODES[id]?NODES[id].cost:0);});
+    var rem=S.remCap();
+    var capDots='';
+    for(var ci=0;ci<S.cap;ci++){
+      var used=ci>=(rem-pendingSlots)&&ci<rem?'pending':ci>=rem?'empty':'full';
+      capDots+='<span class="cap-dot '+used+'">&#9679;</span>';
+    }
+    html+='<div class="trust-wrap">';
+    html+='<div class="trust-hdr"><div class="trust-left"><span class="trust-title">Organizational Trust</span><span class="trust-zone" style="color:'+z.color+'">'+z.label+'</span></div></div>';
+    html+='<div class="trust-track"><div class="trust-fill" style="width:'+S.trust+'%;background:'+z.color+'"></div></div>';
+    html+='<div class="trust-zmarks"><span class="trust-zm">Skeptical</span><span class="trust-zm">Cautious</span><span class="trust-zm">Engaged</span><span class="trust-zm">Champion</span></div>';
+    html+='</div>';
+    // Unified resource strip — always visible, shows live pending cost
+    var budDisplay=pendingBud>0?'$'+Math.floor((S.budget-pendingBud)/1000)+'K <span style="color:var(--red);font-size:10px">(-$'+Math.floor(pendingBud/1000)+'K)</span>':'$'+Math.floor(S.budget/1000)+'K';
+    html+='<div class="res-strip">';
+    html+='<div class="res-strip-item"><span class="res-strip-lbl">BUDGET</span><span class="res-strip-val amber">'+budDisplay+'</span></div>';
+    html+='<div class="res-strip-item"><span class="res-strip-lbl">CAPACITY</span><span class="res-strip-val">'+capDots+'</span></div>';
+    html+='<div class="res-strip-item"><span class="res-strip-lbl">POLITICAL CAPITAL</span><span class="res-strip-val" style="color:var(--purple)">&#10024;'+S.polcap+' <span style="font-size:10px;color:'+z.color+'">+'+z.rate+'/qtr</span></span></div>';
+    html+='</div>';
+    html+='<button class="mob-toggle" onclick="C.mobToggle()">&#128202; Dashboard</button>';
+    html+='<div class="game-body"><div class="panel-l" id="panel-l">'+this.leftPanel()+'</div>';
+    html+='<div class="panel-r" id="panel-r">'+this.rightPanel()+'</div></div></div>';
+    this.app().innerHTML=html;
+    if(S.qPhase==='resolve'){
+      var self=this;
+      setTimeout(function(){var a=self.$('rc-main');if(a)a.classList.add('show');},100);
+      setTimeout(function(){var p=self.$('rc-pulse');if(p)p.classList.add('show');},900);
+    }
+  },
+
+  leftPanel:function(){
+    var ts=S.treeStatus();
+    var rem=S.remCap();
+    var dots='';
+    for(var i=0;i<S.cap;i++)dots+='<span class="cap-dot '+(i<rem?'full':'empty')+'">&#9679;</span>';
+    var trackOrder=['infra','mgr','comms','se'];
+    var html='<div class="ls"><div class="ls-lbl">Survey Scores</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">AP Optimism<span class="tip-box">Do employees believe leadership will act on results? Your north star metric &#8212; weighted 40% in your annual grade.</span></span></span><span class="score-val amber">'+S.ap+'</span>'+(S.ap<50?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 50 &#8212; employees do not believe leadership will act. This is the critical threshold.</span></span>':'')+'</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">Participation<span class="tip-box">How many employees completed the survey. Below 65% data gets noisy. Below 50% results are unreliable.</span></span></span><span class="score-val blue">'+S.part+'%</span>'+(S.part<65?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 65% &#8212; data reliability drops. Below 50% results are unreliable.</span></span>':'')+'</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">Engagement<span class="tip-box">Summary metric. Context only &#8212; moves when AP Optimism and Participation improve consistently.</span></span></span><span class="score-val">'+S.eng+'</span></div>';
+    html+='</div>';
+    // Last survey mini-display
+    html+='<div class="ls">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<div class="ls-lbl">Last Survey</div>';
+    html+='<button onclick="C.toggleLastSurvey()" style="background:transparent;border:none;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--mono)">'+((S.showLastSurvey)?'hide':'show')+'</button>';
+    html+='</div>';
+    if(S.showLastSurvey){
+      html+='<div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap">';
+      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)">'+S.apAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">AP</div></div>';
+      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--blue)">'+S.partAtYearStart+'%</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Part</div></div>';
+      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600">'+S.engAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Eng</div></div>';
+      if(S.grade)html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)">'+S.grade+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Grade</div></div>';
+      html+='</div>';
+    } else {
+      html+='<div style="font-size:10px;color:var(--tm);margin-top:2px">Year '+(S.year>1?S.year-1:0)+' &#183; tap show</div>';
+    }
+    html+='</div>';
+    html+='<div class="ls"><div class="ls-lbl">Investment Tree</div><div class="tree-summary">';
+    for(var ti=0;ti<trackOrder.length;ti++){
+      var tk=trackOrder[ti];var tr=TRACKS[tk];var nodes=ts[tk];
+      html+='<div class="ts-track"><div class="ts-track-name" style="color:'+tr.color+'">'+tr.icon+' '+tr.name+'</div><div class="ts-nodes">';
+      for(var ni=0;ni<nodes.length;ni++){
+        var n=nodes[ni];
+        var cls=n.built?'built':n.avail?'avail':'locked';
+        html+='<div class="ts-node '+cls+'" id="node-'+n.id+'" title="'+n.name+'">'+n.icon+'</div>';
+      }
+      html+='</div></div>';
+    }
+    html+='</div><button class="tree-view-btn" onclick="C.openTree()">View full tree &#8594;</button></div>';
+    html+='<div class="ls"><div class="ls-lbl">Resources</div>';
+    html+='<div style="font-size:11px;color:var(--tm);line-height:1.6">Budget, Capacity, and Political Capital are shown in the strip above. Changes update as you make selections.</div>';
+    html+='</div>';
+    return html;
+  },
+
+  rightPanel:function(){
+    if(S.qPhase==='decision'){
+      if(S.sit)return this.sitCard(S.sit);
+      return this.noSituation();
+    }
+    if(S.qPhase==='build')return this.buildMode();
+    if(S.qPhase==='resolve')return this.resolveMode();
+    return '';
+  },
+
+  sitCard:function(sit){
+    var ch=sit.char?CHARS[sit.char]:null;
+    var html='<div class="sit-card">';
+    html+='<div class="sit-hdr">';
+    if(ch){
+      html+='<div class="char-badge"><div class="char-av">'+ch.av+'</div><div><div class="char-name">'+ch.name+'</div><div class="char-role">'+ch.role+'</div></div></div>';
+    } else {
+      html+='<div class="char-badge"><div class="char-av">&#127970;</div><div><div class="char-name">Organizational</div><div class="char-role">Internal decision</div></div></div>';
+    }
+    if(sit.tut)html+='<div class="tut-badge">&#128065; Consequences visible this round</div>';
+    html+='</div>';
+    html+='<div class="sit-title">'+sit.title+'</div>';
+    html+='<div class="sit-scenario">'+sit.scenario+'</div>';
+    html+='<div class="sit-opts">';
+    for(var i=0;i<sit.opts.length;i++){
+      var o=sit.opts[i];
+      var r=S.checkReq(o);
+      if(!r.met&&r.why===null)continue;
+      var lk=!r.met;
+      html+='<div class="sit-opt'+(lk?' lk':'')+'" '+(lk?'':'onclick="C.choose(\''+sit.id+'\',\''+o.id+'\')"')+'>';
+      html+='<div class="opt-top"><span class="opt-badge'+(lk?' lk':'')+'">'+o.badge+'</span><div class="opt-costs">';
+      if(o.slots)html+='<span class="cc slot">'+o.slots+' slot'+(o.slots>1?'s':'')+'</span>';
+      if(o.bud)html+='<span class="cc bud">$'+o.bud+'</span>';
+      if(o.pc)html+='<span class="cc pc">&#10024;'+o.pc+'</span>';
+      if(o.treeUnlock)html+='<span class="cc unlock">&#127807; '+(NODES[o.treeUnlock]?NODES[o.treeUnlock].name:'')+'</span>';
+      html+='</div></div>';
+      html+='<div class="opt-text">'+o.text+'</div>';
+      if(lk&&r.why)html+='<div class="opt-lock">&#128274; '+r.why+'</div>';
+      if(sit.tut&&!lk&&o.con.note)html+='<div class="opt-preview">'+o.con.note+'</div>';
+      html+='</div>';
+    }
+    html+='</div></div>';
+    return html;
+  },
+
+  buildMode:function(){
+    var rem=S.remCap();
+    if(rem<1)return '<div class="build-mode"><div class="build-done">&#9889; No capacity remaining this quarter.</div>'+this.advBtn()+'</div>';
+    var ts=S.treeStatus();
+    // Check if anything is actually affordable/available right now
+    var anyBuildable=false;
+    ['infra','mgr','comms','se'].forEach(function(tk){
+      ts[tk].forEach(function(n){ if(n.avail&&S.canBuild(n.id))anyBuildable=true; });
+    });
+    if(!anyBuildable){
+      // Auto-resolve — no point making player click through
+      // Use setTimeout so the render cycle completes first
+      var self=this;
+      setTimeout(function(){C.skipBuild();},0);
+      setTimeout(function(){C.goToResolve();},80);
+      return '<div class="build-mode"><div class="build-done" style="color:var(--tm)">&#128274; Nothing buildable this quarter.</div></div>';
+    }
+    var selIds=Object.keys(S.sel);
+    var selCost=0;
+    for(var si=0;si<selIds.length;si++){selCost+=(NODES[selIds[si]]?NODES[selIds[si]].cost:0);}
+    var selSlots=selIds.length;
+    var canCommit=selIds.length>0;
+    var html='<div class="build-mode">';
+    html+='<div class="build-hdr"><div class="build-title">Invest in your tree</div><button class="build-skip" onclick="C.skipBuild()">Skip</button></div>';
+    // Basket
+    html+='<div class="basket"><div class="basket-chips">';
+    if(selIds.length){
+      for(var bi=0;bi<selIds.length;bi++){
+        var bid=selIds[bi];var bn=NODES[bid];
+        if(bn)html+='<span class="basket-chip" onclick="C.toggleNode(\''+bid+'\')">'+bn.icon+' '+bn.name+' &#215;</span>';
+      }
+    } else {
+      html+='<span class="basket-empty">Tap a node to select it</span>';
+    }
+    html+='</div><div class="basket-right">';
+    if(selIds.length){var slotStr=selSlots===1?' slot':' slots';var costStr2=selCost>=1000?'$'+(selCost/1000)+'K':'$'+selCost;html+='<span class="basket-cost">'+selSlots+slotStr+' &#183; '+costStr2+'</span>';}
+    html+='<button class="btn-commit" '+(canCommit?'onclick="C.commitInvestments()"':'disabled')+'>Invest &#8594;</button>';
+    html+='</div></div>';
+    // Tracks
+    html+='<div class="tracks-grid">';
+    var trackOrder=['infra','mgr','comms','se'];
+    for(var ti=0;ti<trackOrder.length;ti++){
+      var tk=trackOrder[ti];var tr=TRACKS[tk];var nodes=ts[tk];
+      html+='<div class="track-block" style="border-color:'+tr.color+'22">';
+      html+='<div class="track-hdr" style="background:'+tr.color+'0D;border-bottom:2px solid '+tr.color+'44">';
+      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<div class="track-focus" style="color:'+tr.color+'99">'+tr.focus+'</div>';
+      html+='<div class="track-when">'+tr.when+'</div></div>';
+      html+='<div class="track-nodes">';
+      for(var ni=0;ni<nodes.length;ni++){
+        var n=nodes[ni];
+        var isSelected=!!S.sel[n.id];
+        var wouldExceedCap=!isSelected&&(selSlots+1>rem);
+        var wouldExceedBud=!isSelected&&(selCost+n.cost>S.budget);
+        var canToggle=n.avail&&(isSelected||(!wouldExceedCap&&!wouldExceedBud));
+        var crossDep=false;
+        for(var pi=0;pi<n.pre.length;pi++){if(NODES[n.pre[pi]]&&NODES[n.pre[pi]].track!==tk){crossDep=true;break;}}
+        var costStr=n.cost>=1000?'$'+n.cost/1000+'K':'$'+n.cost;
+        var stateCls=n.built?'built':n.avail?(isSelected?'sel':canToggle?'avail':'dimmed'):'locked';
+        var nodeStyle=isSelected?'style="border:2px solid '+tr.color+';background:'+tr.color+'15"':'';
+        html+='<div class="tn '+stateCls+'" id="tn-'+n.id+'" '+nodeStyle+(n.avail?' onclick="C.toggleNode(\''+n.id+'\')"':'')+' title="'+n.name+'">';
+        if(isSelected)html+='<div class="tn-check" style="color:'+tr.color+'">&#10003;</div>';
+        html+='<div class="tn-icon">'+n.icon+'</div>';
+        html+='<div class="tn-name" style="'+(n.built?'color:'+tr.color:'')+'">'+n.name+'</div>';
+        html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
+        if(n.built){
+          html+='<div class="tn-built" style="color:'+tr.color+'">&#10003; Built</div>';
+        } else if(n.avail){
+          html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
+          if(crossDep)html+='<div class="tn-cross">&#8599; cross-track req</div>';
+          if(!canToggle&&!isSelected){
+            if(wouldExceedCap)html+='<div class="tn-blocked">No capacity</div>';
+            else if(wouldExceedBud)html+='<div class="tn-blocked">Need '+costStr+'</div>';
+          }
+        } else {
+          var missing=[];
+          for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
+          var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
+          html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
+        }
+        html+='</div>';
+      }
+      html+='</div></div>';
+    }
+    html+='</div></div>';
+    return html;
+  },
+
+  resolveMode:function(){
+    var z=S.getZone();
+    var tBefore=S.trustAtQStart;
+    var tAfter=S.trust;
+    var tDelta=tAfter-tBefore;
+    var deltaPos=tDelta>=0;
+    var deltaStr=(deltaPos?'+':'')+tDelta;
+    var vi=S.pulseV||'neu';
+    var picons={pos:'&#8593;',neu:'&#8594;',neg:'&#8595;'};
+    var html='<div class="resolve-card" id="rc-main">';
+    // Trust bar with trailing region
+    html+='<div class="resolve-trust-hdr"><span class="resolve-trust-lbl">Organizational Trust</span>';
+    html+='<span class="resolve-trust-delta" style="color:'+(deltaPos?'var(--green)':'var(--red)')+'">'+deltaStr+' this quarter</span></div>';
+    html+='<div class="resolve-bar">';
+    if(tDelta!==0){
+      var trailLeft=Math.min(tBefore,tAfter);
+      html+='<div class="resolve-bar-trail" style="left:'+trailLeft+'%;width:'+Math.abs(tDelta)+'%;background:'+(deltaPos?'rgba(76,175,80,.25)':'rgba(231,76,60,.25)')+'"></div>';
+    }
+    html+='<div class="resolve-bar-fill" style="width:'+tAfter+'%;background:'+z.color+'"></div>';
+    html+='</div>';
+    html+='<div class="resolve-zone-lbl" style="color:'+z.color+'">'+z.label+'</div>';
+    // Causal narrative — what happened and why, one line each
+    var anyItems=false;
+    var causeHtml='<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">';
+    for(var i=0;i<S.qCons.length;i++){
+      var c=S.qCons[i];
+      if(!c.note&&!c.trust&&!c.ap&&!c.part)continue;
+      anyItems=true;
+      var parts=[];
+      if(c.trust)parts.push('Trust '+(c.trust>0?'+':'')+c.trust);
+      if(c.ap)parts.push('AP '+(c.ap>0?'+':'')+c.ap);
+      if(c.part)parts.push('Part '+(c.part>0?'+':'')+c.part);
+      if(c.pc)parts.push('PC '+(c.pc>0?'+':'')+c.pc);
+      var allPos=c.trust>=0&&c.ap>=0&&c.part>=0&&(c.pc||0)>=0;
+      var tagCls=c.source==='ambient'?'org':'dec';
+      causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
+      causeHtml+='<span class="cause-tag '+tagCls+'" style="flex-shrink:0;margin-top:1px">'+c.badge+'</span>';
+      causeHtml+='<div style="flex:1">';
+      if(c.note)causeHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+c.note+'</div>';
+      if(parts.length)causeHtml+='<div style="font-family:var(--mono);font-size:11px;color:'+(allPos?'var(--green)':'var(--red)')+';margin-top:3px">'+parts.join(' &#183; ')+'</div>';
+      causeHtml+='</div></div>';
+    }
+    // Tree investments - show what was built and its direct payoff
+    for(var k=0;k<S.qTree.length;k++){
+      var t=S.qTree[k];
+      anyItems=true;
+      var effParts=[];
+      var eff=t.node.effect||{};
+      if(eff.trust)effParts.push('Trust +'+eff.trust);
+      if(eff.ap)effParts.push('AP +'+eff.ap);
+      if(eff.part)effParts.push('Part +'+eff.part);
+      causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
+      causeHtml+='<span class="cause-tag" style="flex-shrink:0;margin-top:1px;background:rgba(76,175,80,.12);color:var(--green);border-color:rgba(76,175,80,.3)">BUILT</span>';
+      causeHtml+='<div style="flex:1">';
+      causeHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+t.node.icon+' <strong style="color:var(--t1)">'+t.node.name+'</strong> &#8212; '+t.node.unlocks+'</div>';
+      if(effParts.length)causeHtml+='<div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:3px">'+effParts.join(' &#183; ')+'</div>';
+      causeHtml+='</div></div>';
+    }
+    // Tree skip note: if nothing built this quarter, explain why
+    if(S.qTree.length===0&&S.qPhase==='resolve'&&!S.isTut){
+      var ts=S.treeStatus();
+      var hadBuildable=false;
+      var tracks=['infra','mgr','comms','se'];
+      for(var ti=0;ti<tracks.length;ti++){
+        var tnodes=ts[tracks[ti]];
+        for(var tni=0;tni<tnodes.length;tni++){
+          if(tnodes[tni].avail&&S.canBuild(tnodes[tni].id)){hadBuildable=true;break;}
+        }
+        if(hadBuildable)break;
+      }
+      anyItems=true;
+      if(!hadBuildable){
+        causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
+        causeHtml+='<span class="cause-tag" style="flex-shrink:0;margin-top:1px;background:rgba(122,144,176,.1);color:var(--tm);border-color:rgba(122,144,176,.3)">TREE</span>';
+        causeHtml+='<div style="flex:1;font-size:12px;color:var(--tm);line-height:1.5">Nothing buildable this quarter &#8212; budget or phase constraints.</div>';
+        causeHtml+='</div>';
+      }
+    }
+    causeHtml+='</div>';
+    if(anyItems)html+=causeHtml;
+    html+='</div>';
+    // Pulse — sequential reveal
+    html+='<div class="resolve-card" id="rc-pulse">';
+    if(S.pulse){
+      html+='<div class="pulse-card '+vi+'"><span class="pulse-lbl">Pulse</span><span class="pulse-ind">'+picons[vi]+'</span><span class="pulse-txt">'+S.pulse+'</span></div>';
+    }
+    html+='</div>';
+    html+=this.advBtn();
+    return html;
+  },
+
+  noSituation:function(){
+    // No situation this quarter - go straight to build phase
+    // Called when qPhase is 'decision' but no sit exists
+    // Immediately transition to build
+    S.sitDone=true;
+    S.qPhase='build';
+    return this.buildMode();
+  },
+
+  advBtn:function(){
+    var last=S.q===4;
+    return '<div class="adv-wrap"><button class="btn-adv" onclick="C.advance()">'+(last?'Pre-Survey Decision &#8594;':'Advance to Q'+(S.q+1)+' &#8594;')+'</button></div>';
+  },
+
+  reveal:function(){
+    var isOrientation=(S.year===0);
+    var ps=S.preSurveyNote;
+    var html='<div class="screen" style="justify-content:center;align-items:center;text-align:center">';
+    html+='<div class="reveal-badge">'+(isOrientation?'YEAR 0 COMPLETE':'YEAR '+S.year+' SURVEY RESULTS')+'</div>';
+    html+='<div class="reveal-scores">';
+    html+='<div class="rv-item"><div class="rv-val amber">'+S.ap+'</div><div class="rv-lbl">AP Optimism</div></div>';
+    html+='<div class="rv-item"><div class="rv-val blue">'+S.part+'%</div><div class="rv-lbl">Participation</div></div>';
+    html+='<div class="rv-item"><div class="rv-val">'+S.eng+'</div><div class="rv-lbl">Engagement</div></div>';
+    html+='</div>';
+    if(isOrientation){
+      html+='<p class="reveal-narr">Year 0 is done. This was orientation &#8212; for you and for the organization. Scores have not shifted dramatically yet. What you built this year is the foundation everything else runs on.</p>';
+      html+='<div class="reveal-note">From here, consequences are yours to read. Watch the pulse. Watch the thermometer. The organization will tell you what it is feeling &#8212; but not in numbers.</div>';
+    } else {
+      html+='<p class="reveal-narr">The results are in. A full year of decisions, investments, and quiet shifts in trust all land here.</p>';
+      if(ps)html+='<div class="reveal-note">'+ps+'</div>';
+    }
+    html+='<button class="btn-p" onclick="C.goY1()">'+(isOrientation?'Enter Year 1':'See Full Results')+' &#8594;</button>';
+    html+='</div>';
+    this.app().innerHTML=html;
+  },
+
+  presurvey:function(){
+    var ps=S.getPreSurvey(S.year);
+    var z=S.getZone();
+    var html='<div class="screen" style="max-width:600px">';
+    html+='<div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase">PRE-SURVEY DECISION &#183; Year '+S.year+'</div>';
+    html+='<div style="font-size:12px;color:var(--tm);margin-top:4px;font-family:var(--mono)">The survey opens next. One call before it does.</div>';
+    if(ps){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:14px">';
+      html+='<div style="font-size:14px;color:var(--t2);line-height:1.65">'+ps.prompt+'</div>';
+      html+='<div style="display:flex;flex-direction:column;gap:9px">';
+      for(var i=0;i<ps.opts.length;i++){
+        var o=ps.opts[i];
+        var locked=false; var lockWhy='';
+        if(o.req&&o.req.zone){
+          var zo=['skeptical','cautious','engaged','champion'];
+          if(zo.indexOf(z.id)<zo.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Organizational Trust';}
+        }
+        var borderCol=locked?'var(--border)':'var(--border)';
+        var divId='ps-opt-'+o.id;
+        html+='<div id="'+divId+'" style="background:var(--card);border:1px solid '+borderCol+';border-radius:var(--r);padding:13px;'+(locked?'opacity:.5;cursor:not-allowed':'cursor:pointer')+'">';
+        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px">';
+        var badgeCol=locked?'color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)':'color:var(--amber);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25)';
+        html+='<span style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;border:1px solid;border-radius:3px;padding:2px 7px;'+badgeCol+'">'+o.badge+'</span>';
+        // Consequence hidden until after choice — consistent with rest of game
+        html+='</div>';
+        html+='<div style="font-size:13px;color:var(--t2);line-height:1.55">'+o.text+'</div>';
+        if(locked)html+='<div style="font-size:10px;color:var(--tm);font-family:var(--mono);margin-top:6px">&#128274; '+lockWhy+'</div>';
+        html+='</div>';
+      }
+      html+='</div></div>';
+    } else {
+      html+='<div style="color:var(--t2);font-size:13px;line-height:1.6">No pre-survey decision this year.</div>';
+    }
+    html+='<button class="btn-g" onclick="C.skipPreSurvey()">Skip &#8594; Launch Survey</button>';
+    html+='</div>';
+    this.app().innerHTML=html;
+    // Attach click handlers after render (guard against missing ps)
+    if(ps&&ps.opts){
+      for(var pi=0;pi<ps.opts.length;pi++){
+        (function(optId){
+          var el=document.getElementById('ps-opt-'+optId);
+          if(el&&!el.style.opacity){el.addEventListener('click',function(){C.choosePreSurvey(optId);});}
+        })(ps.opts[pi].id);
+      }
+    }
+  },
+
+  postsurvey:function(){
+    var g=S.grade||'C';
+    var gradeColors={S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
+    var gc=gradeColors[g]||'#F5A623';
+    var nb=S.nextBudget;
+    var budDelta=nb-S.budget;
+    var budPos=budDelta>=0;
+    var z=S.getZone();
+    var focus=focusSignal(S.ap,S.part,g);
+    var apD=S.ap-S.apAtYearStart;
+    var partD=S.part-S.partAtYearStart;
+    var engD=S.eng-S.engAtYearStart;
+    function dStr(d){return d===0?'&#8212;':(d>0?'+':'')+d;}
+    function dCol(d){return d>0?'var(--green)':d<0?'var(--red)':'var(--tm)';}
+    var html='<div class="screen" style="max-width:640px">';
+    html+='<div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase">YEAR '+S.year+' &#8212; SURVEY RESULTS</div>';
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px">';
+    html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
+    html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
+    html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">AP Optimism</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(apD)+';margin-top:3px">'+dStr(apD)+' vs last year</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--blue);line-height:1">'+S.part+'%</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Participation</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(partD)+';margin-top:3px">'+dStr(partD)+' vs last year</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;line-height:1">'+S.eng+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Engagement</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(engD)+';margin-top:3px">'+dStr(engD)+' vs last year</div></div>';
+    html+='</div>';
+    html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:52px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Grade</div></div>';
+    html+='</div></div>';
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:2px">Year-End Consequences</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
+    html+='<div><div style="font-size:12px;font-weight:600">Next year budget</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Grade '+g+' + '+z.label+' Trust</div></div>';
+    html+='<div style="text-align:right"><div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--amber)">$'+Math.floor(nb/1000)+'K</div>';
+    html+='<div style="font-family:var(--mono);font-size:11px;color:'+(budPos?'var(--green)':'var(--red)')+'">'+(budPos?'+':'')+Math.floor(budDelta/1000)+'K vs this year</div></div>';
+    html+='</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
+    html+='<div><div style="font-size:12px;font-weight:600">Organizational Trust</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Current standing</div></div>';
+    html+='<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">'+z.label+'</div>';
+    html+='</div></div>';
+    html+='<div style="border:1px solid var(--borderl);border-radius:var(--r);padding:16px;background:rgba(245,166,35,.03)">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:8px">Where to Focus</div>';
+    html+='<div style="font-size:13px;color:var(--t2);line-height:1.7">'+focus+'</div>';
+    html+='</div>';
+
+    // Rec results from last year
+    if(S.recResults&&S.recResults.length){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">Recommendation Results</div>';
+      S.recResults.forEach(function(r){
+        var dim=null;
+        for(var di=0;di<REC_DIMENSIONS.length;di++){if(REC_DIMENSIONS[di].id===r.dim){dim=REC_DIMENSIONS[di];break;}}
+        if(!dim)return;
+        html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+        html+='<span style="font-size:16px">'+(r.landed?'✅':'❌')+'</span>';
+        html+='<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
+        html+='<div style="font-size:11px;color:var(--tm)">'+(r.landed?'Landed &#8212; '+dim.owner+' acted on it. Scores improving.':'Deprioritized. The timing was not right.')+'</div></div>';
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+
+    // Character arc moments - show if anyone advanced this year
+    var arcMoments=[];
+    Object.keys(CHAR_ARCS).forEach(function(charId){
+      var arc=CHAR_ARCS[charId];
+      var stage=S.charArcs[charId]||0;
+      if(stage>0){arcMoments.push({name:arc.name,av:arc.stages[stage]?arc.stages[stage].desc:'',stage:stage,label:arc.stages[stage]?arc.stages[stage].label:''});}
+    });
+    if(arcMoments.length){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
+      arcMoments.forEach(function(m){
+        html+='<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">';
+        html+='<span style="font-size:20px;flex-shrink:0">'+CHARS[Object.keys(CHAR_ARCS).find(function(k){return CHAR_ARCS[k].name===m.name;})].av+'</span>';
+        var charId2=Object.keys(CHAR_ARCS).find(function(k){return CHAR_ARCS[k].name===m.name;});
+        var charRole=charId2&&CHARS[charId2]?CHARS[charId2].role:'';
+        html+='<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+m.name+(charRole?' <span style="color:var(--tm);font-weight:400;font-size:10px">'+charRole+'</span>':'')+' &#8212; <span style="color:var(--green)">'+m.label+'</span></div>';
+        html+='<div style="font-size:11px;color:var(--tm);margin-top:2px">'+m.av+'</div></div>';
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+
+    // Recommendations UI — tiered costs, diagnostic signals, skip option
+    if(S.year<5){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase">Recommendations &#8212; '+S.recsIssued+'/2 issued</div>';
+      html+='<div style="font-size:11px;color:var(--tm)">&#10024; '+S.polcap+' PC available</div>';
+      html+='</div>';
+      html+='<div style="font-size:11px;color:var(--tm);margin-bottom:4px">Direct other functions to act on what the survey showed. Each recommendation costs PC based on how clearly the data supports it. Landing probability at <span style="color:'+z.color+'">'+z.label+'</span>: <strong>'+Math.round((REC_LAND_PROB[z.id]||0.45)*100)+'%</strong> base.</div>';
+      html+='<div style="font-size:10px;color:var(--tm);margin-bottom:12px">PC is also used for high-leverage situation options. Save it if the signal here is weak.</div>';
+      if(S.recSkippedNote){
+        html+='<div style="font-size:11px;color:var(--tm);padding:8px;background:var(--card);border-radius:var(--rs);margin-bottom:8px">'+S.recSkippedNote+'</div>';
+      }
+      if(S.recsIssued>=2){
+        html+='<div style="font-size:11px;color:var(--green)">&#10003; Both recommendation slots issued.</div>';
+      } else {
+        // Show dimension cards with diagnostic signal
+        html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">';
+        REC_DIMENSIONS.forEach(function(dim){
+          var alreadyIssued=S.pendingRecs.some(function(r){return r.dim===dim.id;});
+          var signal=getRecDiagnostic(dim.id,S.ap,S.part,S.year,S.tree);
+          var tier=REC_TIERS[signal];
+          var sigColors={high:'var(--green)',medium:'var(--amber)',low:'var(--tm)'};
+          var sigIcons={high:'&#9650;',medium:'&#9644;',low:'&#9660;'};
+          var canAfford=S.polcap>=tier.cost;
+          html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--card);border:1px solid '+(alreadyIssued?'var(--green)':canAfford?'var(--border)':'rgba(255,255,255,.05)')+';border-radius:var(--rs);opacity:'+(alreadyIssued||canAfford?1:0.5)+'">';
+          html+='<div style="flex:1">';
+          html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
+          html+='<div style="font-size:10px;color:var(--tm);margin-top:1px">'+dim.owner+'</div>';
+          html+='<div style="font-size:10px;color:'+sigColors[signal]+';margin-top:2px">'+sigIcons[signal]+' '+tier.label+' &#183; '+tier.desc+'</div>';
+          html+='</div>';
+          html+='<div style="text-align:right;flex-shrink:0">';
+          if(alreadyIssued){
+            html+='<span style="font-size:11px;color:var(--green)">&#10003; Issued</span>';
+          } else {
+            html+='<button data-dim="'+dim.id+'" onclick="C.issueRec(this.getAttribute(\'data-dim\'))" '+(canAfford?'':'disabled')+' style="background:'+(canAfford?'var(--panel)':'transparent')+';border:1px solid '+(canAfford?'var(--border)':'rgba(255,255,255,.1)')+';border-radius:var(--rs);padding:4px 10px;font-size:11px;color:'+(canAfford?'var(--t2)':'var(--tm)')+';cursor:'+(canAfford?'pointer':'default')+';font-family:var(--sans)">'+tier.cost+' PC</button>';
+          }
+          html+='</div>';
+          html+='</div>';
+        });
+        html+='</div>';
+        if(S.recsIssued===0&&!S.recSkippedNote){
+          html+='<button onclick="C.skipRecs()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);padding:5px 14px;font-size:11px;color:var(--tm);cursor:pointer;font-family:var(--sans)">Skip recommendations this year</button>';
+        }
+      }
+      html+='</div>';
+    }
+
+    if(S.year>=5){
+      html+='<button class="btn-p" onclick="C.goToClosing()">See Five-Year Summary &#8594;</button>';
+    } else {
+      html+='<button class="btn-p" onclick="C.beginNextYear()">Begin Year '+(S.year+1)+' &#8594;</button>';
+    }
+    html+='</div>';
+    this.app().innerHTML=html;
+  },
+
+  y1:function(){
+    // Legacy stub - retained for safety, unreachable in normal flow
+    this.closing();
+  },
+
+  closing:function(){
+    var z=S.getZone();
+    var builtIds=Object.keys(S.tree);
+    var builtCount=builtIds.length;
+    var g=S.grade||'C';
+    var gradeColors={S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
+    var gc=gradeColors[g]||'#F5A623';
+
+    // Group decision log by year
+    var byYear={};
+    S.decisionLog.forEach(function(d){
+      if(!byYear[d.year])byYear[d.year]=[];
+      byYear[d.year].push(d);
+    });
+
+    // Build tree summary by track
+    var trackNames={infra:'Listening Infrastructure',mgr:'Manager Capacity',comms:'Communications',se:'Stakeholder Engagement'};
+    var builtByTrack={infra:[],mgr:[],comms:[],se:[]};
+    builtIds.forEach(function(id){
+      var n=NODES[id];
+      if(n)builtByTrack[n.track].push(n.name);
+    });
+
+    var html='<div class="screen" style="max-width:680px">';
+    html+='<div class="reveal-badge">FIVE YEARS COMPLETE</div>';
+    html+='<h2 style="font-size:24px;font-weight:700">The program, as you built it.</h2>';
+
+    // Final scores
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px">';
+    html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
+    html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
+    html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final AP Optimism</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--blue);line-height:1">'+S.part+'%</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Participation</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;line-height:1">'+S.eng+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Engagement</div></div>';
+    html+='</div>';
+    html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:44px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
+    html+='</div>';
+    html+='<div style="margin-top:14px;font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">Organizational Trust: '+z.label+'</div>';
+    html+='</div>';
+
+    // Visual tree - nodes as filled/empty boxes by track
+    var TRACK_META={infra:{name:'Listening Infrastructure',color:'#4A9EFF',icon:'🔧'},mgr:{name:'Manager Capacity',color:'#F5A623',icon:'👥'},comms:{name:'Communications',color:'#26C6DA',icon:'📢'},se:{name:'Stakeholder Engagement',color:'#B39DDB',icon:'🤝'}};
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">What You Built &#8212; '+builtCount+'/16 nodes</div>';
+    ['infra','mgr','comms','se'].forEach(function(tk){
+      var tm2=TRACK_META[tk];var nodes=S.treeStatus()[tk];
+      html+='<div style="margin-bottom:10px">';
+      html+='<div style="font-size:11px;color:'+tm2.color+';font-weight:600;margin-bottom:5px">'+tm2.icon+' '+tm2.name+'</div>';
+      html+='<div style="display:flex;gap:4px">';
+      nodes.forEach(function(n){
+        var built=n.built;
+        html+='<div style="flex:1;background:'+(built?tm2.color+'33':'var(--card)')+';border:1px solid '+(built?tm2.color:'var(--border)')+';border-radius:4px;padding:6px 4px;text-align:center" title="'+n.name+'">';
+        html+='<div style="font-size:13px">'+n.icon+'</div>';
+        html+='<div style="font-size:8px;color:'+(built?tm2.color:'var(--tm)')+';margin-top:2px;font-family:var(--mono)">'+(built?'&#10003;':'&#8212;')+'</div>';
+        html+='</div>';
+      });
+      html+='</div></div>';
+    });
+    html+='</div>';
+
+    // Retrospective narrative - what moved the needle
+    var apGain=S.ap-(DIFF[S.diff].ap);
+    var partGain=S.part-(DIFF[S.diff].part);
+    var mgrBuilt=builtIds.filter(function(id){return id.indexOf('mgr')===0;}).length;
+    var commsBuilt=builtIds.filter(function(id){return id.indexOf('comms')===0;}).length;
+    var infraBuilt=builtIds.filter(function(id){return id.indexOf('infra')===0;}).length;
+    var seBuilt=builtIds.filter(function(id){return id.indexOf('se')===0;}).length;
+    var retro=[];
+    if(apGain>10)retro.push('AP Optimism grew by '+apGain+' points over five years'+(mgrBuilt>=3?' &#8212; your Manager Capacity investments were the primary driver.':'.'));
+    else if(apGain>0)retro.push('AP Optimism moved +'+apGain+' points'+(mgrBuilt<2?' &#8212; deeper Manager Capacity investment would likely have accelerated this.':'.'));
+    else retro.push('AP Optimism did not meaningfully improve. Employees still do not believe leadership will act on results.');
+    if(partGain>5)retro.push('Participation grew by '+partGain+'% &#8212;'+(commsBuilt>=2?' your Communications investments made employees feel the survey was worth their time.':' stronger Communications investment would have compounded this further.'));
+    else if(partGain<0)retro.push('Participation declined. Employees lost confidence the survey was worth completing.');
+    if(z.id==='champion')retro.push('Organizational Trust reached Champion. Leadership actively advocated for the program by the end.');
+    else if(z.id==='engaged')retro.push('Organizational Trust reached Engaged. Leadership was supportive &#8212; Champion was achievable with a few stronger decisions.');
+    else if(z.id==='cautious')retro.push('Organizational Trust stayed Cautious. The program survived but never fully converted leadership into advocates.');
+    else retro.push('Organizational Trust remained Skeptical. The program was always one budget cycle away from being cut.');
+    if(mgrBuilt>=3&&apGain>8)retro.push('The Manager Capacity and AP Optimism combination proved to be your strongest compounding investment.');
+    if(commsBuilt>=3&&partGain>5)retro.push('Communications track investment translated directly into participation gains &#8212; employees heard what happened to their feedback.');
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:10px">What Moved the Needle</div>';
+    retro.forEach(function(r){html+='<p style="font-size:12px;color:var(--t2);line-height:1.65;margin-bottom:8px">'+r+'</p>';});
+    html+='</div>';
+
+    html+='<button class="btn-p" onclick="C.restart()">Play Again</button>';
+    html+='</div>';
+    this.app().innerHTML=html;
+  },
+
+  treeModal:function(investMode){
+    var existing=this.$('tree-modal');if(existing)existing.remove();
+    var ts=S.treeStatus();
+    var html='<div class="modal-ov" id="tree-modal" onclick="C.closeTree(event)">';
+    html+='<div class="modal-box">';
+    html+='<div class="modal-hdr"><div class="modal-title">Investment Tree &#8212; All Tracks</div><button class="modal-close" onclick="C.closeTree()">Close &#10005;</button></div>';
+    html+='<div class="tracks-grid">';
+    var trackOrder=['infra','mgr','comms','se'];
+    for(var ti=0;ti<trackOrder.length;ti++){
+      var tk=trackOrder[ti];var tr=TRACKS[tk];var nodes=ts[tk];
+      html+='<div class="track-block" style="border-color:'+tr.color+'22">';
+      html+='<div class="track-hdr" style="background:'+tr.color+'0D;border-bottom:2px solid '+tr.color+'44">';
+      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<div class="track-focus" style="color:'+tr.color+'99">'+tr.focus+'</div>';
+      html+='<div class="track-when">'+tr.when+'</div></div>';
+      html+='<div class="track-nodes">';
+      for(var ni=0;ni<nodes.length;ni++){
+        var n=nodes[ni];
+        var costStr=n.cost>=1000?'$'+n.cost/1000+'K':'$'+n.cost;
+        var crossDep=false;
+        for(var pi=0;pi<n.pre.length;pi++){if(NODES[n.pre[pi]]&&NODES[n.pre[pi]].track!==tk){crossDep=true;break;}}
+        var isSelected=investMode&&!!S.sel[n.id];
+        var stateCls=n.built?'built':n.avail?'avail':'locked';
+        html+='<div class="tn '+stateCls+'"'+(isSelected?' style="border:2px solid '+tr.color+'"':'')+'>';
+        html+='<div class="tn-icon">'+n.icon+'</div>';
+        html+='<div class="tn-name" style="'+(n.built?'color:'+tr.color:'')+'">'+n.name+'</div>';
+        html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
+        if(n.built){html+='<div class="tn-built" style="color:'+tr.color+'">&#10003; Built</div>';}
+        else if(n.avail){
+          html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
+          if(crossDep)html+='<div class="tn-cross">&#8599; cross-track</div>';
+        } else {
+          var missing=[];
+          for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
+          var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
+          html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
+        }
+        html+='</div>';
+      }
+      html+='</div></div>';
+    }
+    html+='</div></div></div>';
+    document.body.insertAdjacentHTML('beforeend',html);
+  },
+
+  animUnlock:function(id){
+    var el=this.$('node-'+id);
+    if(el){
+      el.classList.add('unlocking');
+      setTimeout(function(){el.classList.remove('unlocking','avail','locked');el.classList.add('built');},650);
+    }
+    var n=NODES[id];if(!n)return;
+    var t=document.createElement('div');
+    t.className='toast';
+    t.innerHTML='<span class="toast-icon">'+n.icon+'</span><div><div class="toast-name">'+n.name+'</div><div class="toast-sub">'+n.unlocks+'</div></div>';
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
+    setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},300);},2600);
+  },
+
+  processUnlocks:function(){
+    var q=S.pendingUnlocks.slice();S.pendingUnlocks=[];
+    var self=this;
+    q.forEach(function(id,i){setTimeout(function(){self.animUnlock(id);},i*450);});
+  }
+};
+
+// ── CONTROLLER ──
+var C = {
+  pick:function(k){S.init(k);R.go();},
+
+  startY0:function(){
+    S.phase='game';S.qPhase='decision';
+    S.sit=null;
+    for(var i=0;i<SITS.length;i++){if(SITS[i].q===1){S.sit=SITS[i];break;}}
+    R.go();
+  },
+
+  skipY0:function(){S.year=0;S.nextBudget=DIFF[S.diff].budget;C.beginNextYear();},
+
+  choose:function(sitId,optId){
+    AUDIO.init();
+    S.resolveOpt(sitId,optId);
+    R.go();
+  },
+
+  toggleNode:function(id){
+    S.toggleSel(id);
+    R.go();
+  },
+
+  commitInvestments:function(){
+    S.commitSel();
+    this.goToResolve();
+  },
+
+  skipBuild:function(){
+    S.sel={};
+    this.goToResolve();
+  },
+
+  goToResolve:function(){
+    S.genAmbient();
+    S.genPulse();
+    S.applyQueued();
+    // Stagnation check: penalise coasted quarters
+    S.checkStagnation();
+    S.qPhase='resolve';
+    R.go();
+    setTimeout(function(){R.processUnlocks();},100);
+    setTimeout(function(){var a=R.$('rc-main');if(a)a.classList.add('show');},80);
+    setTimeout(function(){var p=R.$('rc-pulse');if(p)p.classList.add('show');},900);
+  },
+
+  advance:function(){
+    if(S.q<4){
+      S.q++;
+      S.sitDone=false;S.sel={};S.qCons=[];S.qTree=[];
+      S.ambEv=null;S.pulse=null;S.pulseV=null;S.capUsed=0;
+      S.trustAtQStart=S.trust;
+      S.sit=null;
+      if(S.year===0){
+        for(var i=0;i<SITS.length;i++){if(SITS[i].q===S.q){S.sit=SITS[i];break;}}
+      } else {
+        S.sit=S.yearDraw[S.q-1]||null;
+      }
+      S.qPhase='decision';
+      R.go();
+    } else {
+      S.phase='presurvey';R.go();
+    }
+  },
+
+  choosePreSurvey:function(optId){
+    var ps=S.getPreSurvey(S.year);
+    if(!ps)return;
+    var opt=null;
+    for(var j=0;j<ps.opts.length;j++){if(ps.opts[j].id===optId){opt=ps.opts[j];break;}}
+    if(!opt)return;
+    if(opt.effect.part)S.part=Math.max(0,Math.min(100,S.part+opt.effect.part));
+    if(opt.bud)S.spendBud(opt.bud);
+    var note=opt.effect.note||'';
+    if(opt.effect.part)note+=' (Participation '+(opt.effect.part>0?'+':'')+opt.effect.part+')';
+    S.preSurveyNote=note;
+    if(S.year===0){S.phase='reveal';R.go();}else{C.goPostSurvey();}
+  },
+
+  skipPreSurvey:function(){
+    if(S.year===0){S.phase='reveal';R.go();}else{C.goPostSurvey();}
+  },
+
+  goPostSurvey:function(){
+    var g=calcGrade(S.ap,S.part,S.eng);
+    S.grade=g;
+    S.nextBudget=calcNextBudget(S.diff,S.year+1,g,S.getZone().id);
+    var trustShift={S:15,A:10,B:6,C:1,D:-3,F:-7};
+    var shift=trustShift[g]||0;
+    S.trust=Math.max(5,Math.min(100,S.trust+shift));
+    // Resolve pending recommendations from last year
+    var zone=S.getZone().id;
+    var landProb=REC_LAND_PROB[zone]||0.45;
+    S.recResults=[];
+    for(var ri=0;ri<S.pendingRecs.length;ri++){
+      var rec=S.pendingRecs[ri];
+      var probMod=rec.probMod||1.0;
+      var landed=Math.random()<(landProb*probMod);
+      var signal=rec.signal||'medium';
+      S.recResults.push({dim:rec.dim,landed:landed,year:rec.year,signal:signal});
+      if(landed){
+        for(var di=0;di<REC_DIMENSIONS.length;di++){
+          if(REC_DIMENSIONS[di].id===rec.dim){
+            var d=REC_DIMENSIONS[di];
+            if(signal==='low'){
+              // Low-signal rec: lands superficially but no real score movement, small trust dip next quarter
+              S.adjTrust(-1);
+              S.recResults[S.recResults.length-1].trustDip=true;
+            } else {
+              if(d.score==='ap')S.ap=Math.min(100,S.ap+d.delta);
+              else if(d.score==='part')S.part=Math.min(100,S.part+d.delta);
+              else if(d.score==='eng')S.eng=Math.min(100,S.eng+d.delta);
+              S.adjTrust(2);
+              S.polcap=Math.min(100,S.polcap+3);
+            }
+            break;
+          }
+        }
+      }
+    }
+    S.pendingRecs=[];
+    S.recsIssued=0;
+    S.phase='postsurvey';R.go();
+    setTimeout(function(){AUDIO.gradeReveal(g);},300);
+  },
+
+  startYear:function(){
+    var d=DIFF[S.diff];
+    S.year=1;S.q=1;S.isTut=false;
+    // Full reset to difficulty base values - tutorial was orientation only
+    S.trust=d.trust;S.ap=d.ap;S.part=d.part;S.eng=d.eng;
+    S.polcap=d.polcap;S.cap=d.cap;
+    // Tree resets - Year 1 starts fresh
+    S.tree={};
+    S.budget=S.nextBudget||d.budget;
+    S.capUsed=0;S.sel={};S.qCons=[];S.qTree=[];
+    S.ambEv=null;S.pulse=null;S.pulseV=null;
+    S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
+    S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
+    S.drawYearSituations(1);
+    S.sit=S.yearDraw[0]||null;
+    S.qPhase='decision';S.phase='game';
+    R.go();
+  },
+
+  beginNextYear:function(){
+    if(S.year===0){this.startYear();return;}
+    // Year 2+: budget resets (sticky from grade), scores/trust/tree all carry forward
+    S.year++;S.q=1;
+    S.budget=S.nextBudget;
+    S.capUsed=0;S.sel={};S.qCons=[];S.qTree=[];
+    S.ambEv=null;S.pulse=null;S.pulseV=null;
+    S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
+    S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
+    S.drawYearSituations(S.year);
+    S.sit=S.yearDraw[0]||null;
+    S.qPhase='decision';S.phase='game';
+    R.go();
+  },
+
+  goY1:function(){C.goPostSurvey();},
+  goToClosing:function(){S.phase='closing';R.go();},
+  issueRec:function(dimId){
+    if(S.recsIssued>=2)return;
+    for(var i=0;i<S.pendingRecs.length;i++){if(S.pendingRecs[i].dim===dimId)return;}
+    var signal=getRecDiagnostic(dimId,S.ap,S.part,S.year,S.tree);
+    var tier=REC_TIERS[signal];
+    if(S.polcap<tier.cost)return;
+    S.polcap=Math.max(0,S.polcap-tier.cost);
+    S.pendingRecs.push({dim:dimId,year:S.year,signal:signal,probMod:tier.probMod});
+    S.recsIssued++;
+    R.go();
+  },
+  skipRecs:function(){
+    // Explicit skip - bank PC, show flavor note
+    S.recSkippedNote='You held your capital. The signal was not strong enough to act on yet.';
+    R.go();
+  },
+  restart:function(){S.phase='diff';R.go();},
+  toggleLastSurvey:function(){S.showLastSurvey=!S.showLastSurvey;R.go();},
+  toggleSound:function(){
+    S.soundOn=!S.soundOn;
+    AUDIO.init();
+    var btn=document.getElementById('snd-btn');
+    if(btn)btn.textContent=S.soundOn?'🔊 Sound':'🔇 Sound';
+    if(S.soundOn)AUDIO.nodeClick(); // little confirmation ping
+  },
+  showHelp:function(){
+    // Re-render the onboarding screen as a modal overlay
+    var prev=S.phase;
+    var overlay=document.createElement('div');
+    overlay.id='help-overlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px';
+    overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+    // Temporarily switch phase to render onboarding, capture HTML, restore
+    var savedPhase=S.phase;
+    S.phase='ob';
+    R.go();
+    var obHTML=document.getElementById('app').innerHTML;
+    S.phase=savedPhase;
+    R.go();
+    var box=document.createElement('div');
+    box.style.cssText='max-width:680px;width:100%;background:var(--bg);border-radius:12px;padding:8px;position:relative';
+    box.innerHTML='<button onclick="document.getElementById(\'help-overlay\').remove()" style="position:absolute;top:12px;right:12px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--t2);font-size:12px;padding:4px 10px;cursor:pointer;font-family:var(--sans);z-index:1">Close &#10005;</button>'+obHTML;
+    // Remove the action buttons from the help version
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  },
+
+  openTree:function(){R.treeModal(S.qPhase==='build');},
+  closeTree:function(e){
+    if(e&&e.target&&e.target.id!=='tree-modal')return;
+    var m=R.$('tree-modal');if(m)m.remove();
+  },
+
+  mobToggle:function(){
+    var p=R.$('panel-l');if(p)p.classList.toggle('mob-show');
+  }
+};
+
+R.go();
+
+// ============================================================
+// SOUND SYSTEM - Web Audio API, no external files
+// Three sounds: ambient zone drone, grade reveal sting, node build click
+// Toggle with S.soundOn
+// ============================================================
+var AUDIO = {
+  ctx: null,
+  init: function(){
+    if(this.ctx)return;
+    try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  },
+  resume: function(){
+    if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();
+  },
+  // Short click for tree node build
+  nodeClick: function(){
+    if(!S.soundOn||!this.ctx)return;
+    this.resume();
+    var o=this.ctx.createOscillator();
+    var g=this.ctx.createGain();
+    o.connect(g);g.connect(this.ctx.destination);
+    o.frequency.setValueAtTime(440,this.ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(880,this.ctx.currentTime+0.05);
+    g.gain.setValueAtTime(0.15,this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+0.15);
+    o.start();o.stop(this.ctx.currentTime+0.15);
+  },
+  // Grade reveal sting - varies by grade
+  gradeReveal: function(grade){
+    if(!S.soundOn||!this.ctx)return;
+    this.resume();
+    var freqs={S:[523,659,784],A:[440,554,659],B:[392,494,587],C:[349,440,523],D:[294,370,440],F:[261,330,392]};
+    var f=freqs[grade]||freqs['C'];
+    var now=this.ctx.currentTime;
+    f.forEach(function(freq,i){
+      var o=AUDIO.ctx.createOscillator();
+      var gn=AUDIO.ctx.createGain();
+      o.connect(gn);gn.connect(AUDIO.ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(freq,now+i*0.12);
+      gn.gain.setValueAtTime(0,now+i*0.12);
+      gn.gain.linearRampToValueAtTime(0.12,now+i*0.12+0.05);
+      gn.gain.exponentialRampToValueAtTime(0.001,now+i*0.12+0.4);
+      o.start(now+i*0.12);
+      o.stop(now+i*0.12+0.4);
+    });
+  },
+  // Trust zone ambient tone - subtle, one-shot on zone change
+  zoneShift: function(zoneId){
+    if(!S.soundOn||!this.ctx)return;
+    this.resume();
+    var tones={skeptical:180,cautious:220,engaged:280,champion:350};
+    var freq=tones[zoneId]||220;
+    var o=this.ctx.createOscillator();
+    var g=this.ctx.createGain();
+    o.connect(g);g.connect(this.ctx.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(freq,this.ctx.currentTime);
+    g.gain.setValueAtTime(0,this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.06,this.ctx.currentTime+0.3);
+    g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+1.5);
+    o.start();o.stop(this.ctx.currentTime+1.5);
+  }
+};
+
+</script>
+</body>
+</html>
