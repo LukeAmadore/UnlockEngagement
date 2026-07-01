@@ -973,6 +973,8 @@ var S = {
   recsIssued:0,  // how many recs issued this postsurvey review (max 2)
   soundOn:true,
   showLastSurvey:false,
+  yearHistory:[], // [{year,ap,part,eng,grade}] snapshot at each year end
+  showTrending:false,
   ambEv:null,pulse:null,pulseV:null,
   pendingUnlocks:[],
 
@@ -990,6 +992,7 @@ var S = {
     this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
+    this.yearHistory=[];this.showTrending=false;
     this.pendingRecs=[];this.recResults=[];this.recsIssued=0;
     this.soundOn=true;
     this.ambEv=null; this.pulse=null; this.pulseV=null;
@@ -1409,21 +1412,26 @@ var R = {
     html+='<div class="score-row"><span class="score-name"><span class="tip">Participation<span class="tip-box">How many employees completed the survey. Below 65% data gets noisy. Below 50% results are unreliable.</span></span></span><span class="score-val blue">'+S.part+'%</span>'+(S.part<65?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 65% &#8212; data reliability drops. Below 50% results are unreliable.</span></span>':'')+'</div>';
     html+='<div class="score-row"><span class="score-name"><span class="tip">Engagement<span class="tip-box">Summary metric. Context only &#8212; moves when AP Optimism and Participation improve consistently.</span></span></span><span class="score-val">'+S.eng+'</span></div>';
     html+='</div>';
-    // Last survey mini-display
+    // Last survey — always visible
     html+='<div class="ls">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
     html+='<div class="ls-lbl">Last Survey</div>';
-    html+='<button onclick="C.toggleLastSurvey()" style="background:transparent;border:none;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--mono)">'+((S.showLastSurvey)?'hide':'show')+'</button>';
+    html+='<div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap">';
+    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--amber)">'+S.apAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">AP</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--blue)">'+S.partAtYearStart+'%</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Part</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600">'+S.engAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Eng</div></div>';
+    if(S.grade)html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--amber)">'+S.grade+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Grade</div></div>';
     html+='</div>';
-    if(S.showLastSurvey){
-      html+='<div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap">';
-      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)">'+S.apAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">AP</div></div>';
-      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--blue)">'+S.partAtYearStart+'%</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Part</div></div>';
-      html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600">'+S.engAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Eng</div></div>';
-      if(S.grade)html+='<div><div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)">'+S.grade+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Grade</div></div>';
-      html+='</div>';
-    } else {
-      html+='<div style="font-size:10px;color:var(--tm);margin-top:2px">Year '+(S.year>1?S.year-1:0)+' &#183; tap show</div>';
+    // Trending toggle
+    if(S.yearHistory&&S.yearHistory.length>0){
+      html+='<button onclick="C.toggleTrending()" style="background:transparent;border:none;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--mono);margin-top:6px;padding:0">'+( S.showTrending?'&#9650; hide trending':'&#9660; show trending')+'</button>';
+      if(S.showTrending){
+        html+='<table style="width:100%;border-collapse:collapse;margin-top:8px;font-family:var(--mono);font-size:10px">';
+        html+='<tr><td style="color:var(--tm);padding:2px 6px 2px 0">Yr</td><td style="color:var(--amber);padding:2px 4px">AP</td><td style="color:var(--blue);padding:2px 4px">Part</td><td style="color:var(--tm);padding:2px 4px">Eng</td><td style="color:var(--amber);padding:2px 4px">Grade</td></tr>';
+        S.yearHistory.forEach(function(h){
+          html+='<tr><td style="color:var(--tm);padding:2px 6px 2px 0">Y'+h.year+'</td><td style="color:var(--amber);padding:2px 4px">'+h.ap+'</td><td style="color:var(--blue);padding:2px 4px">'+h.part+'%</td><td style="color:var(--tm);padding:2px 4px">'+h.eng+'</td><td style="color:var(--amber);padding:2px 4px">'+h.grade+'</td></tr>';
+        });
+        html+='</table>';
+      }
     }
     html+='</div>';
     html+='<div class="ls"><div class="ls-lbl">Investment Tree</div><div class="tree-summary">';
@@ -1970,6 +1978,77 @@ var R = {
     retro.forEach(function(r){html+='<p style="font-size:12px;color:var(--t2);line-height:1.65;margin-bottom:8px">'+r+'</p>';});
     html+='</div>';
 
+    // ── Recommendations recap
+    var allRecs=S.recResults||[];
+    if(allRecs.length){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:10px">Recommendations</div>';
+      allRecs.forEach(function(r){
+        var dim=null;
+        for(var di=0;di<REC_DIMENSIONS.length;di++){if(REC_DIMENSIONS[di].id===r.dim){dim=REC_DIMENSIONS[di];break;}}
+        if(!dim)return;
+        var sigLabel=r.signal?({'high':'High Impact','medium':'Moderate','low':'Low Signal'}[r.signal]||r.signal):'';
+        html+='<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">';
+        html+='<span style="font-size:14px;flex-shrink:0">'+(r.landed?'&#10003;':'&#10007;')+'</span>';
+        html+='<div>';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">Y'+r.year+' &#8212; '+dim.label+(sigLabel?' <span style="color:var(--tm);font-weight:400">('+sigLabel+')</span>':'')+'</div>';
+        html+='<div style="font-size:11px;color:var(--tm);margin-top:1px">'+(r.landed?(r.trustDip?'Landed but employees noticed no real change. Small trust dip followed.':'Landed &#8212; '+dim.owner+' acted on it.'):'Deprioritized. The timing was not right.')+'</div>';
+        html+='</div></div>';
+      });
+      html+='</div>';
+    }
+
+    // ── Three line charts: AP Optimism, Participation, Engagement
+    var hist=S.yearHistory||[];
+    if(hist.length>1){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Year-over-Year Trends</div>';
+      html+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+
+      function makeLine(data, color, label, unit){
+        unit=unit||'';
+        var W=180,H=90,pad=28,bpad=20;
+        var vals=data.map(function(d){return d.v;});
+        var minV=Math.max(0,Math.min.apply(null,vals)-5);
+        var maxV=Math.min(100,Math.max.apply(null,vals)+5);
+        var range=maxV-minV||1;
+        var n=data.length;
+        var pts=data.map(function(d,i){
+          var x=pad+(i/(n-1))*(W-pad-8);
+          var y=pad+(1-(d.v-minV)/range)*(H-pad-bpad);
+          return {x:x,y:y,v:d.v,yr:d.yr};
+        });
+        var path=pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+        var svg='<svg width="'+W+'" height="'+H+'" style="overflow:visible">';
+        // Grid lines
+        svg+='<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
+        svg+='<line x1="'+pad+'" y1="'+(H-bpad)+'" x2="'+(W-8)+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
+        // Label
+        svg+='<text x="'+pad+'" y="14" fill="'+color+'" font-size="9" font-family="monospace" letter-spacing="1">'+label.toUpperCase()+'</text>';
+        // Line
+        svg+='<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+        // Area fill
+        var areaPath=path+' L'+pts[pts.length-1].x.toFixed(1)+','+(H-bpad)+' L'+pts[0].x.toFixed(1)+','+(H-bpad)+' Z';
+        svg+='<path d="'+areaPath+'" fill="'+color+'" opacity="0.08"/>';
+        // Data points and labels
+        pts.forEach(function(p,i){
+          svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="'+color+'"/>';
+          var anchor=i===0?'start':i===pts.length-1?'end':'middle';
+          var yOff=p.y<pad+12?12:-6;
+          svg+='<text x="'+p.x.toFixed(1)+'" y="'+(p.y+yOff).toFixed(1)+'" fill="'+color+'" font-size="8" font-family="monospace" text-anchor="'+anchor+'">'+p.v+unit+'</text>';
+          // Year label at bottom
+          svg+='<text x="'+p.x.toFixed(1)+'" y="'+(H-6)+'" fill="rgba(255,255,255,.3)" font-size="7" font-family="monospace" text-anchor="middle">Y'+p.yr+'</text>';
+        });
+        svg+='</svg>';
+        return svg;
+      }
+
+      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
+      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
+      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#B0C4DE', 'Engagement');
+      html+='</div></div>';
+    }
+
     html+='<button class="btn-p" onclick="C.restart()">Play Again</button>';
     html+='</div>';
     this.app().innerHTML=html;
@@ -2163,6 +2242,7 @@ var C = {
         }
       }
     }
+    S.yearHistory.push({year:S.year,ap:S.ap,part:S.part,eng:S.eng,grade:g});
     S.pendingRecs=[];
     S.recsIssued=0;
     S.phase='postsurvey';R.go();
@@ -2223,6 +2303,7 @@ var C = {
   },
   restart:function(){S.phase='diff';R.go();},
   toggleLastSurvey:function(){S.showLastSurvey=!S.showLastSurvey;R.go();},
+  toggleTrending:function(){S.showTrending=!S.showTrending;R.go();},
   toggleSound:function(){
     S.soundOn=!S.soundOn;
     AUDIO.init();
