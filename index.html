@@ -547,7 +547,7 @@ function getRecDiagnostic(dimId, ap, part, year, charArcs, treeBuilt){
   }
   // Manager Effectiveness: high signal when Manager Capacity tree is underdeveloped
   if(dimId==='mgr'){
-    var mgrBuilt=Object.keys(treeBuilt).filter(function(id){return id.indexOf('mgr')===0;}).length;
+    var mgrBuilt=Object.keys(treeBuilt||{}).filter(function(id){return id.indexOf('mgr')===0;}).length;
     if(mgrBuilt<2&&year>=2) return 'high';
     if(mgrBuilt<3) return 'medium';
     return 'low';
@@ -1155,7 +1155,7 @@ var S = {
   },
 
   checkArcAdvance:function(charId, sitId){
-    if(!charId||!CHAR_ARCS[charId])return;
+    if(!charId||!CHAR_ARCS[charId]||!this.tree)return;
     var arc=CHAR_ARCS[charId];
     var stage=this.charArcs[charId]||0;
     if(stage>=3)return; // already at champion
@@ -1163,7 +1163,7 @@ var S = {
     var track=arc.advanceOn.track;
     // Advance if: this decision is one of their key decisions, AND track has at least (stage+1) nodes built
     var decisionMatch=decisions.indexOf(sitId)>=0;
-    var builtCount=Object.keys(this.tree).filter(function(id){return id.indexOf(track)===0;}).length;
+    var builtCount=Object.keys(this.tree||{}).filter(function(id){return id.indexOf(track)===0;}).length;
     if(decisionMatch&&builtCount>stage){
       this.charArcs[charId]=stage+1;
     }
@@ -1177,7 +1177,7 @@ var S = {
       var stage=self.charArcs[charId]||0;
       if(stage>=3)return;
       var track=arc.advanceOn.track;
-      var builtCount=Object.keys(self.tree).filter(function(id){return id.indexOf(track)===0;}).length;
+      var builtCount=Object.keys(self.tree||{}).filter(function(id){return id.indexOf(track)===0;}).length;
       // Advance one stage per 2 nodes built in the relevant track, max based on decisions too
       var treeStage=Math.min(3,Math.floor(builtCount/2));
       if(treeStage>stage)self.charArcs[charId]=treeStage;
@@ -1888,7 +1888,7 @@ var R = {
 
   closing:function(){
     var z=S.getZone();
-    var builtIds=Object.keys(S.tree);
+    var builtIds=Object.keys(S.tree||{});
     var builtCount=builtIds.length;
     var g=S.grade||'C';
     var gradeColors={S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
