@@ -1717,17 +1717,20 @@ var R = {
       for(var i=0;i<ps.opts.length;i++){
         var o=ps.opts[i];
         var locked=false; var lockWhy='';
-        if(o.req&&o.req.zone){
-          var zo=['skeptical','cautious','engaged','champion'];
-          if(zo.indexOf(z.id)<zo.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Organizational Trust';}
+        if(o.req&&o.req.node&&!S.hasNode(o.req.node)){
+          locked=true;
+          lockWhy='Requires '+(NODES[o.req.node]?NODES[o.req.node].name:o.req.node);
         }
-        var borderCol=locked?'var(--border)':'var(--border)';
-        var divId='ps-opt-'+o.id;
-        html+='<div id="'+divId+'" style="background:var(--card);border:1px solid '+borderCol+';border-radius:var(--r);padding:13px;'+(locked?'opacity:.5;cursor:not-allowed':'cursor:pointer')+'">';
-        html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px">';
+        if(o.req&&o.req.zone){
+          var zo2=['skeptical','cautious','engaged','champion'];
+          if(zo2.indexOf(z.id)<zo2.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Trust';}
+        }
         var badgeCol=locked?'color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)':'color:var(--amber);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25)';
+        // Use onclick directly - avoids post-render handler attachment bugs
+        var clickAttr=locked?'':'onclick="C.choosePreSurvey(\''+o.id+'\')"';
+        html+='<div '+clickAttr+' style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;'+(locked?'opacity:.5;cursor:not-allowed':'cursor:pointer')+'">';
+        html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">';
         html+='<span style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;border:1px solid;border-radius:3px;padding:2px 7px;'+badgeCol+'">'+o.badge+'</span>';
-        // Consequence hidden until after choice — consistent with rest of game
         html+='</div>';
         html+='<div style="font-size:13px;color:var(--t2);line-height:1.55">'+o.text+'</div>';
         if(locked)html+='<div style="font-size:10px;color:var(--tm);font-family:var(--mono);margin-top:6px">&#128274; '+lockWhy+'</div>';
@@ -1740,15 +1743,6 @@ var R = {
     html+='<button class="btn-g" onclick="C.skipPreSurvey()">Skip &#8594; Launch Survey</button>';
     html+='</div>';
     this.app().innerHTML=html;
-    // Attach click handlers after render (guard against missing ps)
-    if(ps&&ps.opts){
-      for(var pi=0;pi<ps.opts.length;pi++){
-        (function(optId){
-          var el=document.getElementById('ps-opt-'+optId);
-          if(el&&!el.style.opacity){el.addEventListener('click',function(){C.choosePreSurvey(optId);});}
-        })(ps.opts[pi].id);
-      }
-    }
   },
 
   postsurvey:function(){
