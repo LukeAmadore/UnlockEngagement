@@ -54,15 +54,32 @@ hardcoded into the renderer.
   F−5), gated decision options (+3 to +6 each, requires nodes/PC/zone), node
   effects (SE track mostly), ambient events (texture only; pool weights
   champion .65 / engaged .55 / cautious .45 / skeptical .20; most deltas ±1).
-- **If Normal overshoots Champion:** cap annual decision-sourced trust (~+8/yr)
-  rather than nerfing individual options again.
+- **`TRUST_ANNUAL_CAP` (`easy:null, normal:10, hard:11`) throttles Normal/Hard.**
+  Simulation showed the three positive sources above (decisions ~8–12/yr,
+  grade-shift ~7–8/yr, node effects ~3/yr) each independently approached the old
+  "~8/yr decision cap" note below, so capping decisions alone wasn't enough —
+  Normal/great hit Champion 100% of the time even with grade-shift and node
+  trust cut hard. The fix instead shares ONE annual budget for positive trust
+  across every source (decisions, ambient, node effects, grade-shift, rec
+  landings); losses are never capped. Scaling happens in `applyQueued` /
+  `applyCappedTrust` *before* anything is displayed, and `applyQueued` sums all
+  of a quarter's trust into a single `adjTrust` call (not one per entry) so the
+  floor/ceiling clamp can only ever fire once — otherwise a bad quarter's later
+  entries could get silently absorbed by an earlier floor-out while the
+  displayed chips still summed to something larger. `checkStagnation` pushes its
+  penalty into `qCons` and runs *before* `applyQueued` for the same reason —
+  it must not apply its own separate `adjTrust` call. Do not reintroduce a
+  decisions-only cap; re-simulate before changing `TRUST_ANNUAL_CAP` values.
 - **Budget model:** flat base per year (Easy $50K / Normal $40K / Hard $25K) +
   10% carry-over of unspent (rest "went to overhead") + flat grade delta
   (S+$8K A+$5K B+$2K C 0 D−$3K F−$6K) + Skeptical penalty −$2K. Floor $5K.
   No multipliers, no compounding surpluses.
 - **Node costs are fixed and do NOT scale with budget/difficulty.** Fixed prices
-  against different purchasing power IS the difficulty lever. Total tree ≈ $207K;
-  Normal 5-yr budget ≈ $200K → 10–12 nodes with good play; Hard ≈ 8–9.
+  against different purchasing power IS the difficulty lever. Total tree ≈ $413K
+  (doubled from an original $207K — simulation showed $207K vs. Normal's ~$200K
+  5-yr budget let good play buy nearly the entire tree, ~15 nodes, versus the
+  10–12 target). Normal 5-yr budget ≈ $200K → 10–12 nodes with good play;
+  Hard ≈ $125K+ → 8–9.
 - **PC economy:** zone rates skeptical 1 / cautious 3 / engaged 5 / champion 8 per
   quarter; grade bonuses at year end. Rec tiers cost 18/12/6 PC (see below).
 
