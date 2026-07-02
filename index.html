@@ -4,16 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Engagement Unlocked</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0F1419;--panel:#1C2333;--card:#242D42;--hover:#2D3855;
-  --border:#2E3A55;--borderl:#3D4F72;
-  --amber:#F5A623;--amberd:#C4841A;--blue:#4A9EFF;--green:#4CAF50;--red:#E74C3C;
-  --purple:#B39DDB;--teal:#26C6DA;
-  --t1:#E8EDF5;--t2:#B0C4DE;--tm:#7A90B0;
-  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
+  /* Warm charcoal/brass instrument-panel surfaces (was cool blue-black) */
+  --bg:#1E1B16;--panel:#26221B;--card:#2E291F;--hover:#3A331F;
+  --border:#3D362A;--borderl:#4E4630;
+  /* Names kept as-is (~200 call sites reference them) — values now hold the
+     Foreman's Gauge palette: amber=brass (primary/budget), blue=patina
+     (secondary mechanical), green=sage (positive/narrative), red=rust
+     (negative/danger), purple=gold (political capital), teal=clay (comms
+     track). Change a value here and every var()/color-mix() user follows.
+     See CLAUDE.md visual-identity notes. */
+  --amber:#C08A3E;--amberd:#9C6F2E;--blue:#5D9385;--green:#7FA06E;--red:#D17A57;
+  --purple:#C7A24A;--teal:#BF8156;
+  --t1:#EDE7DA;--t2:#C7BFAE;--tm:#948A76;
+  /* System font stacks (no webfont/CDN dependency). --display is used sparingly
+     for the two identity moments (game title, nav title); --mono covers dense
+     small labels and real data digits alike. */
+  --display:Futura,"Century Gothic","URW Gothic","Segoe UI",sans-serif;
+  --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Consolas","Menlo",monospace;
   --r:8px;--rs:4px;--rl:12px;
+  /* Shape language: sharp mechanical shell, rounded narrative/situation cards,
+     semi-rounded ruled report cards (postsurvey/reveal/closing) */
+  --r-narr:16px;--r-narr-s:12px;--r-rep:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -25,7 +39,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .screen{max-width:700px;margin:0 auto;padding:48px 24px;min-height:100vh;display:flex;flex-direction:column;gap:28px}
 
 /* DIFFICULTY */
-.g-title-main{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.5px;text-align:center}
+.g-title-main{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:-.01em;text-align:center}
 .g-title-sub{font-size:12px;color:var(--tm);letter-spacing:.15em;text-transform:uppercase;margin-top:5px;text-align:center}
 .diff-ctx{font-size:13px;color:var(--t2);text-align:center;line-height:1.7}
 .diff-cards{display:flex;flex-direction:column;gap:14px}
@@ -53,7 +67,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .ob-trust-nm{font-size:12px;font-weight:600;color:var(--t2)}
 .ob-trust-zn{font-family:var(--mono);font-size:11px;font-weight:600}
 .ob-bar{height:6px;background:var(--bg);border-radius:3px;margin-bottom:6px;overflow:hidden}
-.ob-bar-fill{height:100%;border-radius:3px}
 .ob-zones{display:flex;justify-content:space-between}
 .ob-zl{font-size:9px;color:var(--tm);font-family:var(--mono)}
 .ob-trust-desc{font-size:12px;color:var(--tm);line-height:1.55;margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
@@ -62,7 +75,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 /* GAME SHELL */
 .game-shell{display:flex;flex-direction:column;min-height:100vh}
 .g-topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center}
-.g-topbar-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--t2)}
+.g-topbar-title{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.01em;color:var(--t2)}
 .g-topbar-period{font-family:var(--mono);font-size:11px;color:var(--tm)}
 
 /* TRUST BAR */
@@ -75,10 +88,10 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .cap-lbl{font-size:10px;color:var(--tm);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em}
 .cap-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--purple)}
 .cap-rate{font-size:10px;font-family:var(--mono)}
-.trust-track{height:5px;background:var(--bg);border-radius:3px;position:relative;overflow:hidden}
-.trust-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1),background .4s;position:relative}
-.trust-fill::after{content:'';position:absolute;right:-1px;top:-3px;width:11px;height:11px;border-radius:50%;background:inherit;opacity:.4;animation:tpulse 2s ease-in-out infinite}
-@keyframes tpulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.6);opacity:.1}}
+.trust-track{height:9px;background:#131009;border-radius:5px;position:relative;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.55);border:1px solid #0D0B07}
+.trust-fill,.resolve-bar-fill,.ob-bar-fill{height:100%;border-radius:2px 12px 12px 2px;position:relative;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.trust-fill::before,.resolve-bar-fill::before,.ob-bar-fill::before{content:'';position:absolute;left:0;right:0;top:1px;height:48%;background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0));mix-blend-mode:soft-light;pointer-events:none;border-radius:2px 12px 0 0}
+.trust-fill::after,.resolve-bar-fill::after,.ob-bar-fill::after{content:'';position:absolute;top:0;right:-3px;width:16px;height:100%;background:radial-gradient(ellipse 65% 85% at 30% 26%,rgba(255,255,255,.75),rgba(255,255,255,.12) 55%,transparent 78%),radial-gradient(ellipse 70% 60% at 62% 84%,rgba(0,0,0,.4),transparent 72%);mix-blend-mode:soft-light;pointer-events:none}
 .trust-zmarks{display:flex;justify-content:space-between;margin-top:3px}
 .trust-zm{font-size:9px;color:var(--tm);font-family:var(--mono)}
 
@@ -105,7 +118,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .score-warn{color:var(--amber);font-size:11px}
 .tip{position:relative;display:inline-block}
 .tip:hover .tip-box{opacity:1;pointer-events:auto;transform:translateY(0)}
-.tip-box{position:absolute;bottom:calc(100% + 6px);left:0;background:#1a2540;border:1px solid var(--borderl);border-radius:var(--rs);padding:8px 10px;font-size:11px;color:var(--t2);line-height:1.5;min-width:200px;max-width:240px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:50;transform:translateY(4px);font-family:var(--sans);font-weight:400}
+.tip-box{position:absolute;bottom:calc(100% + 6px);left:0;background:#322C1F;border:1px solid var(--borderl);border-radius:var(--rs);padding:8px 10px;font-size:11px;color:var(--t2);line-height:1.5;min-width:200px;max-width:240px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:50;transform:translateY(4px);font-family:var(--sans);font-weight:400}
 
 /* TREE SUMMARY */
 .tree-summary{display:flex;flex-direction:column;gap:10px}
@@ -117,7 +130,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .ts-node.avail{border-color:var(--borderl);background:var(--card)}
 .ts-node.locked{opacity:.2}
 @keyframes node-unlock{0%{transform:scale(.7);opacity:.3}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
-@keyframes node-ring{0%{box-shadow:0 0 0 0 rgba(245,166,35,.7)}100%{box-shadow:0 0 0 14px rgba(245,166,35,0)}}
+@keyframes node-ring{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--amber) 70%, transparent)}100%{box-shadow:0 0 0 14px color-mix(in srgb, var(--amber) 0%, transparent)}}
 .ts-node.unlocking{animation:node-unlock .55s ease-out forwards,node-ring .7s ease-out forwards;background:var(--amberd);border-color:var(--amber)}
 .tree-view-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;text-align:left;padding:2px 0;font-family:var(--sans);margin-top:4px;text-decoration:underline}
 
@@ -133,28 +146,28 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .panel-r{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
 
 /* SITUATION CARD */
-.sit-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:18px;display:flex;flex-direction:column;gap:13px}
+.sit-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-narr);padding:18px;display:flex;flex-direction:column;gap:13px}
 .sit-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .char-badge{display:flex;align-items:center;gap:9px}
-.char-av{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:50%;border:1px solid var(--border);flex-shrink:0}
+.char-av{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:50%;border:1px solid var(--border);flex-shrink:0;color:var(--green)}
 .char-name{font-weight:600;font-size:12px}
 .char-role{font-size:10px;color:var(--tm)}
-.tut-badge{font-size:10px;color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:20px;padding:2px 9px;white-space:nowrap}
+.tut-badge{font-size:10px;color:var(--amber);background:color-mix(in srgb, var(--amber) 10%, transparent);border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);border-radius:20px;padding:2px 9px;white-space:nowrap}
 .sit-title{font-weight:700;font-size:14px;line-height:1.3}
 .sit-scenario{font-size:13px;color:var(--t2);line-height:1.65}
 .sit-opts{display:flex;flex-direction:column;gap:9px}
-.sit-opt{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:7px}
+.sit-opt{background:var(--card);border:1px solid var(--border);border-radius:var(--r-narr-s);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:7px}
 .sit-opt:hover:not(.lk){border-color:var(--amber);background:var(--hover)}
 .sit-opt.lk{opacity:.5;cursor:not-allowed}
 .opt-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.opt-badge{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);border-radius:3px;padding:2px 7px;white-space:nowrap}
+.opt-badge{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;color:var(--amber);background:color-mix(in srgb, var(--amber) 10%, transparent);border:1px solid color-mix(in srgb, var(--amber) 25%, transparent);border-radius:3px;padding:2px 7px;white-space:nowrap}
 .opt-badge.lk{color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)}
 .opt-costs{display:flex;gap:4px;flex-wrap:wrap}
 .cc{font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:3px;white-space:nowrap}
-.cc.slot{color:var(--blue);background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25)}
-.cc.bud{color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25)}
-.cc.pc{color:var(--purple);background:rgba(179,157,219,.1);border:1px solid rgba(179,157,219,.25)}
-.cc.unlock{color:var(--green);background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.25)}
+.cc.slot{color:var(--blue);background:color-mix(in srgb, var(--blue) 10%, transparent);border:1px solid color-mix(in srgb, var(--blue) 25%, transparent)}
+.cc.bud{color:var(--amber);background:color-mix(in srgb, var(--amber) 10%, transparent);border:1px solid color-mix(in srgb, var(--amber) 25%, transparent)}
+.cc.pc{color:var(--purple);background:color-mix(in srgb, var(--purple) 10%, transparent);border:1px solid color-mix(in srgb, var(--purple) 25%, transparent)}
+.cc.unlock{color:var(--green);background:color-mix(in srgb, var(--green) 10%, transparent);border:1px solid color-mix(in srgb, var(--green) 25%, transparent)}
 .opt-text{font-size:12px;color:var(--t2);line-height:1.55}
 .opt-lock{font-size:10px;color:var(--tm);font-family:var(--mono)}
 .opt-preview{font-size:11px;color:var(--green);font-style:italic;padding-top:5px;border-top:1px solid var(--border);line-height:1.5}
@@ -171,12 +184,12 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .basket{background:var(--card);border:1px solid var(--borderl);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
 .basket-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1}
 .basket-empty{font-size:11px;color:var(--tm);font-style:italic}
-.basket-chip{font-size:11px;background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.3);border-radius:3px;padding:2px 7px;cursor:pointer}
-.basket-chip:hover{background:rgba(245,166,35,.2)}
+.basket-chip{font-size:11px;background:color-mix(in srgb, var(--amber) 12%, transparent);color:var(--amber);border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);border-radius:3px;padding:2px 7px;cursor:pointer}
+.basket-chip:hover{background:color-mix(in srgb, var(--amber) 20%, transparent)}
 .basket-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .basket-cost{font-family:var(--mono);font-size:11px;color:var(--t2)}
-.btn-commit{background:var(--amber);color:#0F1419;border:none;border-radius:var(--rs);padding:6px 14px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
-.btn-commit:hover:not([disabled]){background:#FFB733}
+.btn-commit{background:var(--amber);color:#1E1B16;border:none;border-radius:var(--rs);padding:6px 14px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-commit:hover:not([disabled]){background:#D4A052}
 .btn-commit[disabled]{opacity:.4;cursor:not-allowed;background:var(--amber)}
 
 /* TRACKS GRID */
@@ -188,14 +201,14 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .track-when{font-size:11px;color:var(--t2);line-height:1.5}
 .track-nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
 .tn{background:var(--panel);padding:10px 8px;display:flex;flex-direction:column;gap:5px;transition:background .15s;position:relative}
-.tn.built{background:rgba(196,132,26,.1)}
+.tn.built{background:color-mix(in srgb, var(--amberd) 10%, transparent)}
 .tn.avail{cursor:pointer}
 .tn.avail:hover{background:var(--hover)}
 .tn.sel{cursor:pointer}
 .tn.dimmed{opacity:.35}
 .tn.locked{opacity:.35;cursor:not-allowed}
 .tn-check{font-size:14px;font-weight:700;position:absolute;top:6px;right:6px}
-.tn-icon{font-size:16px}
+.tn-icon{font-size:16px;color:var(--amber)}
 .tn-name{font-size:11px;font-weight:600;line-height:1.3}
 .tn-unlocks{font-size:10px;color:var(--green);line-height:1.4;margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,.06)}
 .tn-costs{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
@@ -205,21 +218,21 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .tn-blocked{font-size:10px;color:var(--red);font-family:var(--mono);margin-top:2px}
 
 /* RESOLVE */
-.resolve-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.resolve-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:16px;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
 .resolve-card.show{opacity:1;transform:none}
 .resolve-trust-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .resolve-trust-lbl{font-family:var(--mono);font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em}
 .resolve-trust-delta{font-family:var(--mono);font-size:12px;font-weight:600}
-.resolve-bar{height:8px;background:var(--bg);border-radius:4px;position:relative;overflow:hidden;margin-bottom:4px}
+.resolve-bar{height:9px;background:#131009;border-radius:5px;position:relative;overflow:hidden;margin-bottom:4px;box-shadow:inset 0 2px 4px rgba(0,0,0,.55);border:1px solid #0D0B07}
 .resolve-bar-trail{position:absolute;top:0;height:100%;border-radius:4px}
-.resolve-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.resolve-bar-fill{position:absolute;top:0;left:0}
 .resolve-zone-lbl{font-family:var(--mono);font-size:10px;font-weight:600;margin-top:4px}
 .cause-list{display:flex;flex-direction:column;gap:8px}
 .cause-item{display:flex;gap:10px;align-items:flex-start}
 .cause-tag{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:1px}
-.cause-tag.dec{background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
-.cause-tag.org{background:rgba(74,158,255,.1);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
-.cause-tag.tree{background:rgba(76,175,80,.1);color:var(--green);border:1px solid rgba(76,175,80,.25)}
+.cause-tag.dec{background:color-mix(in srgb, var(--amber) 12%, transparent);color:var(--amber);border:1px solid color-mix(in srgb, var(--amber) 25%, transparent)}
+.cause-tag.org{background:color-mix(in srgb, var(--blue) 10%, transparent);color:var(--blue);border:1px solid color-mix(in srgb, var(--blue) 25%, transparent)}
+.cause-tag.tree{background:color-mix(in srgb, var(--green) 10%, transparent);color:var(--green);border:1px solid color-mix(in srgb, var(--green) 25%, transparent)}
 .cause-body{flex:1}
 .cause-note{font-size:12px;color:var(--t2);line-height:1.5}
 .cause-result{font-size:11px;color:var(--green);margin-top:3px;font-family:var(--mono)}
@@ -236,7 +249,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 /* ADVANCE */
 .adv-wrap{padding-top:2px}
 .btn-adv{background:var(--card);color:var(--amber);border:1px solid var(--amber);border-radius:var(--r);padding:10px 18px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;letter-spacing:.05em;width:100%}
-.btn-adv:hover{background:rgba(245,166,35,.1)}
+.btn-adv:hover{background:color-mix(in srgb, var(--amber) 10%, transparent)}
 
 /* REVEAL */
 .reveal-badge{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase}
@@ -245,7 +258,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .rv-val{font-family:var(--mono);font-size:48px;font-weight:600;line-height:1}
 .rv-lbl{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em}
 .reveal-narr{font-size:13px;color:var(--t2);line-height:1.7;max-width:480px}
-.reveal-note{font-size:12px;color:var(--amber);font-style:italic;border:1px solid rgba(245,166,35,.3);border-radius:var(--r);padding:12px 16px;max-width:480px;line-height:1.6;background:rgba(245,166,35,.04)}
+.reveal-note{font-size:12px;color:var(--amber);font-style:italic;border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);border-radius:var(--r-rep);padding:12px 16px;max-width:480px;line-height:1.6;background:color-mix(in srgb, var(--amber) 4%, transparent)}
 
 /* Y1 STUB */
 .y1-stats{display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px}
@@ -267,8 +280,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .modal-close:hover{border-color:var(--borderl);color:var(--t1)}
 
 /* BUTTONS */
-.btn-p{background:var(--amber);color:#0F1419;border:none;border-radius:var(--r);padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
-.btn-p:hover{background:#FFB733}
+.btn-p{background:var(--amber);color:#1E1B16;border:none;border-radius:var(--r);padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-p:hover{background:#D4A052}
 .btn-g{background:transparent;color:var(--t2);border:1px solid var(--border);border-radius:var(--r);padding:10px 18px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:border-color .15s,color .15s}
 .btn-g:hover{border-color:var(--borderl);color:var(--t1)}
 
@@ -293,44 +306,63 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 <div id="app"></div>
 <script>
 var DIFF = {
-  easy:{label:'Inherited Momentum',color:'#4CAF50',eng:68,ap:65,part:79,trust:52,budget:50000,cap:4,polcap:40,tree:[],voice:'You inherited a program that mostly works. Leadership tolerates it. Employees fill it out. Your job is to make it mean something.'},
-  normal:{label:'Fixer Upper',color:'#FFC107',eng:62,ap:48,part:74,trust:28,budget:40000,cap:3,polcap:25,tree:[],voice:'Three surveys. Three years of the same scores. Nobody acted on anything. You have $40,000 and one year to change that narrative.'},
-  hard:{label:'Post-Reorg Culture',color:'#F44336',eng:51,ap:38,part:58,trust:12,budget:25000,cap:2,polcap:10,tree:[],voice:'You were brought in after a restructuring. The CFO asked in your first week why Meridian even does a survey. You have $25,000 and almost no goodwill. Go.'}
+  easy:{label:'Inherited Momentum',color:'#7FA06E',eng:68,ap:65,part:79,trust:52,budget:50000,cap:4,polcap:40,tree:[],voice:'You inherited a program that mostly works. Leadership tolerates it. Employees fill it out. Your job is to make it mean something.'},
+  normal:{label:'Fixer Upper',color:'#C7A24A',eng:62,ap:48,part:74,trust:28,budget:40000,cap:3,polcap:25,tree:[],voice:'Three surveys. Three years of the same scores. Nobody acted on anything. You have $40,000 and one year to change that narrative.'},
+  hard:{label:'Post-Reorg Culture',color:'#D17A57',eng:51,ap:38,part:58,trust:12,budget:25000,cap:2,polcap:10,tree:[],voice:'You were brought in after a restructuring. The CFO asked in your first week why Meridian even does a survey. You have $25,000 and almost no goodwill. Go.'}
 };
 
 var ZONES = [
-  {id:'skeptical',label:'Skeptical',min:0,max:24,color:'#E74C3C',rate:1},
-  {id:'cautious', label:'Cautious', min:25,max:49,color:'#F5A623',rate:3},
-  {id:'engaged',  label:'Engaged',  min:50,max:74,color:'#4A9EFF',rate:5},
-  {id:'champion', label:'Champion', min:75,max:100,color:'#4CAF50',rate:8}
+  {id:'skeptical',label:'Skeptical',min:0,max:24,color:'#D17A57',rate:1},
+  {id:'cautious', label:'Cautious', min:25,max:49,color:'#C08A3E',rate:3},
+  {id:'engaged',  label:'Engaged',  min:50,max:74,color:'#C7A24A',rate:5},
+  {id:'champion', label:'Champion', min:75,max:100,color:'#7FA06E',rate:8}
 ];
 var ZONE_ORDER = ZONES.map(function(z){return z.id;});
-var GRADE_COLORS = {S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
+var GRADE_COLORS = {S:'#7FA06E',A:'#7FA06E',B:'#5D9385',C:'#C08A3E',D:'#D17A57',F:'#D17A57'};
+
+// Gauge-fluid gradient per trust zone — top-lit, deeper toward the bottom, hue
+// shifts rust (skeptical) -> brass (cautious) -> gold (engaged) -> sage (champion).
+// Paired with the .trust-fill/.resolve-bar-fill/.ob-bar-fill ::before/::after
+// soft-light highlights in the <style> block, which tint to whichever of these
+// is underneath rather than sitting on top as a flat white patch.
+var ZONE_FLUID = {
+  skeptical:'linear-gradient(180deg,rgba(255,190,168,.5) 0%,rgba(178,84,58,.95) 16%,#9C4A32 55%,#722F1E 100%)',
+  cautious: 'linear-gradient(180deg,rgba(255,214,160,.5) 0%,rgba(192,138,62,.95) 16%,#B27C39 55%,#8C5F26 100%)',
+  engaged:  'linear-gradient(180deg,rgba(255,232,180,.55) 0%,rgba(199,162,74,.95) 16%,#B99A4E 55%,#8F7834 100%)',
+  champion: 'linear-gradient(180deg,rgba(233,255,195,.55) 0%,rgba(163,196,110,.95) 16%,#8FAE63 55%,#6C8A45 100%)'
+};
+
+// Inline line-icon helper — replaces emoji throughout with a cohesive geometric
+// set (currentColor stroke, sized in em so it scales with whatever font-size
+// its container already sets, exactly like the emoji it replaces).
+function II(paths){
+  return '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0">'+paths+'</svg>';
+}
 
 var NODES = {
-  'infra-l1':{track:'infra',level:1,icon:'📋',name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:4000,phase:1,pre:[],effect:{part:2}},
-  'infra-l2':{track:'infra',level:2,icon:'📊',name:'Listening Platform',unlocks:'Managers can see their own team data. The ceiling on AP Optimism improvement lifts.',cost:30000,phase:2,pre:['infra-l1'],effect:{ap:2}},
-  'infra-l3':{track:'infra',level:3,icon:'🔬',name:'Analytics Dashboard',unlocks:'Your recommendations become harder to ignore. Leadership starts seeing patterns, not just numbers.',cost:70000,phase:3,pre:['infra-l2'],effect:{trust:2}},
-  'infra-l4':{track:'infra',level:4,icon:'🔗',name:'Integrated System',unlocks:'Five years of connected data. You can show what changed, why, and what it cost not to act sooner.',cost:100000,phase:4,pre:['infra-l3'],effect:{ap:3,part:2}},
-  'mgr-l1':{track:'mgr',level:1,icon:'📖',name:'Manager Listening Guide',unlocks:'Managers have a framework. Action planning conversations can actually happen.',cost:5000,phase:1,pre:[],effect:{ap:2}},
-  'mgr-l2':{track:'mgr',level:2,icon:'🎓',name:'Data Literacy Workshop',unlocks:'Managers can read their scores and have productive conversations about them. Skeptics start to shift.',cost:12000,phase:2,pre:['mgr-l1'],effect:{ap:3}},
-  'mgr-l3':{track:'mgr',level:3,icon:'🎯',name:'Action Planning Coaching',unlocks:'Your team coaches managers through action planning. The primary driver of AP Optimism.',cost:24000,phase:3,pre:['mgr-l2'],effect:{ap:4}},
-  'mgr-l4':{track:'mgr',level:4,icon:'👥',name:'Manager Cohort',unlocks:'Managers no longer need prompting. They run their own sessions and bring you the findings.',cost:40000,phase:4,pre:['mgr-l3'],effect:{ap:4,trust:2}},
-  'comms-l1':{track:'comms',level:1,icon:'📢',name:'Results Comms Kit',unlocks:'Managers have something to share. Employees start hearing what happened to their feedback.',cost:4000,phase:1,pre:[],effect:{part:2}},
-  'comms-l2':{track:'comms',level:2,icon:'📦',name:'Site Results Packages',unlocks:'Each site gets results that feel relevant to them. Participation responds.',cost:8000,phase:2,pre:['comms-l1'],effect:{part:3}},
-  'comms-l3':{track:'comms',level:3,icon:'🖥️',name:'Employee Dashboard',unlocks:'Employees can see what themes were raised and what actions followed. Their belief that the survey matters grows.',cost:16000,phase:3,pre:['comms-l2','infra-l2'],effect:{ap:3}},
-  'comms-l4':{track:'comms',level:4,icon:'🔄',name:'Closed-Loop System',unlocks:'Employees can track what changed from survey to action. The loop is visible and closed.',cost:32000,phase:4,pre:['comms-l3'],effect:{part:4,ap:2}},
-  'se-l1':{track:'se',level:1,icon:'📅',name:'Executive Briefing Cadence',unlocks:'Leadership is briefed before results land publicly. Surprises go down. Trust in the process goes up.',cost:6000,phase:1,pre:[],effect:{trust:2}},
-  'se-l2':{track:'se',level:2,icon:'🌐',name:'Listening Champions Network',unlocks:'Site advocates carry the program without being asked. Momentum builds where you cannot be.',cost:12000,phase:2,pre:['se-l1'],effect:{trust:3}},
-  'se-l3':{track:'se',level:3,icon:'🗺️',name:'Stakeholder Alignment Map',unlocks:'You stop being reactive. Trust shifts become visible before they hit the thermometer.',cost:20000,phase:3,pre:['se-l2'],effect:{trust:3}},
-  'se-l4':{track:'se',level:4,icon:'🤝',name:'Cross-functional Alignment',unlocks:'Cross-functional partners are committed not just consulted. Recommendations have somewhere to land.',cost:30000,phase:4,pre:['se-l3'],effect:{trust:4}}
+  'infra-l1':{track:'infra',level:1,icon:II('<path d="M8 3h8v4H8z"/><rect x="5" y="5" width="14" height="16" rx="1.5"/><path d="M9 11h6M9 15h6"/>'),name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:4000,phase:1,pre:[],effect:{part:2}},
+  'infra-l2':{track:'infra',level:2,icon:II('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M9 20h6M12 16v4"/>'),name:'Listening Platform',unlocks:'Managers can see their own team data. The ceiling on AP Optimism improvement lifts.',cost:30000,phase:2,pre:['infra-l1'],effect:{ap:2}},
+  'infra-l3':{track:'infra',level:3,icon:II('<path d="M5 20V10M11 20V4M17 20V13"/><path d="M3 20h18"/>'),name:'Analytics Dashboard',unlocks:'Your recommendations become harder to ignore. Leadership starts seeing patterns, not just numbers.',cost:70000,phase:3,pre:['infra-l2'],effect:{trust:2}},
+  'infra-l4':{track:'infra',level:4,icon:II('<circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8M6 8v8M18 8v8M8 18h8"/>'),name:'Integrated System',unlocks:'Five years of connected data. You can show what changed, why, and what it cost not to act sooner.',cost:100000,phase:4,pre:['infra-l3'],effect:{ap:3,part:2}},
+  'mgr-l1':{track:'mgr',level:1,icon:II('<path d="M12 6c-2-1.3-4.5-2-7-2v13c2.5 0 5 .7 7 2 2-1.3 4.5-2 7-2V4c-2.5 0-5 .7-7 2z"/><path d="M12 6v13"/>'),name:'Manager Listening Guide',unlocks:'Managers have a framework. Action planning conversations can actually happen.',cost:5000,phase:1,pre:[],effect:{ap:2}},
+  'mgr-l2':{track:'mgr',level:2,icon:II('<path d="M12 4 2 8l10 4 10-4-10-4z"/><path d="M6 10.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-5.5"/>'),name:'Data Literacy Workshop',unlocks:'Managers can read their scores and have productive conversations about them. Skeptics start to shift.',cost:12000,phase:2,pre:['mgr-l1'],effect:{ap:3}},
+  'mgr-l3':{track:'mgr',level:3,icon:II('<circle cx="12" cy="12" r="7.2"/><circle cx="12" cy="12" r="3.4"/><circle cx="12" cy="12" r=".7" fill="currentColor"/>'),name:'Action Planning Coaching',unlocks:'Your team coaches managers through action planning. The primary driver of AP Optimism.',cost:24000,phase:3,pre:['mgr-l2'],effect:{ap:4}},
+  'mgr-l4':{track:'mgr',level:4,icon:II('<circle cx="8" cy="9" r="2.6"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 19c0-3 2.4-5.4 5.5-5.4s5.5 2.4 5.5 5.4M12.5 19c0-2.6 2-4.7 4.5-4.7s4.5 2.1 4.5 4.7"/>'),name:'Manager Cohort',unlocks:'Managers no longer need prompting. They run their own sessions and bring you the findings.',cost:40000,phase:4,pre:['mgr-l3'],effect:{ap:4,trust:2}},
+  'comms-l1':{track:'comms',level:1,icon:II('<path d="M3 10v4h3l6 4V6l-6 4H3z"/><path d="M16 9a4 4 0 0 1 0 6"/>'),name:'Results Comms Kit',unlocks:'Managers have something to share. Employees start hearing what happened to their feedback.',cost:4000,phase:1,pre:[],effect:{part:2}},
+  'comms-l2':{track:'comms',level:2,icon:II('<path d="M12 3 3 7.5 12 12l9-4.5L12 3z"/><path d="M3 7.5V16l9 4.5V12M21 7.5V16l-9 4.5"/>'),name:'Site Results Packages',unlocks:'Each site gets results that feel relevant to them. Participation responds.',cost:8000,phase:2,pre:['comms-l1'],effect:{part:3}},
+  'comms-l3':{track:'comms',level:3,icon:II('<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M9 21h6M12 17v4"/>'),name:'Employee Dashboard',unlocks:'Employees can see what themes were raised and what actions followed. Their belief that the survey matters grows.',cost:16000,phase:3,pre:['comms-l2','infra-l2'],effect:{ap:3}},
+  'comms-l4':{track:'comms',level:4,icon:II('<path d="M4 12a8 8 0 0 1 14-5.2M20 12a8 8 0 0 1-14 5.2"/><path d="M18 3v4h-4M6 21v-4h4"/>'),name:'Closed-Loop System',unlocks:'Employees can track what changed from survey to action. The loop is visible and closed.',cost:32000,phase:4,pre:['comms-l3'],effect:{part:4,ap:2}},
+  'se-l1':{track:'se',level:1,icon:II('<rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 9h16M8 3v4M16 3v4"/>'),name:'Executive Briefing Cadence',unlocks:'Leadership is briefed before results land publicly. Surprises go down. Trust in the process goes up.',cost:6000,phase:1,pre:[],effect:{trust:2}},
+  'se-l2':{track:'se',level:2,icon:II('<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.2 2.5 13.8 0 16M12 4c-2.5 2.2-2.5 13.8 0 16"/>'),name:'Listening Champions Network',unlocks:'Site advocates carry the program without being asked. Momentum builds where you cannot be.',cost:12000,phase:2,pre:['se-l1'],effect:{trust:3}},
+  'se-l3':{track:'se',level:3,icon:II('<path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/>'),name:'Stakeholder Alignment Map',unlocks:'You stop being reactive. Trust shifts become visible before they hit the thermometer.',cost:20000,phase:3,pre:['se-l2'],effect:{trust:3}},
+  'se-l4':{track:'se',level:4,icon:II('<circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="M11 11l2 2"/>'),name:'Cross-functional Alignment',unlocks:'Cross-functional partners are committed not just consulted. Recommendations have somewhere to land.',cost:30000,phase:4,pre:['se-l3'],effect:{trust:4}}
 };
 
 var TRACKS = {
-  infra:{name:'Listening Infrastructure',focus:'Data credibility',when:'Invest here when leadership questions your numbers or recommendations are not landing.',color:'#4A9EFF',icon:'🔧'},
-  mgr:  {name:'Manager Capacity',focus:'AP Optimism engine',when:'Invest here when employees do not believe action will happen — because managers are not acting.',color:'#F5A623',icon:'👥'},
-  comms:{name:'Communications',focus:'Participation & visibility',when:'Invest here when employees do not know what happened to their feedback.',color:'#26C6DA',icon:'📢'},
-  se:   {name:'Stakeholder Engagement',focus:'Organizational Trust',when:'Invest here when doors are closing — options are locked and leadership is skeptical.',color:'#B39DDB',icon:'🤝'}
+  infra:{name:'Listening Infrastructure',focus:'Data credibility',when:'Invest here when leadership questions your numbers or recommendations are not landing.',color:'#5D9385',icon:II('<path d="M5 20V10M11 20V4M17 20V13"/><path d="M3 20h18"/>')},
+  mgr:  {name:'Manager Capacity',focus:'AP Optimism engine',when:'Invest here when employees do not believe action will happen — because managers are not acting.',color:'#C08A3E',icon:II('<circle cx="8" cy="9" r="2.6"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 19c0-3 2.4-5.4 5.5-5.4s5.5 2.4 5.5 5.4M12.5 19c0-2.6 2-4.7 4.5-4.7s4.5 2.1 4.5 4.7"/>')},
+  comms:{name:'Communications',focus:'Participation & visibility',when:'Invest here when employees do not know what happened to their feedback.',color:'#BF8156',icon:II('<path d="M3 10v4h3l6 4V6l-6 4H3z"/><path d="M16 9a4 4 0 0 1 0 6"/>')},
+  se:   {name:'Stakeholder Engagement',focus:'Organizational Trust',when:'Invest here when doors are closing — options are locked and leadership is skeptical.',color:'#C7A24A',icon:II('<circle cx="8" cy="8" r="4"/><circle cx="16" cy="16" r="4"/><path d="M11 11l2 2"/>')}
 };
 
 var PRE_SURVEY = [
@@ -391,10 +423,10 @@ function focusSignal(ap, part, grade) {
 
 
 var CHARS = {
-  marcus: {name:'Marcus', role:'Site A Plant Manager',av:'👷'},
-  delia:  {name:'Delia',  role:'CHRO',av:'👩‍💼'},
-  raj:    {name:'Raj',    role:'CFO',av:'👨‍💼'},
-  yolanda:{name:'Yolanda',role:'Site B Supervisor',av:'👩‍🔧'}
+  marcus: {name:'Marcus', role:'Site A Plant Manager',av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>')},
+  delia:  {name:'Delia',  role:'CHRO',av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>')},
+  raj:    {name:'Raj',    role:'CFO',av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>')},
+  yolanda:{name:'Yolanda',role:'Site B Supervisor',av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>')}
 };
 
 // ============================================================
@@ -406,7 +438,7 @@ var CHARS = {
 
 var CHAR_ARCS = {
   marcus: {
-    name:'Marcus', role:'Site A Plant Manager', av:'👷',
+    name:'Marcus', role:'Site A Plant Manager', av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
     stages:[
       {label:'Skeptical', desc:'Marcus has told his team surveys change nothing. He is a friction point.'},
       {label:'Cautious',  desc:'Marcus is less vocal in his skepticism. He attended one session without being asked.'},
@@ -431,7 +463,7 @@ var CHAR_ARCS = {
     ]
   },
   delia: {
-    name:'Delia', role:'CHRO', av:'👩‍💼',
+    name:'Delia', role:'CHRO', av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
     stages:[
       {label:'Watching',  desc:'Delia is supportive but watching closely.'},
       {label:'Supportive',desc:'Delia forwards your results to leadership with positive framing.'},
@@ -453,7 +485,7 @@ var CHAR_ARCS = {
     ]
   },
   raj: {
-    name:'Raj', role:'CFO', av:'👨‍💼',
+    name:'Raj', role:'CFO', av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>'),
     stages:[
       {label:'Skeptical', desc:'Raj questions the ROI of the program. He is a budget risk.'},
       {label:'Neutral',   desc:'Raj has stopped actively questioning the program. He watches numbers.'},
@@ -475,7 +507,7 @@ var CHAR_ARCS = {
     ]
   },
   yolanda: {
-    name:'Yolanda', role:'Site B Supervisor', av:'👩‍🔧',
+    name:'Yolanda', role:'Site B Supervisor', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
     stages:[
       {label:'Interested', desc:'Yolanda is curious about the program and doing small things proactively.'},
       {label:'Active',     desc:'Yolanda runs her own listening sessions. She asks good questions.'},
@@ -1418,7 +1450,7 @@ var R = {
     html+='</div>';
     html+='<div class="ob-trust">';
     html+='<div class="ob-trust-hdr"><div class="ob-trust-nm">ORGANIZATIONAL TRUST &#8212; your standing</div><div class="ob-trust-zn" style="color:'+z.color+'">'+z.label+'</div></div>';
-    html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+z.color+'"></div></div>';
+    html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+ZONE_FLUID[z.id]+'"></div></div>';
     html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
     html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. Cannot be spent &#8212; only built or lost.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable. Use it for high-leverage situation options and recommendations to other functions. Saving it for the right moment matters more than spending it fast. <em>'+z.label+'</em> earns +'+z.rate+' PC per quarter; grade bonuses add more at year end.<br><br><strong style="color:var(--t2)">Navigation:</strong> Budget, Capacity, and PC are always visible in the strip below the Trust bar. Current survey scores appear below that on mobile. The left panel (Dashboard) shows scores, last survey results, your investment tree, and the four people whose arcs respond to your decisions.</div>';
     html+='</div>';
@@ -1446,7 +1478,7 @@ var R = {
     }
     html+='<div class="trust-wrap">';
     html+='<div class="trust-hdr"><div class="trust-left"><span class="trust-title">Organizational Trust</span><span class="trust-zone" style="color:'+z.color+'">'+z.label+'</span></div></div>';
-    html+='<div class="trust-track"><div class="trust-fill" style="width:'+S.trust+'%;background:'+z.color+'"></div></div>';
+    html+='<div class="trust-track"><div class="trust-fill" style="width:'+S.trust+'%;background:'+ZONE_FLUID[z.id]+'"></div></div>';
     html+='<div class="trust-zmarks"><span class="trust-zm">Skeptical</span><span class="trust-zm">Cautious</span><span class="trust-zm">Engaged</span><span class="trust-zm">Champion</span></div>';
     html+='</div>';
     // Unified resource strip — always visible, shows live pending cost
@@ -1687,9 +1719,9 @@ var R = {
     html+='<div class="resolve-bar">';
     if(tDelta!==0){
       var trailLeft=Math.min(tBefore,tAfter);
-      html+='<div class="resolve-bar-trail" style="left:'+trailLeft+'%;width:'+Math.abs(tDelta)+'%;background:'+(deltaPos?'rgba(76,175,80,.25)':'rgba(231,76,60,.25)')+'"></div>';
+      html+='<div class="resolve-bar-trail" style="left:'+trailLeft+'%;width:'+Math.abs(tDelta)+'%;background:'+(deltaPos?'color-mix(in srgb, var(--green) 25%, transparent)':'color-mix(in srgb, var(--red) 25%, transparent)')+'"></div>';
     }
-    html+='<div class="resolve-bar-fill" style="width:'+tAfter+'%;background:'+z.color+'"></div>';
+    html+='<div class="resolve-bar-fill" style="width:'+tAfter+'%;background:'+ZONE_FLUID[z.id]+'"></div>';
     html+='</div>';
     html+='<div class="resolve-zone-lbl" style="color:'+z.color+'">'+z.label+'</div>';
     // Causal narrative — what happened and why, one line each
@@ -1718,7 +1750,7 @@ var R = {
       anyItems=true;
       var builtNames=S.qTree.map(function(t){return t.node.icon+' '+t.node.name;}).join(', ');
       causeHtml+='<div style="display:flex;gap:9px;align-items:center">';
-      causeHtml+='<span class="cause-tag" style="flex-shrink:0;background:rgba(76,175,80,.12);color:var(--green);border-color:rgba(76,175,80,.3)">BUILT</span>';
+      causeHtml+='<span class="cause-tag" style="flex-shrink:0;background:color-mix(in srgb, var(--green) 12%, transparent);color:var(--green);border-color:color-mix(in srgb, var(--green) 30%, transparent)">BUILT</span>';
       causeHtml+='<span style="font-size:11px;color:var(--green)">'+builtNames+'</span>';
       causeHtml+='</div>';
     }
@@ -1737,7 +1769,7 @@ var R = {
       anyItems=true;
       if(!hadBuildable){
         causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
-        causeHtml+='<span class="cause-tag" style="flex-shrink:0;margin-top:1px;background:rgba(122,144,176,.1);color:var(--tm);border-color:rgba(122,144,176,.3)">TREE</span>';
+        causeHtml+='<span class="cause-tag" style="flex-shrink:0;margin-top:1px;background:rgba(148,138,118,.1);color:var(--tm);border-color:rgba(148,138,118,.3)">TREE</span>';
         causeHtml+='<div style="flex:1;font-size:12px;color:var(--tm);line-height:1.5">Nothing buildable this quarter &#8212; budget or phase constraints.</div>';
         causeHtml+='</div>';
       }
@@ -1798,7 +1830,7 @@ var R = {
     html+='<div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase">PRE-SURVEY DECISION &#183; Year '+S.year+'</div>';
     html+='<div style="font-size:12px;color:var(--tm);margin-top:4px;font-family:var(--mono)">The survey opens next. One call before it does.</div>';
     if(ps){
-      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:20px;display:flex;flex-direction:column;gap:14px">';
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-narr);padding:20px;display:flex;flex-direction:column;gap:14px">';
       html+='<div style="font-size:14px;color:var(--t2);line-height:1.65">'+ps.prompt+'</div>';
       html+='<div style="display:flex;flex-direction:column;gap:9px">';
       for(var i=0;i<ps.opts.length;i++){
@@ -1811,7 +1843,7 @@ var R = {
         if(o.req&&o.req.zone){
           if(ZONE_ORDER.indexOf(z.id)<ZONE_ORDER.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Trust';}
         }
-        var badgeCol=locked?'color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)':'color:var(--amber);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25)';
+        var badgeCol=locked?'color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)':'color:var(--amber);background:color-mix(in srgb, var(--amber) 10%, transparent);border-color:color-mix(in srgb, var(--amber) 25%, transparent)';
         // Use onclick directly - avoids post-render handler attachment bugs
         var clickAttr=locked?'':'onclick="C.choosePreSurvey(\''+o.id+'\')"';
         html+='<div '+clickAttr+' style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;'+(locked?'opacity:.5;cursor:not-allowed':'cursor:pointer')+'">';
@@ -1833,7 +1865,7 @@ var R = {
 
   postsurvey:function(){
     var g=S.grade||'C';
-    var gc=GRADE_COLORS[g]||'#F5A623';
+    var gc=GRADE_COLORS[g]||'#C08A3E';
     var nb=S.nextBudget;
     var budDelta=nb-S.budget;
     var budPos=budDelta>=0;
@@ -1846,7 +1878,7 @@ var R = {
     function dCol(d){return d>0?'var(--green)':d<0?'var(--red)':'var(--tm)';}
     var html='<div class="screen" style="max-width:640px">';
     html+='<div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase">YEAR '+S.year+' &#8212; SURVEY RESULTS</div>';
-    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px">';
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
     html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">AP Optimism</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(apD)+';margin-top:3px">'+dStr(apD)+' vs last year</div></div>';
@@ -1873,7 +1905,7 @@ var R = {
     html+='<div><div style="font-size:12px;font-weight:600">Organizational Trust</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Current standing</div></div>';
     html+='<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">'+z.label+'</div>';
     html+='</div></div>';
-    html+='<div style="border:1px solid var(--borderl);border-radius:var(--r);padding:16px;background:rgba(245,166,35,.03)">';
+    html+='<div style="border:1px solid var(--borderl);border-radius:var(--r);padding:16px;background:color-mix(in srgb, var(--amber) 3%, transparent)">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:8px">Where to Focus</div>';
     html+='<div style="font-size:13px;color:var(--t2);line-height:1.7">'+focus+'</div>';
     html+='</div>';
@@ -1930,7 +1962,7 @@ var R = {
         html+='<div style="font-size:11px;color:var(--tm);padding:8px;background:var(--card);border-radius:var(--rs);margin-bottom:8px">'+S.recSkippedNote+'</div>';
       }
       if(S.guaranteedRec){
-        html+='<div style="font-size:11px;color:var(--purple);padding:8px;background:rgba(179,157,219,.08);border:1px solid rgba(179,157,219,.25);border-radius:var(--rs);margin-bottom:8px">&#10024; A past trade guarantees your next recommendation lands, regardless of Trust zone.</div>';
+        html+='<div style="font-size:11px;color:var(--purple);padding:8px;background:color-mix(in srgb, var(--purple) 8%, transparent);border:1px solid color-mix(in srgb, var(--purple) 25%, transparent);border-radius:var(--rs);margin-bottom:8px">&#10024; A past trade guarantees your next recommendation lands, regardless of Trust zone.</div>';
       }
       if(S.recsIssued>=2){
         html+='<div style="font-size:11px;color:var(--green)">&#10003; Both recommendation slots issued.</div>';
@@ -1987,7 +2019,7 @@ var R = {
     var builtIds=Object.keys(S.tree||{});
     var builtCount=builtIds.length;
     var g=S.grade||'C';
-    var gc=GRADE_COLORS[g]||'#F5A623';
+    var gc=GRADE_COLORS[g]||'#C08A3E';
 
     // Group decision log by year
     var byYear={};
@@ -2009,7 +2041,7 @@ var R = {
     html+='<h2 style="font-size:24px;font-weight:700">The program, as you built it.</h2>';
 
     // Final scores
-    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px">';
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
     html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final AP Optimism</div></div>';
@@ -2022,7 +2054,7 @@ var R = {
     html+='</div>';
 
     // Visual tree - nodes as filled/empty boxes by track
-    var TRACK_META={infra:{name:'Listening Infrastructure',color:'#4A9EFF',icon:'🔧'},mgr:{name:'Manager Capacity',color:'#F5A623',icon:'👥'},comms:{name:'Communications',color:'#26C6DA',icon:'📢'},se:{name:'Stakeholder Engagement',color:'#B39DDB',icon:'🤝'}};
+    var TRACK_META={infra:{name:'Listening Infrastructure',color:'#5D9385',icon:TRACKS.infra.icon},mgr:{name:'Manager Capacity',color:'#C08A3E',icon:TRACKS.mgr.icon},comms:{name:'Communications',color:'#BF8156',icon:TRACKS.comms.icon},se:{name:'Stakeholder Engagement',color:'#C7A24A',icon:TRACKS.se.icon}};
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">What You Built &#8212; '+builtCount+'/16 nodes</div>';
     ['infra','mgr','comms','se'].forEach(function(tk){
@@ -2132,7 +2164,7 @@ var R = {
 
       html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
       html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
-      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#B0C4DE', 'Engagement');
+      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
       html+='</div></div>';
     }
 
