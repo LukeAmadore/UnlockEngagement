@@ -308,22 +308,22 @@ var ZONE_ORDER = ZONES.map(function(z){return z.id;});
 var GRADE_COLORS = {S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
 
 var NODES = {
-  'infra-l1':{track:'infra',level:1,icon:'📋',name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:2000,phase:1,pre:[],effect:{part:2}},
-  'infra-l2':{track:'infra',level:2,icon:'📊',name:'Listening Platform',unlocks:'Managers can see their own team data. The ceiling on AP Optimism improvement lifts.',cost:15000,phase:2,pre:['infra-l1'],effect:{ap:2}},
-  'infra-l3':{track:'infra',level:3,icon:'🔬',name:'Analytics Dashboard',unlocks:'Your recommendations become harder to ignore. Leadership starts seeing patterns, not just numbers.',cost:35000,phase:3,pre:['infra-l2'],effect:{trust:2}},
-  'infra-l4':{track:'infra',level:4,icon:'🔗',name:'Integrated System',unlocks:'Five years of connected data. You can show what changed, why, and what it cost not to act sooner.',cost:50000,phase:4,pre:['infra-l3'],effect:{ap:3,part:2}},
-  'mgr-l1':{track:'mgr',level:1,icon:'📖',name:'Manager Listening Guide',unlocks:'Managers have a framework. Action planning conversations can actually happen.',cost:2500,phase:1,pre:[],effect:{ap:2}},
-  'mgr-l2':{track:'mgr',level:2,icon:'🎓',name:'Data Literacy Workshop',unlocks:'Managers can read their scores and have productive conversations about them. Skeptics start to shift.',cost:6000,phase:2,pre:['mgr-l1'],effect:{ap:3}},
-  'mgr-l3':{track:'mgr',level:3,icon:'🎯',name:'Action Planning Coaching',unlocks:'Your team coaches managers through action planning. The primary driver of AP Optimism.',cost:12000,phase:3,pre:['mgr-l2'],effect:{ap:4}},
-  'mgr-l4':{track:'mgr',level:4,icon:'👥',name:'Manager Cohort',unlocks:'Managers no longer need prompting. They run their own sessions and bring you the findings.',cost:20000,phase:4,pre:['mgr-l3'],effect:{ap:4,trust:2}},
-  'comms-l1':{track:'comms',level:1,icon:'📢',name:'Results Comms Kit',unlocks:'Managers have something to share. Employees start hearing what happened to their feedback.',cost:2000,phase:1,pre:[],effect:{part:2}},
-  'comms-l2':{track:'comms',level:2,icon:'📦',name:'Site Results Packages',unlocks:'Each site gets results that feel relevant to them. Participation responds.',cost:4000,phase:2,pre:['comms-l1'],effect:{part:3}},
-  'comms-l3':{track:'comms',level:3,icon:'🖥️',name:'Employee Dashboard',unlocks:'Employees can see what themes were raised and what actions followed. Their belief that the survey matters grows.',cost:8000,phase:3,pre:['comms-l2','infra-l2'],effect:{ap:3}},
-  'comms-l4':{track:'comms',level:4,icon:'🔄',name:'Closed-Loop System',unlocks:'Employees can track what changed from survey to action. The loop is visible and closed.',cost:16000,phase:4,pre:['comms-l3'],effect:{part:4,ap:2}},
-  'se-l1':{track:'se',level:1,icon:'📅',name:'Executive Briefing Cadence',unlocks:'Leadership is briefed before results land publicly. Surprises go down. Trust in the process goes up.',cost:3000,phase:1,pre:[],effect:{trust:2}},
-  'se-l2':{track:'se',level:2,icon:'🌐',name:'Listening Champions Network',unlocks:'Site advocates carry the program without being asked. Momentum builds where you cannot be.',cost:6000,phase:2,pre:['se-l1'],effect:{trust:3}},
-  'se-l3':{track:'se',level:3,icon:'🗺️',name:'Stakeholder Alignment Map',unlocks:'You stop being reactive. Trust shifts become visible before they hit the thermometer.',cost:10000,phase:3,pre:['se-l2'],effect:{trust:3}},
-  'se-l4':{track:'se',level:4,icon:'🤝',name:'Cross-functional Alignment',unlocks:'Cross-functional partners are committed not just consulted. Recommendations have somewhere to land.',cost:15000,phase:4,pre:['se-l3'],effect:{trust:4}}
+  'infra-l1':{track:'infra',level:1,icon:'📋',name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:4000,phase:1,pre:[],effect:{part:2}},
+  'infra-l2':{track:'infra',level:2,icon:'📊',name:'Listening Platform',unlocks:'Managers can see their own team data. The ceiling on AP Optimism improvement lifts.',cost:30000,phase:2,pre:['infra-l1'],effect:{ap:2}},
+  'infra-l3':{track:'infra',level:3,icon:'🔬',name:'Analytics Dashboard',unlocks:'Your recommendations become harder to ignore. Leadership starts seeing patterns, not just numbers.',cost:70000,phase:3,pre:['infra-l2'],effect:{trust:2}},
+  'infra-l4':{track:'infra',level:4,icon:'🔗',name:'Integrated System',unlocks:'Five years of connected data. You can show what changed, why, and what it cost not to act sooner.',cost:100000,phase:4,pre:['infra-l3'],effect:{ap:3,part:2}},
+  'mgr-l1':{track:'mgr',level:1,icon:'📖',name:'Manager Listening Guide',unlocks:'Managers have a framework. Action planning conversations can actually happen.',cost:5000,phase:1,pre:[],effect:{ap:2}},
+  'mgr-l2':{track:'mgr',level:2,icon:'🎓',name:'Data Literacy Workshop',unlocks:'Managers can read their scores and have productive conversations about them. Skeptics start to shift.',cost:12000,phase:2,pre:['mgr-l1'],effect:{ap:3}},
+  'mgr-l3':{track:'mgr',level:3,icon:'🎯',name:'Action Planning Coaching',unlocks:'Your team coaches managers through action planning. The primary driver of AP Optimism.',cost:24000,phase:3,pre:['mgr-l2'],effect:{ap:4}},
+  'mgr-l4':{track:'mgr',level:4,icon:'👥',name:'Manager Cohort',unlocks:'Managers no longer need prompting. They run their own sessions and bring you the findings.',cost:40000,phase:4,pre:['mgr-l3'],effect:{ap:4,trust:2}},
+  'comms-l1':{track:'comms',level:1,icon:'📢',name:'Results Comms Kit',unlocks:'Managers have something to share. Employees start hearing what happened to their feedback.',cost:4000,phase:1,pre:[],effect:{part:2}},
+  'comms-l2':{track:'comms',level:2,icon:'📦',name:'Site Results Packages',unlocks:'Each site gets results that feel relevant to them. Participation responds.',cost:8000,phase:2,pre:['comms-l1'],effect:{part:3}},
+  'comms-l3':{track:'comms',level:3,icon:'🖥️',name:'Employee Dashboard',unlocks:'Employees can see what themes were raised and what actions followed. Their belief that the survey matters grows.',cost:16000,phase:3,pre:['comms-l2','infra-l2'],effect:{ap:3}},
+  'comms-l4':{track:'comms',level:4,icon:'🔄',name:'Closed-Loop System',unlocks:'Employees can track what changed from survey to action. The loop is visible and closed.',cost:32000,phase:4,pre:['comms-l3'],effect:{part:4,ap:2}},
+  'se-l1':{track:'se',level:1,icon:'📅',name:'Executive Briefing Cadence',unlocks:'Leadership is briefed before results land publicly. Surprises go down. Trust in the process goes up.',cost:6000,phase:1,pre:[],effect:{trust:2}},
+  'se-l2':{track:'se',level:2,icon:'🌐',name:'Listening Champions Network',unlocks:'Site advocates carry the program without being asked. Momentum builds where you cannot be.',cost:12000,phase:2,pre:['se-l1'],effect:{trust:3}},
+  'se-l3':{track:'se',level:3,icon:'🗺️',name:'Stakeholder Alignment Map',unlocks:'You stop being reactive. Trust shifts become visible before they hit the thermometer.',cost:20000,phase:3,pre:['se-l2'],effect:{trust:3}},
+  'se-l4':{track:'se',level:4,icon:'🤝',name:'Cross-functional Alignment',unlocks:'Cross-functional partners are committed not just consulted. Recommendations have somewhere to land.',cost:30000,phase:4,pre:['se-l3'],effect:{trust:4}}
 };
 
 var TRACKS = {
@@ -349,6 +349,13 @@ var BASE_BUDGETS = {easy:50000, normal:40000, hard:25000};
 
 // Grade flat bonus/cut applied to next year's budget
 var GRADE_BUDGET_DELTA = {S:8000,A:5000,B:2000,C:0,D:-3000,F:-6000};
+
+// Annual ceiling on POSITIVE trust gained per year, shared across every source (decision
+// options, node effects, ambient events, grade-shift, recommendation landings). Losses are
+// never capped. Applied before any number is displayed, so the resolve screen always shows
+// the real, already-capped amount — nothing is hidden after the fact. Easy is uncapped by
+// design (it is meant to hand a good player Champion). See CLAUDE.md balance notes.
+var TRUST_ANNUAL_CAP = {easy:null, normal:10, hard:11};
 
 function calcNextBudget(diff, year, grade, trustZone, currentBudget) {
   var base = BASE_BUDGETS[diff]||BASE_BUDGETS.normal;
@@ -979,6 +986,8 @@ var S = {
   showTrending:false,
   ambEv:null,pulse:null,pulseV:null,
   pendingUnlocks:[],
+  yearTrustGained:0, // positive trust earned so far this year, against TRUST_ANNUAL_CAP
+  trustCappedThisQ:false, // true if this quarter's positive trust was throttled by the cap
 
   init:function(key){
     var d=DIFF[key];
@@ -999,6 +1008,7 @@ var S = {
     this.soundOn=true;
     this.ambEv=null; this.pulse=null; this.pulseV=null;
     this.pendingUnlocks=[];
+    this.yearTrustGained=0; this.trustCappedThisQ=false;
     this.phase='ob';
   },
 
@@ -1011,6 +1021,16 @@ var S = {
     this.trust=Math.max(5,Math.min(100,this.trust+d));
     var newZone=this.getZone().id;
     if(newZone!==oldZone)setTimeout(function(){AUDIO.zoneShift(newZone);},200);
+  },
+  // Routes a trust change through the same annual cap as quarterly gains (grade-shift,
+  // recommendation landings). Losses pass through uncapped.
+  applyCappedTrust:function(delta){
+    var cap=TRUST_ANNUAL_CAP[this.diff];
+    if(cap==null||delta<=0){ this.adjTrust(delta); return; }
+    var remaining=Math.max(0,cap-this.yearTrustGained);
+    var applied=Math.min(delta,remaining);
+    this.yearTrustGained+=applied;
+    this.adjTrust(applied);
   },
   remCap:function(){return this.cap-this.capUsed;},
   spendCap:function(n){this.capUsed=Math.min(this.cap,this.capUsed+n);},
@@ -1152,9 +1172,39 @@ var S = {
 
   applyQueued:function(){
     this.trustAtQStart=this.trust;
+
+    // Annual trust cap: every positive-trust source (decisions, ambient, node effects) draws
+    // from one shared per-year budget. Losses are never throttled. Scaling happens here, before
+    // anything is displayed, so the resolve screen always shows the real, already-capped number.
+    var cap=TRUST_ANNUAL_CAP[this.diff];
+    this.trustCappedThisQ=false;
+    var treeEffectScale=1;
+    if(cap!=null){
+      var remaining=Math.max(0,cap-this.yearTrustGained);
+      var positiveTotal=0,i,j;
+      for(i=0;i<this.qCons.length;i++){if(this.qCons[i].trust>0)positiveTotal+=this.qCons[i].trust;}
+      for(j=0;j<this.qTree.length;j++){var e=this.qTree[j].node.effect;if(e&&e.trust>0)positiveTotal+=e.trust;}
+      var scale=(positiveTotal>remaining&&positiveTotal>0)?remaining/positiveTotal:1;
+      if(scale<1){
+        this.trustCappedThisQ=true;
+        for(i=0;i<this.qCons.length;i++){if(this.qCons[i].trust>0)this.qCons[i].trust=Math.round(this.qCons[i].trust*scale);}
+        treeEffectScale=scale;
+      }
+      this.yearTrustGained+=Math.min(positiveTotal,remaining);
+    }
+    if(this.trustCappedThisQ){
+      this.qCons.push({trust:0,ap:0,part:0,pc:0,badge:'PACED',source:'ambient',
+        note:'Credibility builds slowly. Only part of what this quarter earned shows up right away.'});
+    }
+
+    // Trust is summed and applied as ONE adjTrust call (not one per entry) so the floor/ceiling
+    // clamp only ever happens once per quarter — otherwise a bad quarter's later entries could
+    // get silently absorbed by an earlier floor-out, leaving the displayed chips (which show
+    // each entry's own number) adding up to more than the bar actually moved.
+    var trustTotal=0;
     for(var i=0;i<this.qCons.length;i++){
       var c=this.qCons[i];
-      if(c.trust)this.adjTrust(c.trust);
+      if(c.trust)trustTotal+=c.trust;
       if(c.ap)this.ap=this.clamp100(this.ap+c.ap);
       if(c.part)this.part=this.clamp100(this.part+c.part);
     }
@@ -1163,11 +1213,12 @@ var S = {
       if(!this.tree[t.id]){this.tree[t.id]=true;this.pendingUnlocks.push(t.id);}
       var eff=t.node.effect;
       if(eff){
-        if(eff.trust)this.adjTrust(eff.trust);
+        if(eff.trust)trustTotal+=(eff.trust>0?Math.round(eff.trust*treeEffectScale):eff.trust);
         if(eff.ap)this.ap=this.clamp100(this.ap+eff.ap);
         if(eff.part)this.part=this.clamp100(this.part+eff.part);
       }
     }
+    if(trustTotal)this.adjTrust(trustTotal);
     // Recalc engagement every quarter: weighted composite of ap and part
     this.eng=this.clamp100(Math.round(this.ap*0.55+this.part*0.45));
   },
@@ -1238,7 +1289,8 @@ var S = {
     var decisionCons=this.qCons.filter(function(c){return c.source==='decision';});
     var choseFreePath=decisionCons.length>0&&decisionCons.every(function(c){return !c.slots;});
     var penalty=choseFreePath?-2:-1;
-    this.adjTrust(penalty);
+    // Pushed only — applyQueued (called after this) sums it into the quarter's single combined
+    // trust delta, so a floor/ceiling clamp can't happen here and again independently there.
     this.qCons.push({trust:penalty,ap:0,part:0,pc:0,
       note:'Nothing invested or actioned this quarter. The organization noticed.',
       badge:'STAGNATION',source:'ambient'});
@@ -2187,9 +2239,10 @@ var C = {
   goToResolve:function(){
     S.genAmbient();
     S.genPulse();
-    S.applyQueued();
-    // Stagnation check: penalise coasted quarters
+    // Stagnation check runs before applyQueued so its penalty (if any) is summed into the
+    // same single per-quarter trust delta, instead of clamping separately afterward.
     S.checkStagnation();
+    S.applyQueued();
     S.qPhase='resolve';
     R.go();
     setTimeout(function(){R.processUnlocks();},100);
@@ -2240,7 +2293,7 @@ var C = {
     S.nextBudget=calcNextBudget(S.diff,S.year+1,g,S.getZone().id,S.budget);
     var trustShift={S:10,A:7,B:4,C:1,D:-2,F:-5};
     var shift=trustShift[g]||0;
-    S.trust=Math.max(5,Math.min(100,S.trust+shift));
+    S.applyCappedTrust(shift);
     // Resolve pending recommendations from last year
     var zone=S.getZone().id;
     var landProb=REC_LAND_PROB[zone]||0.45;
@@ -2263,7 +2316,7 @@ var C = {
               if(d.score==='ap')S.ap=Math.min(100,S.ap+d.delta);
               else if(d.score==='part')S.part=Math.min(100,S.part+d.delta);
               else if(d.score==='eng')S.eng=Math.min(100,S.eng+d.delta);
-              S.adjTrust(2);
+              S.applyCappedTrust(2);
               S.polcap=Math.min(100,S.polcap+3);
             }
             break;
@@ -2291,6 +2344,7 @@ var C = {
     S.ambEv=null;S.pulse=null;S.pulseV=null;
     S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
     S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
+    S.yearTrustGained=0;
     S.drawYearSituations(1);
     S.sit=S.yearDraw[0]||null;
     S.qPhase='decision';S.phase='game';
@@ -2306,6 +2360,7 @@ var C = {
     S.ambEv=null;S.pulse=null;S.pulseV=null;
     S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
     S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
+    S.yearTrustGained=0;
     S.drawYearSituations(S.year);
     S.sit=S.yearDraw[0]||null;
     S.qPhase='decision';S.phase='game';
