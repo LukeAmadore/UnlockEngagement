@@ -158,8 +158,38 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 
 ## UI/UX conventions
 
-- Dark terminal aesthetic. Contrast floors: `--t2:#B0C4DE`, `--tm:#7A90B0`
-  (WCAG AA — do not darken these).
+- **Visual identity: "Foreman's Gauge."** Warm charcoal/brass instrument-panel
+  aesthetic, not the generic dark-dev-tool look (electric blue/purple/teal,
+  IBM Plex Mono, emoji icons) it started as. All ~90 hardcoded accent colors
+  were consolidated into the existing `--amber/--blue/--green/--red/--purple/
+  --teal` root variables (names kept for the ~200 call sites that reference
+  them; values now hold brass/patina/sage/rust/gold/clay respectively — see
+  the comment above `:root` in index.html) plus `color-mix(in srgb, var(--x)
+  N%, transparent)` for tint/glow backgrounds, so a future palette change is
+  one edit, not a file-wide find-replace.
+- **Shape language communicates content type**, not just decoration:
+  `--r-narr` (16px, rounded) on situation/decision cards — human/narrative
+  moments; `--r-rep` (6px, semi-rounded) on resolve/postsurvey/reveal/closing
+  cards — data/report moments; the mechanical shell (topbar, trust bar,
+  resource strip, tree, buttons, modal) stays on the original sharp `--r/--rs/
+  --rl` scale. Don't blur this — a card's radius should tell you what kind of
+  content is in it before you read it.
+- **Trust bar is a zone-tinted fluid gauge**, not a flat progress bar — see
+  `ZONE_FLUID` in index.html and the `.trust-fill`/`.resolve-bar-fill`/
+  `.ob-bar-fill` shared `::before`/`::after` rules. The gradient + meniscus
+  highlight are `mix-blend-mode:soft-light` so they tint to whichever zone
+  gradient sits underneath rather than sitting on top as a flat white patch —
+  keep any future bar-style edits going through that same shared selector
+  group, not a one-off `.trust-fill` override, or the other two bars silently
+  drift out of sync.
+- **Icons are inline SVG via the `II()` helper**, not emoji — see the icon
+  fields on `NODES`/`TRACKS`/`CHARS`/`CHAR_ARCS`. Sized in `em` so they scale
+  with whatever font-size their container already sets; adding a new node/
+  character means calling `II('<path .../>')`, not picking an emoji.
+- Contrast floors: `--t2:#C7BFAE` (9.4:1 on `--bg`), `--tm:#948A76` (5.0:1 on
+  `--bg` / 4.6:1 on `--panel`) — both re-verified WCAG AA after the palette
+  swap. Do not darken these, and re-check contrast with the actual `--bg`/
+  `--panel` values (not eyeballed) if either changes again.
 - Resource strip (Budget / Capacity dots / PC) always visible under the trust bar.
   Mobile additionally gets the score strip (AP/Part/Eng + Y·Q) — hidden on desktop
   via `@media(max-width:680px)` only.
