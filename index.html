@@ -304,6 +304,8 @@ var ZONES = [
   {id:'engaged',  label:'Engaged',  min:50,max:74,color:'#4A9EFF',rate:5},
   {id:'champion', label:'Champion', min:75,max:100,color:'#4CAF50',rate:8}
 ];
+var ZONE_ORDER = ZONES.map(function(z){return z.id;});
+var GRADE_COLORS = {S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
 
 var NODES = {
   'infra-l1':{track:'infra',level:1,icon:'📋',name:'Basic Survey Tool',unlocks:'Cleaner data. Participation becomes trackable and your results get more reliable.',cost:2000,phase:1,pre:[],effect:{part:2}},
@@ -967,12 +969,12 @@ var S = {
   apAtYearStart:0,partAtYearStart:0,engAtYearStart:0,
   decisionLog:[], // [{year,q,title,badge,note}] full game history for closing summary
   charArcs:{marcus:0,delia:0,raj:0,yolanda:0}, // arc stage per character 0-3
-  pendingRecs:[], // [{dim,year,signal,probMod}] recs issued this year, resolved next postsurvey
+  pendingRecs:[], // [{dim,year,signal,probMod,guaranteed}] recs issued this year, resolved next postsurvey
+  guaranteedRec:false, // set by guaranteeNextRec decisions; consumed by the next issueRec call
   recSkippedNote:'',
   recResults:[], // [{dim,landed,year}] resolved rec results for narrative
   recsIssued:0,  // how many recs issued this postsurvey review (max 2)
   soundOn:true,
-  showLastSurvey:false,
   yearHistory:[], // [{year,ap,part,eng,grade}] snapshot at each year end
   showTrending:false,
   ambEv:null,pulse:null,pulseV:null,
@@ -993,7 +995,7 @@ var S = {
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
     this.yearHistory=[];this.showTrending=false;
-    this.pendingRecs=[];this.recResults=[];this.recsIssued=0;
+    this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;
     this.soundOn=true;
     this.ambEv=null; this.pulse=null; this.pulseV=null;
     this.pendingUnlocks=[];
@@ -1014,6 +1016,7 @@ var S = {
   spendCap:function(n){this.capUsed=Math.min(this.cap,this.capUsed+n);},
   spendBud:function(n){this.budget=Math.max(0,this.budget-n);},
   hasNode:function(id){return !!this.tree[id];},
+  clamp100:function(v){return Math.max(0,Math.min(100,v));},
 
   checkReq:function(opt){
     // Capacity check applies to every option regardless of req
@@ -1022,8 +1025,7 @@ var S = {
     }
     if(!opt.req)return{met:true,why:null};
     var r=opt.req;
-    var zo=['skeptical','cautious','engaged','champion'];
-    if(r.zone&&zo.indexOf(this.getZone().id)<zo.indexOf(r.zone))return{met:false,why:'Requires '+r.zone+' Organizational Trust'};
+    if(r.zone&&ZONE_ORDER.indexOf(this.getZone().id)<ZONE_ORDER.indexOf(r.zone))return{met:false,why:'Requires '+r.zone+' Organizational Trust'};
     if(r.pc&&this.polcap<r.pc)return{met:false,why:'Requires '+r.pc+' PC &#8212; earn through strong decisions, grades, and positive events'};
     if(r.node&&!this.hasNode(r.node))return{met:false,why:'Requires '+(NODES[r.node]?NODES[r.node].name:r.node)};
     if(r.noNode&&this.hasNode(r.noNode))return{met:false,why:null};
@@ -1052,6 +1054,8 @@ var S = {
     if(opt.pc)this.polcap=Math.max(0,this.polcap-opt.pc);
 
     var trustDelta=opt.con.trust||0;
+    var apDelta=opt.con.ap||0;
+    var partDelta=opt.con.part||0;
     var noteText=opt.con.note||'';
 
     // VARIANCE: outcome has randomness layered on the base consequence
@@ -1062,7 +1066,18 @@ var S = {
       noteText+=(varianceBonus>0?' It worked out.':' It did not quite land.');
     }
 
-    this.qCons.push({trust:trustDelta,ap:opt.con.ap||0,part:opt.con.part||0,pc:(opt.pc?-opt.pc:0),note:noteText,badge:opt.badge,source:'decision'});
+    // RISK CONSEQUENCE: high-commitment bet — chance the payoff is replaced by the downside
+    if(opt.riskConsequence){
+      if(Math.random()<0.4){
+        trustDelta=opt.riskConsequence.trust||0;
+        apDelta=0;partDelta=0;
+        noteText='The case did not hold up under scrutiny. It backfired.';
+      } else {
+        noteText+=' The data held up.';
+      }
+    }
+
+    this.qCons.push({trust:trustDelta,ap:apDelta,part:partDelta,pc:(opt.pc?-opt.pc:0),note:noteText,badge:opt.badge,source:'decision'});
     this.decisionLog.push({year:this.year,q:this.q,title:sit.title,badge:opt.badge,note:noteText});
     // Check if this decision advances a character arc
     this.checkArcAdvance(sit.char, sitId);
@@ -1072,7 +1087,7 @@ var S = {
       this.polcap=Math.min(100,this.polcap+opt.pcGain);
     }
 
-    // GUARANTEE NEXT REC: flag for recommendation system (future)
+    // GUARANTEE NEXT REC: consumed by the next recommendation issued at postsurvey
     if(opt.guaranteeNextRec){
       this.guaranteedRec=true;
     }
@@ -1140,8 +1155,8 @@ var S = {
     for(var i=0;i<this.qCons.length;i++){
       var c=this.qCons[i];
       if(c.trust)this.adjTrust(c.trust);
-      if(c.ap)this.ap=Math.max(0,Math.min(100,this.ap+c.ap));
-      if(c.part)this.part=Math.max(0,Math.min(100,this.part+c.part));
+      if(c.ap)this.ap=this.clamp100(this.ap+c.ap);
+      if(c.part)this.part=this.clamp100(this.part+c.part);
     }
     for(var j=0;j<this.qTree.length;j++){
       var t=this.qTree[j];
@@ -1149,12 +1164,12 @@ var S = {
       var eff=t.node.effect;
       if(eff){
         if(eff.trust)this.adjTrust(eff.trust);
-        if(eff.ap)this.ap=Math.max(0,Math.min(100,this.ap+eff.ap));
-        if(eff.part)this.part=Math.max(0,Math.min(100,this.part+eff.part));
+        if(eff.ap)this.ap=this.clamp100(this.ap+eff.ap);
+        if(eff.part)this.part=this.clamp100(this.part+eff.part);
       }
     }
     // Recalc engagement every quarter: weighted composite of ap and part
-    this.eng=Math.max(0,Math.min(100,Math.round(this.ap*0.55+this.part*0.45)));
+    this.eng=this.clamp100(Math.round(this.ap*0.55+this.part*0.45));
   },
 
   checkArcAdvance:function(charId, sitId){
@@ -1315,7 +1330,6 @@ var R = {
 
   $:function(id){return document.getElementById(id);},
   app:function(){return this.$('app');},
-  h:function(s){return s;}, // passthrough
 
   diff:function(){
     var html='<div class="screen"><div><div class="g-title-main">Engagement <span class="amber">Unlocked</span></div><div class="g-title-sub">Listen and Lead</div></div>';
@@ -1743,8 +1757,7 @@ var R = {
           lockWhy='Requires '+(NODES[o.req.node]?NODES[o.req.node].name:o.req.node);
         }
         if(o.req&&o.req.zone){
-          var zo2=['skeptical','cautious','engaged','champion'];
-          if(zo2.indexOf(z.id)<zo2.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Trust';}
+          if(ZONE_ORDER.indexOf(z.id)<ZONE_ORDER.indexOf(o.req.zone)){locked=true;lockWhy='Requires '+o.req.zone+' Trust';}
         }
         var badgeCol=locked?'color:var(--tm);background:rgba(255,255,255,.03);border-color:var(--border)':'color:var(--amber);background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.25)';
         // Use onclick directly - avoids post-render handler attachment bugs
@@ -1768,8 +1781,7 @@ var R = {
 
   postsurvey:function(){
     var g=S.grade||'C';
-    var gradeColors={S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
-    var gc=gradeColors[g]||'#F5A623';
+    var gc=GRADE_COLORS[g]||'#F5A623';
     var nb=S.nextBudget;
     var budDelta=nb-S.budget;
     var budPos=budDelta>=0;
@@ -1865,13 +1877,17 @@ var R = {
       if(S.recSkippedNote){
         html+='<div style="font-size:11px;color:var(--tm);padding:8px;background:var(--card);border-radius:var(--rs);margin-bottom:8px">'+S.recSkippedNote+'</div>';
       }
+      if(S.guaranteedRec){
+        html+='<div style="font-size:11px;color:var(--purple);padding:8px;background:rgba(179,157,219,.08);border:1px solid rgba(179,157,219,.25);border-radius:var(--rs);margin-bottom:8px">&#10024; A past trade guarantees your next recommendation lands, regardless of Trust zone.</div>';
+      }
       if(S.recsIssued>=2){
         html+='<div style="font-size:11px;color:var(--green)">&#10003; Both recommendation slots issued.</div>';
       } else {
         // Show dimension cards with diagnostic signal
         html+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">';
         REC_DIMENSIONS.forEach(function(dim){
-          var alreadyIssued=S.pendingRecs.some(function(r){return r.dim===dim.id;});
+          var issuedRec=S.pendingRecs.filter(function(r){return r.dim===dim.id;})[0];
+          var alreadyIssued=!!issuedRec;
           var signal=getRecDiagnostic(dim.id,S.ap,S.part,S.year,S.tree);
           var tier=REC_TIERS[signal];
           var sigColors={high:'var(--green)',medium:'var(--amber)',low:'var(--tm)'};
@@ -1885,7 +1901,7 @@ var R = {
           html+='</div>';
           html+='<div style="text-align:right;flex-shrink:0">';
           if(alreadyIssued){
-            html+='<span style="font-size:11px;color:var(--green)">&#10003; Issued</span>';
+            html+='<span style="font-size:11px;color:var(--green)">&#10003; Issued'+(issuedRec.guaranteed?' &#183; Guaranteed':'')+'</span>';
           } else {
             html+='<button data-dim="'+dim.id+'" onclick="C.issueRec(this.getAttribute(\'data-dim\'))" '+(canAfford?'':'disabled')+' style="background:'+(canAfford?'var(--panel)':'transparent')+';border:1px solid '+(canAfford?'var(--border)':'rgba(255,255,255,.1)')+';border-radius:var(--rs);padding:4px 10px;font-size:11px;color:'+(canAfford?'var(--t2)':'var(--tm)')+';cursor:'+(canAfford?'pointer':'default')+';font-family:var(--sans)">'+tier.cost+' PC</button>';
           }
@@ -1919,8 +1935,7 @@ var R = {
     var builtIds=Object.keys(S.tree||{});
     var builtCount=builtIds.length;
     var g=S.grade||'C';
-    var gradeColors={S:'#4CAF50',A:'#4CAF50',B:'#4A9EFF',C:'#F5A623',D:'#E74C3C',F:'#E74C3C'};
-    var gc=gradeColors[g]||'#F5A623';
+    var gc=GRADE_COLORS[g]||'#F5A623';
 
     // Group decision log by year
     var byYear={};
@@ -2207,7 +2222,7 @@ var C = {
     var opt=null;
     for(var j=0;j<ps.opts.length;j++){if(ps.opts[j].id===optId){opt=ps.opts[j];break;}}
     if(!opt)return;
-    if(opt.effect.part)S.part=Math.max(0,Math.min(100,S.part+opt.effect.part));
+    if(opt.effect.part)S.part=S.clamp100(S.part+opt.effect.part);
     if(opt.bud)S.spendBud(opt.bud);
     var note=opt.effect.note||'';
     if(opt.effect.part)note+=' (Participation '+(opt.effect.part>0?'+':'')+opt.effect.part+')';
@@ -2233,7 +2248,7 @@ var C = {
     for(var ri=0;ri<S.pendingRecs.length;ri++){
       var rec=S.pendingRecs[ri];
       var probMod=rec.probMod||1.0;
-      var landed=Math.random()<(landProb*probMod);
+      var landed=rec.guaranteed||Math.random()<(landProb*probMod);
       var signal=rec.signal||'medium';
       S.recResults.push({dim:rec.dim,landed:landed,year:rec.year,signal:signal});
       if(landed){
@@ -2306,7 +2321,9 @@ var C = {
     var tier=REC_TIERS[signal];
     if(S.polcap<tier.cost)return;
     S.polcap=Math.max(0,S.polcap-tier.cost);
-    S.pendingRecs.push({dim:dimId,year:S.year,signal:signal,probMod:tier.probMod});
+    var guaranteed=S.guaranteedRec;
+    if(guaranteed)S.guaranteedRec=false;
+    S.pendingRecs.push({dim:dimId,year:S.year,signal:signal,probMod:tier.probMod,guaranteed:guaranteed});
     S.recsIssued++;
     R.go();
   },
@@ -2316,7 +2333,6 @@ var C = {
     R.go();
   },
   restart:function(){S.phase='diff';R.go();},
-  toggleLastSurvey:function(){S.showLastSurvey=!S.showLastSurvey;R.go();},
   toggleTrending:function(){S.showTrending=!S.showTrending;R.go();},
   toggleSound:function(){
     S.soundOn=!S.soundOn;
