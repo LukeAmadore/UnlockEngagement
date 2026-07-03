@@ -8,10 +8,10 @@ conflict rather than silently overriding it.
 
 A single-file, browser-based serious game (`index.html`, no dependencies, no build
 step) about leading an Employee Listening Center of Excellence at a fictional food
-manufacturer (Meridian Foods, 3 sites, 1,400 employees). The player runs five annual
-survey cycles (plus an optional Year 0 tutorial), making quarterly decisions,
-investing in a capability tree, and managing four resources. Deployed via GitHub
-Pages.
+manufacturer (Meridian Foods — Bell Creek, Riverside, and Prairie Junction plants,
+1,400 employees). The player runs five annual survey cycles (plus an optional Year 0
+tutorial), making quarterly decisions, investing in a capability tree, and managing
+four resources. Deployed via GitHub Pages.
 
 **This game is also an engine.** The architecture is deliberately content-agnostic:
 swapping the content layer (situations, characters, tree, metric names) should yield
@@ -39,7 +39,7 @@ hardcoded into the renderer.
 
 | Resource | Nature | Notes |
 |---|---|---|
-| Organizational Trust | 0–100 standing, cannot be spent | Zones: Skeptical <25, Cautious <50, Engaged <75, Champion 75+. Floor of 5 (no death spiral). |
+| Organizational Trust | 0–100 standing, cannot be spent | Zones: Skeptical 0–19, Cautious 20–39, Building 40–59, Engaged 60–79, Champion 80–100. Floor of 5 (no death spiral). Building was added between Cautious and Engaged so a strong-grade year has somewhere to land besides a stale-feeling Cautious label — see balance notes below. |
 | Political Capital | Spendable currency | Earned passively per quarter by zone rate + grade bonus at year end. Spent on gated situation options and recommendations. |
 | Budget | Annual money | See budget model below. |
 | Capacity | Slots per quarter | 1 per decision option that costs a slot, 1 per tree node built. Easy 4 / Normal 3 / Hard 2. |
@@ -48,13 +48,14 @@ hardcoded into the renderer.
 
 - **Trust trajectory:** Easy reaches Champion with A/S play. **Normal should land
   shy of Engaged or just at Engaged with good (B/A) play; Champion should be rare
-  and require sustained A/S.** Hard fights to reach Cautious; Engaged is the
-  stretch-goal ending.
+  and require sustained A/S.** Hard fights to reach Cautious or lands at Building
+  with sustained good play; Engaged is the stretch-goal ending (rare, not zero).
 - **Trust sources by weight:** survey grade shift (primary: S+10 A+7 B+4 C+1 D−2
   F−5), gated decision options (+3 to +6 each, requires nodes/PC/zone), node
   effects (SE track mostly), ambient events (texture only; pool weights
-  champion .65 / engaged .55 / cautious .45 / skeptical .20; most deltas ±1).
-- **`TRUST_ANNUAL_CAP` (`easy:null, normal:10, hard:11`) throttles Normal/Hard.**
+  champion .65 / engaged .55 / building .50 / cautious .45 / skeptical .20;
+  most deltas ±1).
+- **`TRUST_ANNUAL_CAP` (`easy:null, normal:10, hard:13`) throttles Normal/Hard.**
   Simulation showed the three positive sources above (decisions ~8–12/yr,
   grade-shift ~7–8/yr, node effects ~3/yr) each independently approached the old
   "~8/yr decision cap" note below, so capping decisions alone wasn't enough —
@@ -70,6 +71,10 @@ hardcoded into the renderer.
   penalty into `qCons` and runs *before* `applyQueued` for the same reason —
   it must not apply its own separate `adjTrust` call. Do not reintroduce a
   decisions-only cap; re-simulate before changing `TRUST_ANNUAL_CAP` values.
+  Hard's cap moved 11→13 when the Building zone was added — Engaged's floor
+  moved from 50 to 60, and 11 could no longer reach it even as a rare
+  stretch under sustained great play; re-check this any time zone
+  boundaries change again, not just when the cap itself changes.
 - **Budget model:** flat base per year (Easy $50K / Normal $40K / Hard $25K) +
   10% carry-over of unspent (rest "went to overhead") + flat grade delta
   (S+$8K A+$5K B+$2K C 0 D−$3K F−$6K) + Skeptical penalty −$2K. Floor $5K.
@@ -80,8 +85,9 @@ hardcoded into the renderer.
   5-yr budget let good play buy nearly the entire tree, ~15 nodes, versus the
   10–12 target). Normal 5-yr budget ≈ $200K → 10–12 nodes with good play;
   Hard ≈ $125K+ → 8–9.
-- **PC economy:** zone rates skeptical 1 / cautious 3 / engaged 5 / champion 8 per
-  quarter; grade bonuses at year end. Rec tiers cost 18/12/6 PC (see below).
+- **PC economy:** zone rates skeptical 1 / cautious 3 / building 4 / engaged 5 /
+  champion 8 per quarter; grade bonuses at year end. Rec tiers cost 18/12/6 PC
+  (see below). Rec landing probability by zone: 20/40/58/75/90%.
 
 ## Investment tree (16 nodes, 4 tracks × 4 levels)
 
@@ -102,13 +108,33 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 ## Situation system
 
 - Year 0: 4 hardcoded tutorial situations (`SITS`), consequences visible in Q1 only.
-- Years 1–5: `YEAR_POOLS[year]` of 8 situations each; Fisher-Yates draw of 4 per
+- Years 1–5: `YEAR_POOLS[year]` of 12 situations each; Fisher-Yates draw of 4 per
   playthrough. Year 5 pool is legacy-themed.
+- **One situation per GAME (not per year) is guaranteed to draw.** `EXEC_DISAGREEMENT_IDS`
+  lists 5 candidate exec-disagreement situations, one per year (`y1-j` Delia/Desmond,
+  `y2-c` Raj/Delia, `y3-c` Raj/Desmond, `y4-c` Warren/Delia, `y5-d` Desmond/Delia).
+  `S.init` picks ONE at random per playthrough into `S.guaranteedAnchorId`.
+  `drawYearSituations(yr)` forces that single id into its year's draw if
+  `yr` matches; every other year (including the other 4 candidate years) draws
+  fully at random from its normal 12-situation pool — the other candidates are
+  ordinary pool members that may or may not get drawn. This guarantees the
+  player sees *a* version of the exec-friction beat exactly once across the
+  5-year game, with which pairing varying by playthrough, rather than
+  guaranteeing all 5 every game (that was tried and reverted — it made the
+  device routine instead of a rare beat). If adding more candidate situations,
+  append their ids to `EXEC_DISAGREEMENT_IDS` rather than flagging them
+  `anchor:true` directly — anchor status is now assigned dynamically per game,
+  not authored statically on the situation object.
 - Pre-survey decision per year (`YEAR_PRESURVEY`); consequence revealed AFTER the
-  choice, never before.
-- **4 balance-tested shapes** (2 narrative skins each): `relationship`,
+  choice, never before. Each year's best option also carries a small `effect.trust`
+  (routed through `S.applyCappedTrust`) so the presurvey choice visibly connects to
+  the main trust loop instead of only moving Participation.
+- **4 balance-tested shapes** (3 narrative skins each): `relationship`,
   `resource_tradeoff`, `data_integrity`, `capacity_mechanic`. New situations should
-  reuse a shape's cost/payoff profile; write new fiction, not new math.
+  reuse a shape's cost/payoff profile; write new fiction, not new math. (Grown from
+  2 skins/shape to 3 in one pass — verify pool counts stay a multiple of 4 across
+  all 5 years if adding more, and re-run `sim.js` to confirm the larger draw pool
+  doesn't shift trust/grade distributions before merging.)
 - Special option effects: `variance` (±1 trust swing with narrated outcome),
   `pcGain`, `guaranteeNextRec`, `contractorHire` (cap decay not yet implemented),
   `treeUnlock`, 2-slot high-commitment options (peak arc moments, trust +6).
@@ -138,15 +164,74 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 
 ## Systems added late (know they exist before "adding" them)
 
-- **Character arcs:** `CHAR_ARCS` — 4 characters × 4 stages; advance via relevant
+- **Character arcs:** `CHAR_ARCS` — 7 characters × 4 stages; advance via relevant
   track investment (1 stage per 2 nodes) + key decision IDs. Stage changes swap
   ambient event pools. People panel (left panel + postsurvey grid) always shows
-  all four with role + stage.
+  all seven with role + stage.
+- **Org tiers, deliberately NOT a second trust resource:** `CHARS[id].tier` is
+  `'exec'` (Delia CHRO, Raj CFO, Desmond COO, Warren CEO) or `'plant'` (Marcus/
+  Bell Creek, Yolanda/Riverside, Priya/Prairie Junction — one rep per location).
+  All 3 plant reps share the same title, **Plant Manager** (Yolanda and Priya
+  were originally "Supervisor," a level below Marcus — retitled so the tier
+  reads as peers, not a mixed rank). Organizational Trust stays the single
+  tracked resource; do not fork it per tier
+  or per character — that would require re-deriving the whole balance model
+  (zones, budget formula, PC rates, rec landing odds all key off the one number)
+  and was explicitly rejected in favor of this lighter approach. `tierIds(tier)` /
+  `tierStatus(tier)` (module-level helpers, just above the recommendations system)
+  derive a display-only label (Early/Mixed/Building/Strong) from the *average arc
+  stage* of that tier's characters — nothing new is tracked, it's a read of
+  existing `S.charArcs` values. People panel (both renders) and the Company modal's
+  Leadership section all group by tier with this derived label in the header, so a
+  CFO and a plant manager read as different altitudes without a second gauge.
+  `priya`/`desmond`/`warren` currently have empty `advanceOn.decisions` arrays (no
+  situations reference them by id yet, so their arcs only advance via passive tree
+  investment through `checkTreeArcAdvance`) — a future situations pass could give
+  them decision-based bonus advancement the way Marcus/Delia/Raj/Yolanda have.
+- **Company identity / About page:** `COMPANY_INFO` (name, product tagline, founding
+  year, HQ blurb, mission, vision, 4 named values, history timeline, `plants` array
+  with one entry per site — opened year + personality blurb, rendered in a
+  "Locations" section) plus a `bio` field per `CHARS` entry — pure content layer,
+  swap this object (and the bios) to reskin the game per the "this game is also an
+  engine" rule at the top of this file. Rendered by `R.companyModal()` /
+  `C.openCompany()`, reachable from a button on the difficulty-select screen, the
+  in-game nav ("Company"), and by clicking any entry in the People panel (left
+  panel or postsurvey grid). The 4 stated values
+  (Integrity, People First, Continuous Improvement, Ownership) are referenced by
+  name in a couple of situations (`y1-d`, `y3-f`) so decisions occasionally cite the
+  company's own stated values directly, not just abstract trust/AP math — keep new
+  values-tie-in situations reusing an existing shape's cost/effect numbers, per the
+  situation-shape rule below, rather than inventing new mechanics for the callback.
+  The 5 candidate situations in `EXEC_DISAGREEMENT_IDS` (see Situation system
+  above) frame two execs disagreeing with each other in the scenario text (not
+  just with the player), rotating the pairing by id rather than reusing the
+  same two people every time — a lightweight way to make the exec cast feel
+  like they have relationships with each other, not just with the CoE lead;
+  the underlying options/numbers are unchanged from before each rewrite. If
+  adding more candidates, keep rotating pairings rather than defaulting back
+  to Raj/Delia every time.
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by
-  zone: 20/45/70/90%. Explicit skip button with flavor note. Results resolve at
-  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state.
+  zone: 20/40/58/75/90%. Explicit skip button with flavor note. Results resolve at
+  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state (5-arg call:
+  `dimId, ap, part, year, treeBuilt` — an earlier version had a 6-arg signature with
+  an unused `charArcs` param that shifted `treeBuilt` out of alignment with both call
+  sites, silently zeroing the Manager Effectiveness dimension's signal; fixed, don't
+  reintroduce an unused param ahead of `treeBuilt`) and picks the high/medium/low
+  signal. Each dimension maps to a real stat + delta (`REC_DIMENSIONS[i].score/delta`
+  — e.g. Manager Effectiveness → AP +5); `getRecReason()` explains *why* the signal
+  is what it is in plain language citing actual ap/part/year/node values, and the
+  issue-time card also states the target stat/delta so the payoff is visible before
+  spending PC. Landed high/medium recs apply their real delta + trust +2 + PC +3;
+  landed low-signal recs apply nothing but trust −1; a **deprioritized (unlanded)
+  high/medium-signal rec queues into `S.recFallout`** and surfaces once, as a normal
+  cause-chip on the resolve screen of a random quarter the *following* year (via
+  `genAmbient()`, which checks `recFallout` before the regular ambient pool) — a
+  real, data-supported ask that went unaddressed has an in-game consequence (small
+  ap/part hit + trust −1, text keyed by dimension in `REC_FALLOUT_TEXT`), not just a
+  quieter number at postsurvey. The "Recommendation Results" card names the exact
+  stat/delta/trust/PC change per outcome instead of generic "scores improving" text.
 - **Stagnation:** if something was buildable but nothing was built → −1 trust; if
   the decision also cost zero slots → −2. Never fires in Year 0 or when nothing
   was affordable.
@@ -155,6 +240,18 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   feeds the trending table (left panel) and closing-screen SVG line charts.
 - **Sound:** three programmatic sounds, toggle in nav, never autoplay before a
   user gesture (AudioContext init on first interaction).
+- **Tree nodes are compact by default:** icon, name, cost/slot chips (or a lock
+  message), nothing else. A `Details ▾` toggle per track (`S.treeDetailsOpen`,
+  `C.toggleTreeDetails`) reveals each node's `unlocks` description text; built
+  nodes get a small top-right checkmark badge (`.tn-check`, reused from the
+  build-phase "selected" indicator — the two states are mutually exclusive so
+  sharing the class is safe) instead of an inline "&#10003; Built" line. This is
+  duplicated logic across two render sites — the inline build-phase tree
+  (`R.build`) and the "View full tree" modal (`R.treeModal`) — both read the
+  same `S.treeDetailsOpen` object, so a toggle made in one place is remembered
+  in the other. `C.toggleTreeDetails` must re-render whichever one is actually
+  on screen (`R.go()` for the inline tree, `R.treeModal()` if the modal element
+  exists) rather than unconditionally opening the modal — got this wrong once.
 
 ## UI/UX conventions
 
