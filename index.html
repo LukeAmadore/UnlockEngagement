@@ -322,22 +322,25 @@ var DIFF = {
 };
 
 var ZONES = [
-  {id:'skeptical',label:'Skeptical',min:0,max:24,color:'#D17A57',rate:1},
-  {id:'cautious', label:'Cautious', min:25,max:49,color:'#C08A3E',rate:3},
-  {id:'engaged',  label:'Engaged',  min:50,max:74,color:'#C7A24A',rate:5},
-  {id:'champion', label:'Champion', min:75,max:100,color:'#7FA06E',rate:8}
+  {id:'skeptical',label:'Skeptical',min:0,max:19,color:'#D17A57',rate:1},
+  {id:'cautious', label:'Cautious', min:20,max:39,color:'#C08A3E',rate:3},
+  {id:'building', label:'Building', min:40,max:59,color:'#C39644',rate:4},
+  {id:'engaged',  label:'Engaged',  min:60,max:79,color:'#C7A24A',rate:5},
+  {id:'champion', label:'Champion', min:80,max:100,color:'#7FA06E',rate:8}
 ];
 var ZONE_ORDER = ZONES.map(function(z){return z.id;});
 var GRADE_COLORS = {S:'#7FA06E',A:'#7FA06E',B:'#5D9385',C:'#C08A3E',D:'#D17A57',F:'#D17A57'};
 
 // Gauge-fluid gradient per trust zone — top-lit, deeper toward the bottom, hue
-// shifts rust (skeptical) -> brass (cautious) -> gold (engaged) -> sage (champion).
-// Paired with the .trust-fill/.resolve-bar-fill/.ob-bar-fill ::before/::after
-// soft-light highlights in the <style> block, which tint to whichever of these
-// is underneath rather than sitting on top as a flat white patch.
+// shifts rust (skeptical) -> brass (cautious) -> amber-gold (building) -> gold
+// (engaged) -> sage (champion). Paired with the .trust-fill/.resolve-bar-fill/
+// .ob-bar-fill ::before/::after soft-light highlights in the <style> block,
+// which tint to whichever of these is underneath rather than sitting on top
+// as a flat white patch.
 var ZONE_FLUID = {
   skeptical:'linear-gradient(180deg,rgba(255,190,168,.5) 0%,rgba(178,84,58,.95) 16%,#9C4A32 55%,#722F1E 100%)',
   cautious: 'linear-gradient(180deg,rgba(255,214,160,.5) 0%,rgba(192,138,62,.95) 16%,#B27C39 55%,#8C5F26 100%)',
+  building: 'linear-gradient(180deg,rgba(255,223,170,.52) 0%,rgba(196,150,68,.95) 16%,#B58B44 55%,#8D6B2D 100%)',
   engaged:  'linear-gradient(180deg,rgba(255,232,180,.55) 0%,rgba(199,162,74,.95) 16%,#B99A4E 55%,#8F7834 100%)',
   champion: 'linear-gradient(180deg,rgba(233,255,195,.55) 0%,rgba(163,196,110,.95) 16%,#8FAE63 55%,#6C8A45 100%)'
 };
@@ -397,7 +400,7 @@ var GRADE_BUDGET_DELTA = {S:8000,A:5000,B:2000,C:0,D:-3000,F:-6000};
 // never capped. Applied before any number is displayed, so the resolve screen always shows
 // the real, already-capped amount — nothing is hidden after the fact. Easy is uncapped by
 // design (it is meant to hand a good player Champion). See CLAUDE.md balance notes.
-var TRUST_ANNUAL_CAP = {easy:null, normal:10, hard:11};
+var TRUST_ANNUAL_CAP = {easy:null, normal:10, hard:13};
 
 function calcNextBudget(diff, year, grade, trustZone, currentBudget) {
   var base = BASE_BUDGETS[diff]||BASE_BUDGETS.normal;
@@ -556,7 +559,7 @@ var REC_DIMENSIONS = [
   {id:'mgr',       label:'Manager Effectiveness', owner:'People Managers',score:'ap',    delta:5},
 ];
 
-var REC_LAND_PROB = {skeptical:0.20, cautious:0.45, engaged:0.70, champion:0.90};
+var REC_LAND_PROB = {skeptical:0.20, cautious:0.40, building:0.58, engaged:0.75, champion:0.90};
 
 // Tiered recommendation costs based on diagnostic match
 // High-impact (matches what's actually broken): 18 PC, full landing prob
@@ -604,6 +607,39 @@ function getRecDiagnostic(dimId, ap, part, year, charArcs, treeBuilt){
     return 'low';
   }
   return 'medium';
+}
+
+// Plain-language version of the same conditions above, naming the actual
+// number that drove the signal instead of an abstract tier — shown every
+// postsurvey so the mechanic teaches itself by repetition across 5 years.
+function getRecReason(dimId, ap, part, year, treeBuilt){
+  if(dimId==='growth'){
+    if(ap<55&&year>=2) return 'AP Optimism ('+ap+') is below the healthy line, and it\'s year '+year+' &#8212; this is the point that gap starts to matter.';
+    if(ap<65) return 'AP Optimism ('+ap+') is trending soft, but not critical yet.';
+    return 'AP Optimism ('+ap+') is healthy &#8212; this isn\'t where the problem is.';
+  }
+  if(dimId==='recognition'){
+    if(ap<52&&part>=65) return 'AP Optimism ('+ap+') is low even though Participation ('+part+'%) is solid &#8212; people show up but don\'t feel recognized for it.';
+    if(ap<62) return 'AP Optimism ('+ap+') is soft; recognition could help, but it isn\'t the clear primary driver.';
+    return 'AP Optimism ('+ap+') is healthy &#8212; recognition isn\'t the gap right now.';
+  }
+  if(dimId==='comms'){
+    if(part<68) return 'Participation ('+part+'%) is low &#8212; people aren\'t hearing what happened to their last round of feedback.';
+    if(part<76) return 'Participation ('+part+'%) is trending soft.';
+    return 'Participation ('+part+'%) is healthy &#8212; this isn\'t the gap.';
+  }
+  if(dimId==='safety'){
+    if(ap<50&&year<=3) return 'AP Optimism ('+ap+') is very low this early &#8212; that usually means people are still afraid to speak up.';
+    if(ap<60) return 'AP Optimism ('+ap+') is soft, though not at the fear-driven range yet.';
+    return 'AP Optimism ('+ap+') is healthy &#8212; this isn\'t where trust is breaking down.';
+  }
+  if(dimId==='mgr'){
+    var mgrBuilt2=Object.keys(treeBuilt||{}).filter(function(id){return id.indexOf('mgr')===0;}).length;
+    if(mgrBuilt2<2&&year>=2) return 'Only '+mgrBuilt2+'/4 Manager Capacity nodes built by year '+year+' &#8212; managers don\'t have the tools yet.';
+    if(mgrBuilt2<3) return mgrBuilt2+'/4 Manager Capacity nodes built &#8212; there is room to grow here.';
+    return 'Manager Capacity is well-built ('+mgrBuilt2+'/4) &#8212; this isn\'t the gap.';
+  }
+  return '';
 }
 
 
@@ -705,6 +741,38 @@ var YEAR_POOLS = {
       {id:'a',badge:'LET IT BE',text:'Some wins do not need a spotlight. Note it and move on.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Quiet, but real progress.'}},
       {id:'b',badge:'THANK HIM DIRECTLY',text:'A short note to the manager, acknowledging the shift.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Small gesture, genuine impact.'}},
       {id:'c',badge:'BANK THE GOODWILL',text:'Use the moment to build a quiet reserve of trust with Delia for later.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+8 Political Capital. Delia remembers who delivers results without asking for credit.'},pcGain:8}
+     ]},
+    // RELATIONSHIP shape x3
+    {id:'y1-i',shape:'relationship',title:'Delia\'s Quiet Favor',char:'delia',
+     scenario:'Delia privately asks you to give a new site director a soft landing on his first survey results &#8212; he inherited a demoralized team from a predecessor who ignored feedback entirely.',
+     opts:[
+      {id:'a',badge:'TALK TO HIM DIRECTLY',text:'Meet with him yourself before results circulate, and walk him through what to expect.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Quick fix. He feels supported walking in.'}},
+      {id:'b',badge:'LET DELIA HANDLE IT',text:'It\'s her relationship to manage, not yours.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Respects the chain of command.'}},
+      {id:'c',badge:'BUILD HIS CONFIDENCE PROPERLY',text:'Pair him with a manager who\'s been through this before.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'He arrives at his first action-planning session prepared, not blindsided.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x3
+    {id:'y1-j',shape:'resource_tradeoff',title:'The Shared Vendor Contract',char:'delia',
+     scenario:'Delia asks whether the listening program can share its survey vendor\'s contract with a wellness initiative to split costs, but it means coordinating scope with another team.',
+     opts:[
+      {id:'a',badge:'KEEP CONTRACTS SEPARATE',text:'Explain that shared scope creates dependency risk you\'d rather avoid.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. The contract stays yours.'}},
+      {id:'b',badge:'AGREE TO SHARE',text:'Split the contract. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Delia appreciates the flexibility.'}},
+      {id:'c',badge:'PROPOSE A TRADE',text:'Offer to share it in exchange for Delia\'s support on your next recommendation.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land, regardless of Trust zone.'},guaranteeNextRec:true}
+     ]},
+    // DATA_INTEGRITY shape x3
+    {id:'y1-k',shape:'data_integrity',title:'The Early Leak',char:'raj',
+     scenario:'Someone on Raj\'s team saw a partial dataset and mentioned in a hallway conversation that "the numbers look rough this year" &#8212; before you\'ve validated anything.',
+     opts:[
+      {id:'a',badge:'CORRECT IT QUIETLY',text:'Tell Raj privately the data isn\'t validated yet.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Protects integrity. Outcome depends on what the real data shows.'},variance:true},
+      {id:'b',badge:'LET IT STAND',text:'It\'s just a passing comment. Don\'t make it a thing.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Preserves the moment. Risk if reality disappoints.'},variance:true},
+      {id:'c',badge:'GET REAL DATA FAST',text:'Rush validation so whatever gets said next is accurate.',slots:1,bud:0,pc:0,req:{node:'infra-l1'},con:{trust:4,ap:1,part:0,note:'Removes the gamble. Whatever the data shows, it\'s now true.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x3
+    {id:'y1-l',shape:'capacity_mechanic',title:'The Overlooked Detail',char:null,
+     scenario:'A junior HR coordinator flagged a small inconsistency in the survey vendor\'s demographic categories &#8212; something no one else caught &#8212; and quietly fixed it before it caused problems downstream.',
+     opts:[
+      {id:'a',badge:'LET IT BE',text:'Some good work doesn\'t need a spotlight. Note it and move on.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Quiet, but real diligence.'}},
+      {id:'b',badge:'THANK HER DIRECTLY',text:'A short note to her, acknowledging the catch.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Small gesture, genuine impact.'}},
+      {id:'c',badge:'BANK THE GOODWILL',text:'Use the moment to build a quiet reserve of trust for later.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+8 Political Capital. People remember who catches problems quietly.'},pcGain:8}
      ]}
   ],
 
@@ -763,6 +831,38 @@ var YEAR_POOLS = {
      opts:[
       {id:'a',badge:'USE THE QUIET TIME',text:'Get ahead on planning for next quarter instead of reacting.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Quiet quarters are when real groundwork happens.'}},
       {id:'b',badge:'TAKE THE BREATHER',text:'Let the team rest. Not every quarter needs to be a push.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Sustainable, if unremarkable.'}},
+      {id:'c',badge:'BUILD RESERVE CAPITAL',text:'Use the calm to strengthen relationships before the next storm.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+10 Political Capital banked for when you need it.'},pcGain:10}
+     ]},
+    // RELATIONSHIP shape x3
+    {id:'y2-i',shape:'relationship',title:'Delia\'s New Hire',char:'delia',
+     scenario:'Delia hired a new HRBP specifically to support the listening program, and wants your read on how much autonomy to give them heading into their first full cycle.',
+     opts:[
+      {id:'a',badge:'GIVE THEM AUTONOMY NOW',text:'Let them own a piece of the rollout from day one.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:1,note:'Bold. They rise to it.'}},
+      {id:'b',badge:'KEEP THEM SUPERVISED',text:'Ease them in slowly this first year.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Cautious. Safe, unremarkable.'}},
+      {id:'c',badge:'CO-DESIGN THEIR ROLE',text:'Sit down with Delia and build a real onboarding plan together.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:1,note:'They start strong, with real structure behind them.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x3
+    {id:'y2-j',shape:'resource_tradeoff',title:'The Vendor Renewal Squeeze',char:'raj',
+     scenario:'Raj\'s team is renegotiating every vendor contract company-wide and wants your survey platform bundled into a broader procurement deal for leverage.',
+     opts:[
+      {id:'a',badge:'RESIST BUNDLING',text:'Argue the platform needs its own dedicated terms.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Outcome depends on how firmly Raj pushes back.'},variance:true},
+      {id:'b',badge:'PROPOSE A MIDDLE PATH',text:'Accept partial bundling in exchange for pricing protection.',slots:0,bud:1500,pc:0,req:null,con:{trust:2,ap:0,part:1,note:'A workable compromise.'}},
+      {id:'c',badge:'SPEND POLITICAL CAPITAL',text:'Use your standing to keep the contract separate outright.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:3,ap:0,part:0,note:'Kept separate, cleanly resolved.'}}
+     ]},
+    // DATA_INTEGRITY shape x3
+    {id:'y2-k',shape:'data_integrity',title:'The Optimistic Rounding',char:'marcus',
+     scenario:'An analyst on your team rounded a borderline participation number up in an early draft deck, "to make the slide cleaner." Small, but it isn\'t accurate.',
+     opts:[
+      {id:'a',badge:'LET IT SLIDE THIS TIME',text:'It\'s a rounding error, not a real distortion.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Outcome depends on whether anyone else notices.'},variance:true},
+      {id:'b',badge:'CORRECT THE DECK',text:'Fix the number before it goes any further.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Small correction, quietly handled.'}},
+      {id:'c',badge:'USE IT AS A TEACHING MOMENT',text:'Turn this into a short team norm about reporting exact numbers.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:3,ap:1,part:0,note:'Turns a small lapse into a stronger team norm.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x3
+    {id:'y2-l',shape:'capacity_mechanic',title:'The Unplanned Gap Week',char:null,
+     scenario:'A scheduling conflict cleared an entire week you\'d blocked for a workshop that fell through. No one is expecting anything from you this week.',
+     opts:[
+      {id:'a',badge:'USE THE GAP TO GET AHEAD',text:'Get ahead on planning for the rest of the year.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'Quiet weeks are when real groundwork happens.'}},
+      {id:'b',badge:'TAKE THE BREATHER',text:'Let the team rest. Not every open week needs filling.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Sustainable, if unremarkable.'}},
       {id:'c',badge:'BUILD RESERVE CAPITAL',text:'Use the calm to strengthen relationships before the next storm.',slots:0,bud:0,pc:0,req:{node:'se-l1'},con:{trust:0,ap:0,part:0,note:'+10 Political Capital banked for when you need it.'},pcGain:10}
      ]}
   ],
@@ -823,6 +923,38 @@ var YEAR_POOLS = {
       {id:'a',badge:'LOCK IN MULTI-YEAR',text:'Commit budget now for savings later.',slots:0,bud:3000,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Saves money long-term, costs more now.'}},
       {id:'b',badge:'STAY FLEXIBLE',text:'Renew year-to-year. Costs more over time but keeps options open.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'No upfront cost, less long-term savings.'}},
       {id:'c',badge:'NEGOTIATE WITH LEVERAGE',text:'Use your program\'s track record to negotiate better terms.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:1,ap:0,part:0,note:'Best of both — savings without the upfront cost.'}}
+     ]},
+    // RELATIONSHIP shape x3
+    {id:'y3-i',shape:'relationship',title:'The Quiet Mentor',char:null,
+     scenario:'A manager at Site C &#8212; never vocal, never a problem &#8212; has quietly been coaching two newer supervisors using ideas from your program. No one asked her to.',
+     opts:[
+      {id:'a',badge:'APPROVE INFORMALLY',text:'Let her keep doing it without making it official.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Low cost, modest impact.'}},
+      {id:'b',badge:'GIVE IT STRUCTURE',text:'Help her set a real cadence for the coaching.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'More likely to stick.'}},
+      {id:'c',badge:'FORMALIZE AS PART OF THE TREE',text:'Turn her quiet coaching into an actual program.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:2,part:0,note:'Her quiet coaching becomes an actual program.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x3
+    {id:'y3-j',shape:'resource_tradeoff',title:'The Merger Rumor',char:'raj',
+     scenario:'Word spreads that Meridian may acquire a smaller competitor next year, and Raj is quietly asking whether your program could absorb a second workforce without a bigger budget.',
+     opts:[
+      {id:'a',badge:'ASK FOR A SCOPING PERIOD',text:'Request time to actually plan before committing to anything.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time to actually plan.'}},
+      {id:'b',badge:'SAY YES PROVISIONALLY',text:'Signal willingness now, work out details later.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Optimistic. Details unresolved.'}},
+      {id:'c',badge:'NEGOTIATE THE BUDGET NOW',text:'Get the resources committed before the acquisition even closes.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'Locks in the resources before the acquisition even closes.'}}
+     ]},
+    // DATA_INTEGRITY shape x3
+    {id:'y3-k',shape:'data_integrity',title:'The Convenient Comparison',char:null,
+     scenario:'A regional director cites a different business unit\'s much higher participation rate as proof yours is underperforming &#8212; without mentioning that unit made completion mandatory.',
+     opts:[
+      {id:'a',badge:'LET IT GO UNCHALLENGED',text:'Responding might just prolong the comparison.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Avoids conflict, leaves the comparison to stand.'}},
+      {id:'b',badge:'QUIETLY CORRECT THE RECORD',text:'Circulate a short brief on the methodology difference.',slots:1,bud:1200,pc:0,req:null,con:{trust:0,ap:0,part:2,note:'A short brief showing the methodology difference.'}},
+      {id:'c',badge:'BUILD A REAL COMPARISON',text:'Show exactly why voluntary participation is the harder, more honest number.',slots:1,bud:0,pc:0,req:{node:'comms-l2'},con:{trust:3,ap:1,part:3,note:'Shows exactly why voluntary participation is the harder, more honest number.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x3
+    {id:'y3-l',shape:'capacity_mechanic',title:'The Cross-Site Rotation',char:null,
+     scenario:'Someone proposes rotating you through a standing seat on each site\'s local leadership huddle &#8212; visibility, but a recurring seat every quarter for the rest of the year.',
+     opts:[
+      {id:'a',badge:'TAKE THE SEAT',text:'Commit to the rotation for the rest of the year.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Ongoing visibility. Costs capacity every quarter until year end.'}},
+      {id:'b',badge:'DECLINE FOR NOW',text:'Your plate is full. Pass on the rotation this year.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Conserves capacity.'}},
+      {id:'c',badge:'SEND A DELEGATE',text:'Send a team member instead, building their visibility too.',slots:1,bud:0,pc:0,req:{node:'se-l2'},con:{trust:1,ap:0,part:0,note:'Builds team visibility without costing you ongoing time.'}}
      ]}
   ],
 
@@ -882,6 +1014,38 @@ var YEAR_POOLS = {
       {id:'a',badge:'SAY IT\'S TOO EARLY TO PLAN',text:'Deflect for now. Focus on Year 5.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Avoids the question.'}},
       {id:'b',badge:'START LIGHT DOCUMENTATION',text:'Begin writing down what\'s worked, just in case.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Modest insurance.'}},
       {id:'c',badge:'NAME IT AS A PRIORITY',text:'Tell Delia succession planning will be a real focus in Year 5.',slots:0,bud:0,pc:0,req:{node:'se-l2'},con:{trust:3,ap:0,part:0,note:'Delia feels reassured the program will outlast you.'}}
+     ]},
+    // RELATIONSHIP shape x3
+    {id:'y4-i',shape:'relationship',title:'Raj\'s Unexpected Endorsement',char:'raj',
+     scenario:'Raj, unprompted, offers to co-sign a memo to the executive team supporting next year\'s budget ask. He has never volunteered for anything like this before.',
+     opts:[
+      {id:'a',badge:'LET HIM SEND IT SOLO',text:'His words alone carry real weight right now.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'His words alone carry real weight.'}},
+      {id:'b',badge:'REVIEW IT TOGETHER FIRST',text:'Make sure the memo is airtight before it goes out.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Polished, aligned messaging.'}},
+      {id:'c',badge:'CO-SIGN AND PRESENT TOGETHER',text:'Present the ask jointly, in person.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:4,ap:2,part:1,note:'The CFO and the CoE lead making the same ask, together, is hard to ignore.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x3
+    {id:'y4-j',shape:'resource_tradeoff',title:'The Attribution Question',char:'delia',
+     scenario:'Delia asks whether the Communications track investment actually drove the participation gains, or whether it\'s just a good economy and low turnover doing the work.',
+     opts:[
+      {id:'a',badge:'ACKNOWLEDGE THE LIMITATION',text:'Be honest that attribution is genuinely hard here.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Honest, if unsatisfying.'}},
+      {id:'b',badge:'COMMISSION A STUDY',text:'Pay for external validation of the causal link.',slots:1,bud:3000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Buys external credibility.'}},
+      {id:'c',badge:'PRESENT THE STRONGEST CASE',text:'Build a site-by-site comparison showing the connection.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:1,part:0,note:'A site-by-site comparison makes the case convincingly.'}}
+     ]},
+    // DATA_INTEGRITY shape x3
+    {id:'y4-k',shape:'data_integrity',title:'The Convenient Silence',char:null,
+     scenario:'A site that had a rough quarter simply didn\'t submit its department-level breakdown this cycle, citing "system issues." No one has followed up.',
+     opts:[
+      {id:'a',badge:'ACCEPT THE EXPLANATION',text:'Give them the benefit of the doubt this once.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Outcome depends on whether the explanation was true.'},variance:true},
+      {id:'b',badge:'FOLLOW UP DIRECTLY',text:'Ask what actually happened, plainly.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Turns out the data was just delayed, not hidden.'}},
+      {id:'c',badge:'AUDIT EVERY SITE\'S SUBMISSION',text:'Check all sites\' submissions, not just the one that stalled.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:6,ap:1,part:0,note:'Full transparency, no exceptions, no ambiguity left standing.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x3
+    {id:'y4-l',shape:'capacity_mechanic',title:'The Consultant Offer',char:null,
+     scenario:'A boutique consulting firm offers a discounted engagement to help design your Year 5 closing report, in exchange for using your program as a public case study afterward.',
+     opts:[
+      {id:'a',badge:'ACCEPT AND GO PUBLIC',text:'Take the discount, let them publish the case study.',slots:1,bud:8000,pc:0,req:{zone:'engaged'},con:{trust:0,ap:1,part:0,note:'Great report, but your program\'s internals become semi-public.'}},
+      {id:'b',badge:'ACCEPT, KEEP IT PRIVATE',text:'Pay full rate to keep the work internal only.',slots:1,bud:8000,pc:0,req:{zone:'engaged'},con:{trust:1,ap:0,part:0,note:'Same quality work, no external exposure.'}},
+      {id:'c',badge:'DECLINE',text:'Keep it in-house and save the budget.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Keep it in-house, save the budget.'}}
      ]}
   ],
   5: [
@@ -940,6 +1104,38 @@ var YEAR_POOLS = {
       {id:'a',badge:'TAKE IT AT FACE VALUE',text:'Whatever the pulse says, that is the read.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Simple, unfiltered.'}},
       {id:'b',badge:'DIG ONE LAYER DEEPER',text:'Follow up with a few people directly before drawing conclusions.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'More texture, more confidence in the read.'}},
       {id:'c',badge:'CROSS-REFERENCE FIVE YEARS OF DATA',text:'Compare this pulse against every prior year\'s pattern.',slots:1,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:2,ap:1,part:0,note:'The clearest possible picture of where things stand.'}}
+     ]},
+    // RELATIONSHIP shape x3
+    {id:'y5-i',shape:'relationship',title:'Delia\'s Farewell Ask',char:'delia',
+     scenario:'Ahead of her own planned transition, Delia asks if you\'ll write a short note for her file about what the program\'s partnership with HR looked like at its best.',
+     opts:[
+      {id:'a',badge:'WRITE IT PLAINLY',text:'A short, honest note. Nothing embellished.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Simple, sincere.'}},
+      {id:'b',badge:'KEEP IT BRIEF, DECLINE THE DETAIL',text:'A polite line or two, nothing more.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Polite, minimal.'}},
+      {id:'c',badge:'DOCUMENT THE FULL PARTNERSHIP',text:'Write the real record of what five years of partnership built.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:3,ap:0,part:0,note:'A real record of what five years of partnership built.'}}
+     ]},
+    // RESOURCE_TRADEOFF shape x3
+    {id:'y5-j',shape:'resource_tradeoff',title:'The Continuation Ask',char:'raj',
+     scenario:'Raj wants a single number: what does it cost to keep this running exactly as-is for one more year, no changes.',
+     opts:[
+      {id:'a',badge:'GIVE A CONSERVATIVE ESTIMATE',text:'Round down to make continuation feel easy.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Easy to approve.'}},
+      {id:'b',badge:'GIVE THE FULL NUMBER',text:'Be honest about what it actually takes.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Honest, harder to hear.'}},
+      {id:'c',badge:'BUILD THE FULL CASE',text:'Present the complete cost picture with the case for keeping it.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:5,ap:0,part:0,note:'Raj has everything he needs to defend the number upward.'}}
+     ]},
+    // DATA_INTEGRITY shape x3
+    {id:'y5-k',shape:'data_integrity',title:'The Unflattering Year',char:null,
+     scenario:'Someone points out that Year 3 was actually a step backward before the recovery, and asks whether the closing report should mention it.',
+     opts:[
+      {id:'a',badge:'LEAVE IT OUT',text:'Focus the report on the overall trend, not the dip.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Outcome depends on whether anyone else remembers Year 3.'},variance:true},
+      {id:'b',badge:'MENTION IT BRIEFLY',text:'A single honest line, without dwelling on it.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Honest without dwelling on it.'}},
+      {id:'c',badge:'SHOW THE DIP AND THE RECOVERY',text:'Present the full arc, dip included, so the recovery means something.',slots:2,bud:0,pc:0,req:{node:'infra-l4'},con:{trust:6,ap:1,part:0,note:'The recovery means more once people see what it recovered from.'}}
+     ]},
+    // CAPACITY_MECHANIC shape x3
+    {id:'y5-l',shape:'capacity_mechanic',title:'The Last Open Slot',char:null,
+     scenario:'One final open block of time before the program closes out for good. Spend it on the people, or the paperwork.',
+     opts:[
+      {id:'a',badge:'SPEND IT WITH THE TEAM',text:'Give the last open block to the people who did the work.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:1,part:0,note:'A last, human close to five years of work.'}},
+      {id:'b',badge:'SPEND IT ON THE RECORD',text:'Use it to make sure everything is written down.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'The paperwork will outlast the memory.'}},
+      {id:'c',badge:'DO BOTH',text:'Split the final block between people and paperwork.',slots:2,bud:0,pc:0,req:{node:'mgr-l2'},con:{trust:3,ap:1,part:0,note:'A strong close on both fronts.'}}
      ]}
   ]
 };
@@ -947,32 +1143,32 @@ var YEAR_POOLS = {
 var YEAR_PRESURVEY = {
   1: {prompt:'After last year\'s low Site C participation, how much do you push transparency about what changed?',
    opts:[
-    {id:'a',badge:'SHOW WHAT CHANGED',text:'Lead the launch by naming specific things that happened because of last year\'s results.',req:{node:'comms-l1'},effect:{part:4,note:'Concrete proof the survey mattered.'}},
+    {id:'a',badge:'SHOW WHAT CHANGED',text:'Lead the launch by naming specific things that happened because of last year\'s results.',req:{node:'comms-l1'},effect:{part:4,trust:2,note:'Concrete proof the survey mattered.'}},
     {id:'b',badge:'KEEP IT SIMPLE',text:'Standard launch messaging, no special framing.',req:null,effect:{part:0,note:'Standard launch.'}},
     {id:'c',badge:'ASK WHAT WOULD MATTER',text:'Send a 1-question pulse asking what would make this year\'s survey feel worth it.',req:null,effect:{part:2,note:'Employees feel asked, not just told.'}}
    ]},
   2: {prompt:'A department head wants advance notice of which teams will see results first. How do you handle the rollout order?',
    opts:[
     {id:'a',badge:'EQUAL ROLLOUT',text:'All sites get results at the same time, no exceptions.',req:null,effect:{part:0,note:'Fair and simple.'}},
-    {id:'b',badge:'PRIORITIZE LOW-TRUST SITES',text:'Sites with lower scores get results and support first.',req:{node:'comms-l2'},effect:{part:3,note:'Targeted support where it\'s needed most.'}},
+    {id:'b',badge:'PRIORITIZE LOW-TRUST SITES',text:'Sites with lower scores get results and support first.',req:{node:'comms-l2'},effect:{part:3,trust:2,note:'Targeted support where it\'s needed most.'}},
     {id:'c',badge:'LET DEPARTMENT HEADS CHOOSE',text:'Give leaders control over their own rollout timing.',req:null,effect:{part:1,note:'Flexible, but inconsistent.'}}
    ]},
   3: {prompt:'You can invest your remaining pre-survey capacity in manager readiness or employee awareness. Which matters more right now?',
    opts:[
     {id:'a',badge:'MANAGER READINESS',text:'Ensure every manager knows what to do when results land.',req:{node:'mgr-l2'},effect:{part:2,note:'Action planning is ready to go the moment scores arrive.'}},
-    {id:'b',badge:'EMPLOYEE AWARENESS',text:'Remind employees what changed since last survey.',req:{node:'comms-l2'},effect:{part:4,note:'Employees walk in already believing it matters.'}},
+    {id:'b',badge:'EMPLOYEE AWARENESS',text:'Remind employees what changed since last survey.',req:{node:'comms-l2'},effect:{part:4,trust:2,note:'Employees walk in already believing it matters.'}},
     {id:'c',badge:'SPLIT THE EFFORT',text:'A lighter touch on both fronts.',req:null,effect:{part:2,note:'Balanced, but neither lands as strongly.'}}
    ]},
   4: {prompt:'Participation has been flat. A vendor offers a direct-to-employee reminder tool.',
    opts:[
-    {id:'a',badge:'USE IT EVERYWHERE',text:'Direct reminders are proven to lift participation.',req:null,effect:{part:6,note:'Budget -$1,200. Reliable lift.'},bud:1200},
+    {id:'a',badge:'USE IT EVERYWHERE',text:'Direct reminders are proven to lift participation.',req:null,effect:{part:6,trust:1,note:'Budget -$1,200. Reliable lift, and it shows leadership you act on flat numbers instead of ignoring them.'},bud:1200},
     {id:'b',badge:'TARGET THE WEAKEST SITE',text:'Use it only where participation is lowest.',req:null,effect:{part:4,note:'Budget -$400. Focused impact.'},bud:400},
     {id:'c',badge:'DECLINE',text:'Participation should come from belief the survey matters, not reminders.',req:null,effect:{part:0,note:'Principled. No bonus.'}}
    ]},
   5: {prompt:'The final survey. One message before it opens, to a workforce that has seen four cycles of this before.',
    opts:[
     {id:'a',badge:'A PERSONAL REFLECTION',text:'Record a short message reflecting on five years and asking employees to tell the truth one more time.',req:null,effect:{part:3,note:'Personal and direct.'}},
-    {id:'b',badge:'LET THE CHAMPIONS LAUNCH IT',text:'Ask Marcus and Yolanda to co-create the final launch message.',req:{node:'mgr-l4'},effect:{part:5,note:'The people closest to the work make the final ask.'}},
+    {id:'b',badge:'LET THE CHAMPIONS LAUNCH IT',text:'Ask Marcus and Yolanda to co-create the final launch message.',req:{node:'mgr-l4'},effect:{part:5,trust:3,note:'The people closest to the work make the final ask.'}},
     {id:'c',badge:'STANDARD CLOSE',text:'No special send-off. Let the work speak for itself.',req:null,effect:{part:0,note:'Quiet, consistent with how it started.'}}
    ]}
 };
@@ -1336,7 +1532,7 @@ var S = {
 
   genAmbient:function(){
     var z=this.getZone();
-    var pw=z.id==='champion'?.65:z.id==='engaged'?.55:z.id==='cautious'?.45:.20;
+    var pw=z.id==='champion'?.65:z.id==='engaged'?.55:z.id==='building'?.50:z.id==='cautious'?.45:.20;
     var arcEvents=this.getCharAmbientEvents();
     var posPool=POS_EVENTS.concat(arcEvents.filter(function(e){return e.isPos;}));
     var negPool=NEG_EVENTS.concat(arcEvents.filter(function(e){return !e.isPos;}));
@@ -1455,7 +1651,7 @@ var R = {
     html+='<div class="ob-trust ob-trust-hero">';
     html+='<div class="ob-trust-hdr"><div class="ob-trust-nm">ORGANIZATIONAL TRUST &#8212; your standing</div><div class="ob-trust-zn" style="color:'+z.color+'">'+z.label+'</div></div>';
     html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+ZONE_FLUID[z.id]+'"></div></div>';
-    html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
+    html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Building</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
     html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. Cannot be spent &#8212; only built or lost.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable. Use it for high-leverage situation options and recommendations to other functions. Saving it for the right moment matters more than spending it fast. <em>'+z.label+'</em> earns +'+z.rate+' PC per quarter; grade bonuses add more at year end.<br><br><strong style="color:var(--t2)">Navigation:</strong> Budget, Capacity, and PC are always visible in the strip below the Trust bar. Current survey scores appear below that on mobile. The left panel (Dashboard) shows scores, last survey results, your investment tree, and the four people whose arcs respond to your decisions.</div>';
     html+='</div>';
     html+='<div class="ob-metrics">';
@@ -1491,7 +1687,7 @@ var R = {
     html+='<div class="trust-wrap">';
     html+='<div class="trust-hdr"><div class="trust-left"><span class="trust-title">Organizational Trust</span><span class="trust-zone" style="color:'+z.color+'">'+z.label+'</span></div></div>';
     html+='<div class="trust-track"><div class="trust-fill" style="width:'+S.trust+'%;background:'+ZONE_FLUID[z.id]+'"></div></div>';
-    html+='<div class="trust-zmarks"><span class="trust-zm">Skeptical</span><span class="trust-zm">Cautious</span><span class="trust-zm">Engaged</span><span class="trust-zm">Champion</span></div>';
+    html+='<div class="trust-zmarks"><span class="trust-zm">Skeptical</span><span class="trust-zm">Cautious</span><span class="trust-zm">Building</span><span class="trust-zm">Engaged</span><span class="trust-zm">Champion</span></div>';
     html+='</div>';
     // Unified resource strip — always visible, shows live pending cost
     var budDisplay='$'+Math.floor(S.budget/1000)+'K'+(pendingBud>0?' <span style="color:var(--red);font-size:10px">(-$'+Math.floor(pendingBud/1000)+'K pending)</span>':'');
@@ -1994,6 +2190,7 @@ var R = {
           html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:1px">'+dim.owner+'</div>';
           html+='<div style="font-size:10px;color:'+sigColors[signal]+';margin-top:2px">'+sigIcons[signal]+' '+tier.label+' &#183; '+tier.desc+'</div>';
+          html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.4">'+getRecReason(dim.id,S.ap,S.part,S.year,S.tree)+'</div>';
           html+='</div>';
           html+='<div style="text-align:right;flex-shrink:0">';
           if(alreadyIssued){
@@ -2320,9 +2517,11 @@ var C = {
     for(var j=0;j<ps.opts.length;j++){if(ps.opts[j].id===optId){opt=ps.opts[j];break;}}
     if(!opt)return;
     if(opt.effect.part)S.part=S.clamp100(S.part+opt.effect.part);
+    if(opt.effect.trust)S.applyCappedTrust(opt.effect.trust);
     if(opt.bud)S.spendBud(opt.bud);
     var note=opt.effect.note||'';
     if(opt.effect.part)note+=' (Participation '+(opt.effect.part>0?'+':'')+opt.effect.part+')';
+    if(opt.effect.trust)note+=' (Trust '+(opt.effect.trust>0?'+':'')+opt.effect.trust+')';
     S.preSurveyNote=note;
     if(S.year===0){S.phase='reveal';R.go();}else{C.goPostSurvey();}
   },
@@ -2520,7 +2719,7 @@ var AUDIO = {
   zoneShift: function(zoneId){
     if(!S.soundOn||!this.ctx)return;
     this.resume();
-    var tones={skeptical:180,cautious:220,engaged:280,champion:350};
+    var tones={skeptical:180,cautious:220,building:250,engaged:280,champion:350};
     var freq=tones[zoneId]||220;
     var o=this.ctx.createOscillator();
     var g=this.ctx.createGain();

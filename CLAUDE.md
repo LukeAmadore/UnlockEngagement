@@ -39,7 +39,7 @@ hardcoded into the renderer.
 
 | Resource | Nature | Notes |
 |---|---|---|
-| Organizational Trust | 0–100 standing, cannot be spent | Zones: Skeptical <25, Cautious <50, Engaged <75, Champion 75+. Floor of 5 (no death spiral). |
+| Organizational Trust | 0–100 standing, cannot be spent | Zones: Skeptical 0–19, Cautious 20–39, Building 40–59, Engaged 60–79, Champion 80–100. Floor of 5 (no death spiral). Building was added between Cautious and Engaged so a strong-grade year has somewhere to land besides a stale-feeling Cautious label — see balance notes below. |
 | Political Capital | Spendable currency | Earned passively per quarter by zone rate + grade bonus at year end. Spent on gated situation options and recommendations. |
 | Budget | Annual money | See budget model below. |
 | Capacity | Slots per quarter | 1 per decision option that costs a slot, 1 per tree node built. Easy 4 / Normal 3 / Hard 2. |
@@ -48,13 +48,14 @@ hardcoded into the renderer.
 
 - **Trust trajectory:** Easy reaches Champion with A/S play. **Normal should land
   shy of Engaged or just at Engaged with good (B/A) play; Champion should be rare
-  and require sustained A/S.** Hard fights to reach Cautious; Engaged is the
-  stretch-goal ending.
+  and require sustained A/S.** Hard fights to reach Cautious or lands at Building
+  with sustained good play; Engaged is the stretch-goal ending (rare, not zero).
 - **Trust sources by weight:** survey grade shift (primary: S+10 A+7 B+4 C+1 D−2
   F−5), gated decision options (+3 to +6 each, requires nodes/PC/zone), node
   effects (SE track mostly), ambient events (texture only; pool weights
-  champion .65 / engaged .55 / cautious .45 / skeptical .20; most deltas ±1).
-- **`TRUST_ANNUAL_CAP` (`easy:null, normal:10, hard:11`) throttles Normal/Hard.**
+  champion .65 / engaged .55 / building .50 / cautious .45 / skeptical .20;
+  most deltas ±1).
+- **`TRUST_ANNUAL_CAP` (`easy:null, normal:10, hard:13`) throttles Normal/Hard.**
   Simulation showed the three positive sources above (decisions ~8–12/yr,
   grade-shift ~7–8/yr, node effects ~3/yr) each independently approached the old
   "~8/yr decision cap" note below, so capping decisions alone wasn't enough —
@@ -70,6 +71,10 @@ hardcoded into the renderer.
   penalty into `qCons` and runs *before* `applyQueued` for the same reason —
   it must not apply its own separate `adjTrust` call. Do not reintroduce a
   decisions-only cap; re-simulate before changing `TRUST_ANNUAL_CAP` values.
+  Hard's cap moved 11→13 when the Building zone was added — Engaged's floor
+  moved from 50 to 60, and 11 could no longer reach it even as a rare
+  stretch under sustained great play; re-check this any time zone
+  boundaries change again, not just when the cap itself changes.
 - **Budget model:** flat base per year (Easy $50K / Normal $40K / Hard $25K) +
   10% carry-over of unspent (rest "went to overhead") + flat grade delta
   (S+$8K A+$5K B+$2K C 0 D−$3K F−$6K) + Skeptical penalty −$2K. Floor $5K.
@@ -80,8 +85,9 @@ hardcoded into the renderer.
   5-yr budget let good play buy nearly the entire tree, ~15 nodes, versus the
   10–12 target). Normal 5-yr budget ≈ $200K → 10–12 nodes with good play;
   Hard ≈ $125K+ → 8–9.
-- **PC economy:** zone rates skeptical 1 / cautious 3 / engaged 5 / champion 8 per
-  quarter; grade bonuses at year end. Rec tiers cost 18/12/6 PC (see below).
+- **PC economy:** zone rates skeptical 1 / cautious 3 / building 4 / engaged 5 /
+  champion 8 per quarter; grade bonuses at year end. Rec tiers cost 18/12/6 PC
+  (see below). Rec landing probability by zone: 20/40/58/75/90%.
 
 ## Investment tree (16 nodes, 4 tracks × 4 levels)
 
@@ -102,13 +108,18 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 ## Situation system
 
 - Year 0: 4 hardcoded tutorial situations (`SITS`), consequences visible in Q1 only.
-- Years 1–5: `YEAR_POOLS[year]` of 8 situations each; Fisher-Yates draw of 4 per
+- Years 1–5: `YEAR_POOLS[year]` of 12 situations each; Fisher-Yates draw of 4 per
   playthrough. Year 5 pool is legacy-themed.
 - Pre-survey decision per year (`YEAR_PRESURVEY`); consequence revealed AFTER the
-  choice, never before.
-- **4 balance-tested shapes** (2 narrative skins each): `relationship`,
+  choice, never before. Each year's best option also carries a small `effect.trust`
+  (routed through `S.applyCappedTrust`) so the presurvey choice visibly connects to
+  the main trust loop instead of only moving Participation.
+- **4 balance-tested shapes** (3 narrative skins each): `relationship`,
   `resource_tradeoff`, `data_integrity`, `capacity_mechanic`. New situations should
-  reuse a shape's cost/payoff profile; write new fiction, not new math.
+  reuse a shape's cost/payoff profile; write new fiction, not new math. (Grown from
+  2 skins/shape to 3 in one pass — verify pool counts stay a multiple of 4 across
+  all 5 years if adding more, and re-run `sim.js` to confirm the larger draw pool
+  doesn't shift trust/grade distributions before merging.)
 - Special option effects: `variance` (±1 trust swing with narrated outcome),
   `pcGain`, `guaranteeNextRec`, `contractorHire` (cap decay not yet implemented),
   `treeUnlock`, 2-slot high-commitment options (peak arc moments, trust +6).
@@ -145,8 +156,13 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by
-  zone: 20/45/70/90%. Explicit skip button with flavor note. Results resolve at
-  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state.
+  zone: 20/40/58/75/90%. Explicit skip button with flavor note. Results resolve at
+  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state and picks the
+  high/medium/low signal; `getRecReason()` turns that signal into a plain-language
+  sentence citing the actual ap/part/year/node values behind it (e.g. "AP Optimism
+  (54) is trending soft, but not critical yet."), rendered under each dimension's
+  tier line so the recommendation panel explains itself instead of just labeling
+  a signal strength.
 - **Stagnation:** if something was buildable but nothing was built → −1 trust; if
   the decision also cost zero slots → −2. Never fires in Year 0 or when nothing
   was affordable.
