@@ -2515,7 +2515,21 @@ var R = {
     html+='<div class="reveal-badge">FIVE YEARS COMPLETE</div>';
     html+='<h2 style="font-size:24px;font-weight:700">The program, as you built it.</h2>';
 
-    // Final scores
+    // Year-over-year trend charts — lead with the story, not just the endpoint
+    var hist=S.yearHistory||[];
+    if(hist.length>1){
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Year-over-Year Trends</div>';
+      html+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.trust};}), 'var(--green)', 'Organizational Trust');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
+      html+='</div></div>';
+    }
+
+    // Final score — the headline number, kept simple since the chart above
+    // already tells the five-year story; no duplicate trust bar here.
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
@@ -2525,7 +2539,7 @@ var R = {
     html+='</div>';
     html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:44px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
     html+='</div>';
-    html+='<div style="margin-top:16px">'+this.trustBarBlock(DIFF[S.diff].trust,'over five years')+'</div>';
+    html+='<div style="margin-top:14px;font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">Organizational Trust: '+z.label+'</div>';
     html+='</div>';
 
     // Visual tree - nodes as filled/empty boxes by track
@@ -2563,6 +2577,7 @@ var R = {
     else if(partGain<0)retro.push('Participation declined. Employees lost confidence the survey was worth completing.');
     if(z.id==='champion')retro.push('Organizational Trust reached Champion. Leadership actively advocated for the program by the end.');
     else if(z.id==='engaged')retro.push('Organizational Trust reached Engaged. Leadership was supportive &#8212; Champion was achievable with a few stronger decisions.');
+    else if(z.id==='building')retro.push('Organizational Trust reached Building. The program earned real footing, even if leadership never fully converted into advocates.');
     else if(z.id==='cautious')retro.push('Organizational Trust stayed Cautious. The program survived but never fully converted leadership into advocates.');
     else retro.push('Organizational Trust remained Skeptical. The program was always one budget cycle away from being cut.');
     if(mgrBuilt>=3&&apGain>8)retro.push('The Manager Capacity and AP Optimism combination proved to be your strongest compounding investment.');
@@ -2592,20 +2607,8 @@ var R = {
       html+='</div>';
     }
 
-    // ── Three line charts: AP Optimism, Participation, Engagement
-    var hist=S.yearHistory||[];
+    // Per-leader movement: stage 0 (where everyone starts) vs where they ended.
     if(hist.length>1){
-      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
-      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Year-over-Year Trends</div>';
-      html+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
-
-      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.trust};}), 'var(--green)', 'Organizational Trust');
-      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
-      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
-      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
-      html+='</div></div>';
-
-      // Per-leader movement: stage 0 (where everyone starts) vs where they ended.
       html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
       html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Where People Ended Up</div>';
       [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
