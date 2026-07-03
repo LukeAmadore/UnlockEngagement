@@ -110,16 +110,21 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 - Year 0: 4 hardcoded tutorial situations (`SITS`), consequences visible in Q1 only.
 - Years 1–5: `YEAR_POOLS[year]` of 12 situations each; Fisher-Yates draw of 4 per
   playthrough. Year 5 pool is legacy-themed.
-- **`anchor:true` on a situation guarantees it draws that year** — `drawYearSituations`
-  pulls all anchors first, then shuffles the remaining pool to fill out to 4, then
-  shuffles final quarter order so the anchor doesn't always land in Q1. Currently
-  used for one exec-disagreement beat per year, all 5 years (`y1-j` Delia/Desmond,
-  `y2-c` Raj/Delia, `y3-c` Raj/Desmond, `y4-c` Warren/Delia, `y5-d` Desmond/Delia)
-  so that moment isn't left to the 4-of-12 lottery (~2/3 chance per year of NOT
-  being drawn otherwise) — and so the pairing rotates rather than always being the
-  same two people. Keep at most 1 anchor per year — the mechanism doesn't limit
-  this, but stacking multiple guaranteed situations in one draw crowds out the
-  variety the random pool exists for.
+- **One situation per GAME (not per year) is guaranteed to draw.** `EXEC_DISAGREEMENT_IDS`
+  lists 5 candidate exec-disagreement situations, one per year (`y1-j` Delia/Desmond,
+  `y2-c` Raj/Delia, `y3-c` Raj/Desmond, `y4-c` Warren/Delia, `y5-d` Desmond/Delia).
+  `S.init` picks ONE at random per playthrough into `S.guaranteedAnchorId`.
+  `drawYearSituations(yr)` forces that single id into its year's draw if
+  `yr` matches; every other year (including the other 4 candidate years) draws
+  fully at random from its normal 12-situation pool — the other candidates are
+  ordinary pool members that may or may not get drawn. This guarantees the
+  player sees *a* version of the exec-friction beat exactly once across the
+  5-year game, with which pairing varying by playthrough, rather than
+  guaranteeing all 5 every game (that was tried and reverted — it made the
+  device routine instead of a rare beat). If adding more candidate situations,
+  append their ids to `EXEC_DISAGREEMENT_IDS` rather than flagging them
+  `anchor:true` directly — anchor status is now assigned dynamically per game,
+  not authored statically on the situation object.
 - Pre-survey decision per year (`YEAR_PRESURVEY`); consequence revealed AFTER the
   choice, never before. Each year's best option also carries a small `effect.trust`
   (routed through `S.applyCappedTrust`) so the presurvey choice visibly connects to
@@ -194,11 +199,12 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   company's own stated values directly, not just abstract trust/AP math — keep new
   values-tie-in situations reusing an existing shape's cost/effect numbers, per the
   situation-shape rule below, rather than inventing new mechanics for the callback.
-  The 5 anchor situations (see `anchor:true` above) frame two execs disagreeing
-  with each other in the scenario text (not just with the player), rotating the
-  pairing each year rather than reusing the same two people — a lightweight way
-  to make the exec cast feel like they have relationships with each other, not
-  just with the CoE lead; the underlying options/numbers are unchanged from
+  The 5 anchor situations (see `EXEC_DISAGREEMENT_IDS` above) frame two execs
+  disagreeing with each other in the scenario text (not just with the player),
+  rotating the pairing each year rather than reusing the same two people — a
+  lightweight way to make the exec cast feel like they have relationships with
+  each other, not just with the CoE lead; the underlying options/numbers are
+  unchanged from
   before each rewrite. If adding more, keep rotating pairings rather than
   defaulting back to Raj/Delia every time.
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
