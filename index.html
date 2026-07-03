@@ -303,7 +303,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
   .panel-l.mob-show{display:flex}
   .mob-toggle{display:flex}
   .track-nodes{grid-template-columns:repeat(2,1fr)}
-  .plants-grid{grid-template-columns:1fr!important}
+  .stack-mobile{grid-template-columns:1fr!important}
   .reveal-scores{gap:20px}
   .rv-val{font-size:38px}
   .game-shell{padding-bottom:32px}
@@ -461,19 +461,27 @@ var COMPANY_INFO = {
   plants:[
     {name:'Bell Creek', opened:1962, desc:'The original site, and still the company\'s emotional home base. Some families have worked the line here three generations running &#8212; the place has muscle memory older than most of its equipment. Marcus\'s plant.'},
     {name:'Riverside', opened:1988, desc:'The first plant built for something other than canning, and it shows: newer processes, a more open culture, and the shortest drive to "the Silo." Yolanda\'s plant.'},
-    {name:'Prairie Junction', opened:2016, desc:'Built fast to meet demand, and it never quite caught up on culture what it gained in output. The newest and most remote plant &#8212; and, tellingly, the one where no listening champion has stepped up yet.'}
+    {name:'Prairie Junction', opened:2016, desc:'Built fast to meet demand, and it never quite caught up on culture what it gained in output. The newest and most remote plant &#8212; and the one where a listening champion is only just starting to step up.'}
   ]
 };
 
+// tier: 'exec' (leadership team) or 'plant' (one rep per location) — used to group
+// the People panel and Company modal so it's clear these aren't the same altitude.
 var CHARS = {
-  marcus: {name:'Marcus', role:'Bell Creek Plant Manager',av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
-    bio:'Nineteen years at Bell Creek, the last six as plant manager &#8212; he started on the line himself. Two previous "engagement initiatives" went nowhere and cost him credibility with his own team for championing them, which is exactly why he\'s slow to trust this one. Coaches a rec-league softball team and will absolutely tell you about it.'},
-  delia:  {name:'Delia',  role:'CHRO',av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+  delia:  {name:'Delia',  role:'CHRO', tier:'exec', av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
     bio:'Recruited three years ago from a much larger consumer goods company specifically to modernize Meridian\'s people practices. She hired you, personally, which means your success is hers too &#8212; she\'s more politically exposed by this program than she lets on. Runs on cold brew and a company book club that only she attends.'},
-  raj:    {name:'Raj',    role:'CFO',av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>'),
+  raj:    {name:'Raj',    role:'CFO', tier:'exec', av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>'),
     bio:'Eight years at Meridian. Watched the last "employee engagement" vendor get quietly non-renewed after two years and nothing to show for it &#8212; his skepticism is scar tissue, not temperament. Genuinely good with people once the numbers earn his trust. Keeps a spreadsheet of everything, including his kids\' Little League stats.'},
-  yolanda:{name:'Yolanda',role:'Riverside Supervisor',av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
-    bio:'Youngest supervisor at Riverside, promoted early after she started running her own informal listening sessions without waiting for permission. Ambitious in a way she doesn\'t hide, and still refreshingly unjaded about org politics. Sees this program as her chance to be visible beyond one plant.'}
+  desmond:{name:'Desmond',role:'COO', tier:'exec', av:II('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M4.2 4.2l2.2 2.2M17.6 17.6l2.2 2.2M3 12h3M18 12h3M4.2 19.8l2.2-2.2M17.6 6.4l2.2-2.2"/>'),
+    bio:'Came up through operations at two other manufacturers before Meridian. Doesn\'t use the word "engagement" un-ironically and won\'t start now, but he tracks downtime, near-misses, and turnover obsessively &#8212; if the program moves any of those numbers, he\'ll notice before Raj does. Runs each plant walk-through like an inspection, because it is one.'},
+  warren: {name:'Warren', role:'CEO', tier:'exec', av:II('<rect x="7" y="3" width="10" height="18" rx="1"/><path d="M10 7h1M13 7h1M10 11h1M13 11h1M10 15h1M13 15h1"/>'),
+    bio:'CEO since the 2004 acquisition &#8212; the only executive left who remembers the company before the holding company owned it. Rarely in the room for anything below a board-level number, which makes it worse when he is. Asks one blunt question and expects a straight answer, not a deck.'},
+  marcus: {name:'Marcus', role:'Bell Creek Plant Manager', tier:'plant', av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
+    bio:'Nineteen years at Bell Creek, the last six as plant manager &#8212; he started on the line himself. Two previous "engagement initiatives" went nowhere and cost him credibility with his own team for championing them, which is exactly why he\'s slow to trust this one. Coaches a rec-league softball team and will absolutely tell you about it.'},
+  yolanda:{name:'Yolanda',role:'Riverside Supervisor', tier:'plant', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
+    bio:'Youngest supervisor at Riverside, promoted early after she started running her own informal listening sessions without waiting for permission. Ambitious in a way she doesn\'t hide, and still refreshingly unjaded about org politics. Sees this program as her chance to be visible beyond one plant.'},
+  priya:  {name:'Priya',  role:'Prairie Junction Supervisor', tier:'plant', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
+    bio:'Promoted to supervisor eight months ago &#8212; Prairie Junction\'s fast, understaffed launch back in 2016 left the role sitting empty more often than filled. Transferred in from a completely different industry and is still learning which battles are worth fighting. First supervisor here to show up to a listening session voluntarily.'}
 };
 
 // ============================================================
@@ -574,8 +582,94 @@ var CHAR_ARCS = {
       [],
       []
     ]
+  },
+  priya: {
+    name:'Priya', role:'Prairie Junction Supervisor', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
+    stages:[
+      {label:'Uncertain', desc:'Priya is still learning the plant and the role. She has not pushed back on the program, but she has not pushed for it either.'},
+      {label:'Trying',    desc:'Priya started running short check-ins with her shift leads, unevenly but genuinely.'},
+      {label:'Committed', desc:'Priya\'s check-ins are now a fixture. Prairie Junction is closing the participation gap with the other two plants.'},
+      {label:'Champion',  desc:'Priya is the first real listening champion Prairie Junction has had. Employees notice.'}
+    ],
+    advanceOn:{track:'mgr', decisions:[]},
+    posEvents:[
+      [],
+      [{text:"Priya ran her first shift check-in without being asked to.",d:2}],
+      [{text:"Priya's participation numbers at Prairie Junction closed most of the gap with Riverside.",d:2}],
+      [{text:"Priya was asked to help onboard the next new supervisor, using her own listening approach.",d:3}]
+    ],
+    negEvents:[
+      [{text:"Priya seemed unsure how to talk about the survey with her team. Participation stayed flat.",d:-1}],
+      [{text:"Priya's first check-in attempt fell flat &#8212; low turnout, no follow-up.",d:-1}],
+      [],
+      []
+    ]
+  },
+  desmond: {
+    name:'Desmond', role:'COO', av:II('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M4.2 4.2l2.2 2.2M17.6 17.6l2.2 2.2M3 12h3M18 12h3M4.2 19.8l2.2-2.2M17.6 6.4l2.2-2.2"/>'),
+    stages:[
+      {label:'Unconvinced',      desc:'Desmond sees the program as HR overhead with no operational payoff yet.'},
+      {label:'Watching Numbers', desc:'Desmond has started checking whether turnover or safety incidents move with the program. Nothing dramatic yet.'},
+      {label:'Cautiously Sold',  desc:'Desmond mentioned the program in an ops review without being asked &#8212; a real shift for him.'},
+      {label:'Operational Champion', desc:'Desmond now cites the program in his own plant walk-throughs as a reason things run better.'}
+    ],
+    advanceOn:{track:'infra', decisions:[]},
+    posEvents:[
+      [],
+      [{text:"Desmond asked for the participation numbers broken out by shift, unprompted.",d:1}],
+      [{text:"Desmond mentioned the listening program in a plant operations review.",d:2}],
+      [{text:"Desmond told a plant manager the program is \"one of the only HR things that has actually shown up on the floor.\"",d:3}]
+    ],
+    negEvents:[
+      [{text:"Desmond asked, pointedly, what the program has actually changed operationally.",d:-2}],
+      [{text:"Desmond flagged a scheduling conflict between survey sessions and a production deadline.",d:-1}],
+      [],
+      []
+    ]
+  },
+  warren: {
+    name:'Warren', role:'CEO', av:II('<rect x="7" y="3" width="10" height="18" rx="1"/><path d="M10 7h1M13 7h1M10 11h1M13 11h1M10 15h1M13 15h1"/>'),
+    stages:[
+      {label:'Distant',              desc:'Warren knows the program exists and not much else. It has not reached his level of attention.'},
+      {label:'Noticing',             desc:'Warren asked one pointed question about the program in a board update. He is paying a little attention now.'},
+      {label:'Cautiously Supportive',desc:'Warren referenced the program\'s numbers, correctly, in a leadership conversation. He is tracking it.'},
+      {label:'Champion',             desc:'Warren cites the program as proof the company learned something from the 2021 restructuring.'}
+    ],
+    advanceOn:{track:'se', decisions:[]},
+    posEvents:[
+      [],
+      [{text:"Warren asked Delia one specific question about the program in a board update &#8212; and remembered the answer later.",d:2}],
+      [{text:"Warren referenced the program's trend line, correctly, in an all-hands.",d:3}],
+      [{text:"Warren told the board the listening program is proof the culture actually changed after 2021.",d:4}]
+    ],
+    negEvents:[
+      [{text:"Warren asked, in passing, whether the program was still running.",d:-1}],
+      [],
+      [],
+      []
+    ]
   }
 };
+
+// Derived, display-only summary of a tier's arc progress — no separate trust
+// resource, just a plain-language read on the existing 0-3 stage numbers so
+// "Leadership" and "Plant Leadership" read as distinct groups, not one flat list.
+function tierIds(tier){
+  return Object.keys(CHARS).filter(function(id){return CHARS[id].tier===tier;});
+}
+function groupStatusLabel(avgStage){
+  if(avgStage>=2.5)return 'Strong';
+  if(avgStage>=1.5)return 'Building';
+  if(avgStage>=0.5)return 'Mixed';
+  return 'Early';
+}
+function tierStatus(tier){
+  var ids=tierIds(tier);
+  if(!ids.length)return 'Early';
+  var sum=0;
+  for(var i=0;i<ids.length;i++)sum+=(S.charArcs[ids[i]]||0);
+  return groupStatusLabel(sum/ids.length);
+}
 
 
 // ============================================================
@@ -1260,7 +1354,7 @@ var S = {
   trustAtQStart:0,
   apAtYearStart:0,partAtYearStart:0,engAtYearStart:0,
   decisionLog:[], // [{year,q,title,badge,note}] full game history for closing summary
-  charArcs:{marcus:0,delia:0,raj:0,yolanda:0}, // arc stage per character 0-3
+  charArcs:{marcus:0,delia:0,raj:0,yolanda:0,priya:0,desmond:0,warren:0}, // arc stage per character 0-3
   pendingRecs:[], // [{dim,year,signal,probMod,guaranteed}] recs issued this year, resolved next postsurvey
   guaranteedRec:false, // set by guaranteeNextRec decisions; consumed by the next issueRec call
   recSkippedNote:'',
@@ -1289,7 +1383,7 @@ var S = {
     this.trustAtQStart=d.trust;
     this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
     this.decisionLog=[];
-    this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
+    this.charArcs={marcus:0,delia:0,raj:0,yolanda:0,priya:0,desmond:0,warren:0};
     this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};
     this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;this.recFallout=[];
     this.soundOn=true;
@@ -1834,20 +1928,26 @@ var R = {
       html+='</div></div>';
     }
     html+='</div><button class="tree-view-btn" onclick="C.openTree()">View full tree &#8594;</button></div>';
-    // Characters section — replaces Resources
+    // Characters section — replaces Resources. Grouped by tier (exec vs plant)
+    // since a CFO and a plant supervisor aren't the same altitude, even though
+    // Trust itself stays one number — see tierStatus() for the derived read.
     html+='<div class="ls"><div class="ls-lbl">People</div>';
-    Object.keys(CHAR_ARCS).forEach(function(charId){
-      var arc=CHAR_ARCS[charId];
-      var ch=CHARS[charId];
-      var stage=S.charArcs[charId]||0;
-      var stageInfo=arc.stages[stage];
-      html+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer" onclick="C.openCompany()" title="View bio">';
-      html+='<span style="font-size:18px;flex-shrink:0">'+ch.av+'</span>';
-      html+='<div>';
-      html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
-      html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
-      html+='<div style="font-size:10px;color:var(--green);margin-top:1px">'+stageInfo.label+'</div>';
-      html+='</div></div>';
+    [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp){
+      var tier=grp[0],label=grp[1];
+      html+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">'+label+'</div><div style="font-size:10px;color:var(--tm)">'+tierStatus(tier)+'</div></div>';
+      tierIds(tier).forEach(function(charId){
+        var arc=CHAR_ARCS[charId];
+        var ch=CHARS[charId];
+        var stage=S.charArcs[charId]||0;
+        var stageInfo=arc.stages[stage];
+        html+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer" onclick="C.openCompany()" title="View bio">';
+        html+='<span style="font-size:18px;flex-shrink:0">'+ch.av+'</span>';
+        html+='<div>';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+        html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
+        html+='<div style="font-size:10px;color:var(--green);margin-top:1px">'+stageInfo.label+'</div>';
+        html+='</div></div>';
+      });
     });
     html+='</div>';
     return html;
@@ -2230,26 +2330,32 @@ var R = {
     }
 
     // Character arc moments - show if anyone advanced this year
-    // People — always show all four characters with current stage
+    // People — grouped by tier (Leadership vs Plant Leadership), each always
+    // showing every character in that group with current stage.
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-    Object.keys(CHAR_ARCS).forEach(function(charId){
-      var arc=CHAR_ARCS[charId];
-      var ch=CHARS[charId];
-      var stage=S.charArcs[charId]||0;
-      var stageInfo=arc.stages[stage];
-      var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
-      html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start;cursor:pointer" onclick="C.openCompany()" title="View bio">';
-      html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
-      html+='<div>';
-      html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
-      html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
-      html+='<div style="font-size:10px;color:'+stageColors[stage]+';margin-top:2px;font-weight:600">'+stageInfo.label+'</div>';
-      html+='<div style="font-size:10px;color:var(--tm);margin-top:2px;line-height:1.4">'+stageInfo.desc+'</div>';
-      html+='</div></div>';
+    var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
+    [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
+      var tier=grp[0],label=grp[1];
+      html+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'"><div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">'+label+'</div><div style="font-size:10px;color:var(--tm)">'+tierStatus(tier)+'</div></div>';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+      tierIds(tier).forEach(function(charId){
+        var arc=CHAR_ARCS[charId];
+        var ch=CHARS[charId];
+        var stage=S.charArcs[charId]||0;
+        var stageInfo=arc.stages[stage];
+        html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start;cursor:pointer" onclick="C.openCompany()" title="View bio">';
+        html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
+        html+='<div>';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+        html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
+        html+='<div style="font-size:10px;color:'+stageColors[stage]+';margin-top:2px;font-weight:600">'+stageInfo.label+'</div>';
+        html+='<div style="font-size:10px;color:var(--tm);margin-top:2px;line-height:1.4">'+stageInfo.desc+'</div>';
+        html+='</div></div>';
+      });
+      html+='</div>';
     });
-    html+='</div></div>';
+    html+='</div>';
 
     // Recommendations UI — tiered costs, diagnostic signals, skip option
     if(S.year<5){
@@ -2571,7 +2677,7 @@ var R = {
     html+='</div></div>';
     html+='<div>';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">Locations</div>';
-    html+='<div class="plants-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+    html+='<div class="stack-mobile" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
     ci.plants.forEach(function(p){
       html+='<div style="border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;background:var(--card)">';
       html+='<div style="font-size:12px;font-weight:700;color:var(--t2)">'+p.name+'</div>';
@@ -2580,20 +2686,23 @@ var R = {
       html+='</div>';
     });
     html+='</div></div>';
-    html+='<div>';
-    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">Leadership</div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-    Object.keys(CHARS).forEach(function(charId){
-      var ch=CHARS[charId];
-      html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:12px;background:var(--card)">';
-      html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">';
-      html+='<span style="font-size:20px;color:var(--amber)">'+ch.av+'</span>';
-      html+='<div><div style="font-size:13px;font-weight:700;color:var(--t2)">'+ch.name+'</div><div style="font-size:10px;color:var(--tm)">'+ch.role+'</div></div>';
-      html+='</div>';
-      html+='<div style="font-size:11px;color:var(--tm);line-height:1.6">'+(ch.bio||'')+'</div>';
-      html+='</div>';
+    [['exec','Executive Team'],['plant','Plant Leadership']].forEach(function(grp){
+      var tier=grp[0],label=grp[1];
+      html+='<div>';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">'+label+'</div>';
+      html+='<div class="stack-mobile" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+      tierIds(tier).forEach(function(charId){
+        var ch=CHARS[charId];
+        html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:12px;background:var(--card)">';
+        html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">';
+        html+='<span style="font-size:20px;color:var(--amber)">'+ch.av+'</span>';
+        html+='<div><div style="font-size:13px;font-weight:700;color:var(--t2)">'+ch.name+'</div><div style="font-size:10px;color:var(--tm)">'+ch.role+'</div></div>';
+        html+='</div>';
+        html+='<div style="font-size:11px;color:var(--tm);line-height:1.6">'+(ch.bio||'')+'</div>';
+        html+='</div>';
+      });
+      html+='</div></div>';
     });
-    html+='</div></div>';
     html+='</div></div>';
     document.body.insertAdjacentHTML('beforeend',html);
   },

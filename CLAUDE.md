@@ -157,10 +157,27 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 
 ## Systems added late (know they exist before "adding" them)
 
-- **Character arcs:** `CHAR_ARCS` — 4 characters × 4 stages; advance via relevant
+- **Character arcs:** `CHAR_ARCS` — 7 characters × 4 stages; advance via relevant
   track investment (1 stage per 2 nodes) + key decision IDs. Stage changes swap
   ambient event pools. People panel (left panel + postsurvey grid) always shows
-  all four with role + stage.
+  all seven with role + stage.
+- **Org tiers, deliberately NOT a second trust resource:** `CHARS[id].tier` is
+  `'exec'` (Delia CHRO, Raj CFO, Desmond COO, Warren CEO) or `'plant'` (Marcus/
+  Bell Creek, Yolanda/Riverside, Priya/Prairie Junction — one rep per location).
+  Organizational Trust stays the single tracked resource; do not fork it per tier
+  or per character — that would require re-deriving the whole balance model
+  (zones, budget formula, PC rates, rec landing odds all key off the one number)
+  and was explicitly rejected in favor of this lighter approach. `tierIds(tier)` /
+  `tierStatus(tier)` (module-level helpers, just above the recommendations system)
+  derive a display-only label (Early/Mixed/Building/Strong) from the *average arc
+  stage* of that tier's characters — nothing new is tracked, it's a read of
+  existing `S.charArcs` values. People panel (both renders) and the Company modal's
+  Leadership section all group by tier with this derived label in the header, so a
+  CFO and a plant supervisor read as different altitudes without a second gauge.
+  `priya`/`desmond`/`warren` currently have empty `advanceOn.decisions` arrays (no
+  situations reference them by id yet, so their arcs only advance via passive tree
+  investment through `checkTreeArcAdvance`) — a future situations pass could give
+  them decision-based bonus advancement the way Marcus/Delia/Raj/Yolanda have.
 - **Company identity / About page:** `COMPANY_INFO` (name, product tagline, founding
   year, HQ blurb, mission, vision, 4 named values, history timeline, `plants` array
   with one entry per site — opened year + personality blurb, rendered in a
