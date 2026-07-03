@@ -2515,8 +2515,16 @@ var R = {
     html+='<div class="reveal-badge">FIVE YEARS COMPLETE</div>';
     html+='<h2 style="font-size:24px;font-weight:700">The program, as you built it.</h2>';
 
-    // Year-over-year trend charts — lead with the story, not just the endpoint.
-    // Fixed 2x2 grid (not flex-wrap) so 4 charts never wrap as an awkward 3-then-1.
+    // Final grade summary leads — just the grade and the trust bar. AP/Part/Eng
+    // numbers live in the trend charts right below (and were seen at Year 5's
+    // survey results), so repeating them here was redundant.
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
+    html+='<div style="text-align:center"><div style="font-family:var(--mono);font-size:52px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
+    html+='<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border)">'+this.trustBarBlock(DIFF[S.diff].trust,'over five years')+'</div>';
+    html+='</div>';
+
+    // Year-over-year trend charts. Fixed 2x2 grid (not flex-wrap) so 4 charts
+    // never wrap as an awkward 3-then-1.
     var hist=S.yearHistory||[];
     if(hist.length>1){
       html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
@@ -2528,14 +2536,6 @@ var R = {
       html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
       html+='</div></div>';
     }
-
-    // Final grade summary — just the grade and the trust bar. AP/Part/Eng
-    // numbers already live in the trend charts above (and were seen at Year 5's
-    // survey results), so repeating them here was redundant.
-    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
-    html+='<div style="text-align:center"><div style="font-family:var(--mono);font-size:52px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
-    html+='<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border)">'+this.trustBarBlock(DIFF[S.diff].trust,'over five years')+'</div>';
-    html+='</div>';
 
     // Visual tree - nodes as filled/empty boxes by track
     var TRACK_META={infra:{name:'Listening Infrastructure',color:'#5D9385',icon:TRACKS.infra.icon},mgr:{name:'Manager Capacity',color:'#C08A3E',icon:TRACKS.mgr.icon},comms:{name:'Communications',color:'#BF8156',icon:TRACKS.comms.icon},se:{name:'Stakeholder Engagement',color:'#C7A24A',icon:TRACKS.se.icon}};
