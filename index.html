@@ -379,10 +379,10 @@ var TRACKS = {
 
 var PRE_SURVEY = [
   {year:0,
-   prompt:'One decision before the survey opens. Site C participation was low last year and trust is fragile. How do you launch?',
+   prompt:'One decision before the survey opens. Prairie Junction participation was low last year and trust is fragile. How do you launch?',
    opts:[
     {id:'a',badge:'MANAGER CONVERSATIONS',text:'Equip every manager with a 5-minute team conversation guide before the survey opens. Personal, but scalable.',req:null,effect:{part:3,note:'Managers set the tone. Employees hear about the survey from someone they know, not an email.'}},
-    {id:'b',badge:'PLANT DIRECTOR VIDEO',text:'Ask the Site C plant director to record a short personal ask for honest feedback. High visibility.',req:{zone:'cautious'},effect:{part:5,note:'A face and a name asking for input. Site C employees feel specifically seen.'}},
+    {id:'b',badge:'PLANT DIRECTOR VIDEO',text:'Ask the Prairie Junction plant director to record a short personal ask for honest feedback. High visibility.',req:{zone:'cautious'},effect:{part:5,note:'A face and a name asking for input. Prairie Junction employees feel specifically seen.'}},
     {id:'c',badge:'STANDARD LAUNCH',text:'Email and posters. No special effort this quarter.',req:null,effect:{part:0,note:'Standard launch. Nothing extra spent, nothing extra gained.'}}
    ]
   }
@@ -434,11 +434,40 @@ function focusSignal(ap, part, grade) {
 }
 
 
+// Content-layer company identity — see CLAUDE.md "This game is also an engine":
+// swap this object (and the CHARS bios below) to reskin the game without touching the loop.
+var COMPANY_INFO = {
+  name:'Meridian Foods',
+  tagline:'Makers of Meridian Crunch snack bars and Wholesome Harvest frozen meals.',
+  founded:1962,
+  hq:'a converted grain elevator on the edge of Bell Creek, still called "the Silo" by everyone who works there.',
+  mission:'To bring honest, wholesome food to every table &#8212; and to build a workplace where people are heard as clearly as our customers.',
+  vision:'A company where feedback moves as fast as our production lines.',
+  values:[
+    {name:'Integrity', desc:'Do right even when no one\'s checking the line.'},
+    {name:'People First', desc:'The floor knows things the org chart doesn\'t.'},
+    {name:'Continuous Improvement', desc:'Good enough today, better tomorrow.'},
+    {name:'Ownership', desc:'Everyone acts like they own the place &#8212; because in the ways that count, they do.'}
+  ],
+  history:[
+    {year:1962, text:'Founded as a single cannery in Bell Creek by two brothers who couldn\'t agree on a recipe, so they sold both.'},
+    {year:1988, text:'Riverside plant opens. First time Meridian makes something that isn\'t in a can.'},
+    {year:2004, text:'Acquired by a national holding company. Meridian Crunch bars survive the rebrand; almost nothing else does.'},
+    {year:2016, text:'Prairie Junction plant opens fast, understaffed, and never quite catches up on culture what it gained in output.'},
+    {year:2021, text:'A rough restructuring leaves trust across all three plants at its lowest point in company history.'},
+    {year:2022, text:'The Employee Listening Center of Excellence is founded. This is where you come in.'}
+  ]
+};
+
 var CHARS = {
-  marcus: {name:'Marcus', role:'Site A Plant Manager',av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>')},
-  delia:  {name:'Delia',  role:'CHRO',av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>')},
-  raj:    {name:'Raj',    role:'CFO',av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>')},
-  yolanda:{name:'Yolanda',role:'Site B Supervisor',av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>')}
+  marcus: {name:'Marcus', role:'Bell Creek Plant Manager',av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
+    bio:'Nineteen years at Bell Creek, the last six as plant manager &#8212; he started on the line himself. Two previous "engagement initiatives" went nowhere and cost him credibility with his own team for championing them, which is exactly why he\'s slow to trust this one. Coaches a rec-league softball team and will absolutely tell you about it.'},
+  delia:  {name:'Delia',  role:'CHRO',av:II('<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
+    bio:'Recruited three years ago from a much larger consumer goods company specifically to modernize Meridian\'s people practices. She hired you, personally, which means your success is hers too &#8212; she\'s more politically exposed by this program than she lets on. Runs on cold brew and a company book club that only she attends.'},
+  raj:    {name:'Raj',    role:'CFO',av:II('<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8 16v-3M12 16V9M16 16v-5"/>'),
+    bio:'Eight years at Meridian. Watched the last "employee engagement" vendor get quietly non-renewed after two years and nothing to show for it &#8212; his skepticism is scar tissue, not temperament. Genuinely good with people once the numbers earn his trust. Keeps a spreadsheet of everything, including his kids\' Little League stats.'},
+  yolanda:{name:'Yolanda',role:'Riverside Supervisor',av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
+    bio:'Youngest supervisor at Riverside, promoted early after she started running her own informal listening sessions without waiting for permission. Ambitious in a way she doesn\'t hide, and still refreshingly unjaded about org politics. Sees this program as her chance to be visible beyond one plant.'}
 };
 
 // ============================================================
@@ -450,7 +479,7 @@ var CHARS = {
 
 var CHAR_ARCS = {
   marcus: {
-    name:'Marcus', role:'Site A Plant Manager', av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
+    name:'Marcus', role:'Bell Creek Plant Manager', av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
     stages:[
       {label:'Skeptical', desc:'Marcus has told his team surveys change nothing. He is a friction point.'},
       {label:'Cautious',  desc:'Marcus is less vocal in his skepticism. He attended one session without being asked.'},
@@ -519,19 +548,19 @@ var CHAR_ARCS = {
     ]
   },
   yolanda: {
-    name:'Yolanda', role:'Site B Supervisor', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
+    name:'Yolanda', role:'Riverside Supervisor', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
     stages:[
       {label:'Interested', desc:'Yolanda is curious about the program and doing small things proactively.'},
       {label:'Active',     desc:'Yolanda runs her own listening sessions. She asks good questions.'},
-      {label:'Champion',   desc:'Yolanda is the most visible manager advocate for the program at Site B.'},
+      {label:'Champion',   desc:'Yolanda is the most visible manager advocate for the program at Riverside.'},
       {label:'Model',      desc:'Yolanda is cited as an example by other sites. She mentors managers.'}
     ],
     advanceOn:{track:'comms', decisions:['y1-b','y2-b','y3-b','y4-b','y5-b']},
     posEvents:[
       [{text:"Yolanda asked when the next survey results would be shared. First time a manager asked proactively.",d:1}],
-      [{text:"Yolanda ran her own listening session at Site B without being asked.",d:2}],
+      [{text:"Yolanda ran her own listening session at Riverside without being asked.",d:2}],
       [{text:"Yolanda mentioned the listening program in a leadership forum. Delia noticed.",d:2}],
-      [{text:"A manager at Site C asked Yolanda for coaching on how she handles action planning.",d:3}]
+      [{text:"A manager at Prairie Junction asked Yolanda for coaching on how she handles action planning.",d:3}]
     ],
     negEvents:[
       [],
@@ -657,17 +686,17 @@ function getRecReason(dimId, ap, part, year, treeBuilt){
 
 var SITS = [
   {id:'y0-q1',q:1,tut:true,title:'The Floor Supervisor Question',char:'delia',
-   scenario:'Delia forwarded an email from a Site B floor supervisor asking why last year\'s survey "went nowhere." She added one line: "Worth addressing?"',
+   scenario:'Delia forwarded an email from a Riverside floor supervisor asking why last year\'s survey "went nowhere." She added one line: "Worth addressing?"',
    opts:[
-    {id:'a',badge:'SEND UPDATE',text:'Draft a plain-language update for Delia to share with Site B. Acknowledges the gap honestly.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Delia notices the transparency. Site B employees get something concrete.'}},
-    {id:'b',badge:'ASK MANAGER',text:'Suggest Delia ask the Site B manager to hold a brief team conversation. Takes it off your plate.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. Nothing moves — but nothing costs either.'}},
-    {id:'c',badge:'PRESENT DIRECTLY',text:'Ask Delia to let you present directly to Site B. Higher exposure, higher trust signal if it lands.',slots:1,bud:0,pc:0,req:{zone:'engaged'},con:{trust:5,ap:2,part:1,note:'Employees at Site B feel seen. Delia is impressed by the initiative.'}}
+    {id:'a',badge:'SEND UPDATE',text:'Draft a plain-language update for Delia to share with Riverside. Acknowledges the gap honestly.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Delia notices the transparency. Riverside employees get something concrete.'}},
+    {id:'b',badge:'ASK MANAGER',text:'Suggest Delia ask the Riverside manager to hold a brief team conversation. Takes it off your plate.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. Nothing moves — but nothing costs either.'}},
+    {id:'c',badge:'PRESENT DIRECTLY',text:'Ask Delia to let you present directly to Riverside. Higher exposure, higher trust signal if it lands.',slots:1,bud:0,pc:0,req:{zone:'engaged'},con:{trust:5,ap:2,part:1,note:'Employees at Riverside feel seen. Delia is impressed by the initiative.'}}
    ]},
   {id:'y0-q2',q:2,tut:false,title:'The Confidentiality Request',char:'marcus',
    scenario:'Marcus asked for his team\'s individual survey responses. He wants to "have real conversations" with people who raised concerns. His intent is genuine.',
    opts:[
     {id:'a',badge:'EXPLAIN',text:'Walk Marcus through why individual responses are not shared. Offer themes and his team\'s aggregate picture instead.',slots:0,bud:0,pc:0,req:null,con:{trust:-1,ap:1,part:0,note:'Marcus is mildly frustrated but respects it. Employee trust holds.'}},
-    {id:'b',badge:'FACILITATE SESSION',text:'Offer small-group listening sessions you facilitate. Gives Marcus the conversations without breaching confidentiality.',slots:1,bud:400,pc:0,req:null,con:{trust:2,ap:2,part:0,note:'Marcus feels supported. Site A teams feel heard.'}},
+    {id:'b',badge:'FACILITATE SESSION',text:'Offer small-group listening sessions you facilitate. Gives Marcus the conversations without breaching confidentiality.',slots:1,bud:400,pc:0,req:null,con:{trust:2,ap:2,part:0,note:'Marcus feels supported. Bell Creek teams feel heard.'}},
     {id:'c',badge:'ESCALATE',text:'Flag to Delia that a manager is requesting individual data. Protects the program but strains the relationship.',slots:0,bud:0,pc:0,req:{pc:25},con:{trust:-3,ap:0,part:0,note:'Delia backs you. Marcus feels managed, not supported.'}}
    ]},
   {id:'y0-q3',q:3,tut:false,title:'The Platform Question',char:'raj',
@@ -678,7 +707,7 @@ var SITS = [
     {id:'c',badge:'MAKE THE CASE',text:'Present a direct cost-benefit response with data on what the platform enables and what would be lost switching.',slots:1,bud:0,pc:0,req:{node:'infra-l1',pc:30},con:{trust:5,ap:0,part:0,note:'Raj respects the directness. The case lands.'}}
    ]},
   {id:'y0-q4',q:4,tut:false,title:'The Capability Gap',char:'yolanda',
-   scenario:'Three managers — including Yolanda at Site B — say they do not know what to do when survey results land. They\'re not resistant. They\'re just lost.',
+   scenario:'Three managers — including Yolanda at Riverside — say they do not know what to do when survey results land. They\'re not resistant. They\'re just lost.',
    opts:[
     {id:'a',badge:'COACH PERSONALLY',text:'Spend time with each manager walking them through their results. Not scalable, but immediate.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:2,part:0,note:'Managers feel supported. Yolanda is grateful.'}},
     {id:'b',badge:'HOLD THE LINE',text:'Tell them you\'re developing something structured. Ask them to sit tight this quarter.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:-1,part:0,note:'Managers wait. AP Optimism signal turns amber. Needs to resolve next year.'}},
@@ -696,7 +725,7 @@ var YEAR_POOLS = {
   1: [
     // RELATIONSHIP shape x2
     {id:'y1-a',shape:'relationship',title:'The Manager Who Went Off-Script',char:'marcus',
-     scenario:'A manager at Site A — one of Marcus\'s direct reports — told her team that "corporate doesn\'t actually read these surveys." Marcus heard secondhand and is annoyed on your behalf, but hasn\'t said anything to her.',
+     scenario:'A manager at Bell Creek — one of Marcus\'s direct reports — told her team that "corporate doesn\'t actually read these surveys." Marcus heard secondhand and is annoyed on your behalf, but hasn\'t said anything to her.',
      opts:[
       {id:'a',badge:'TALK TO HER DIRECTLY',text:'Go around Marcus and address it with the manager yourself.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Quick fix. Marcus notices you went around him.'}},
       {id:'b',badge:'ASK MARCUS TO HANDLE IT',text:'It\'s his report. Let him manage his own team.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Respects the chain of command.'}},
@@ -717,12 +746,12 @@ var YEAR_POOLS = {
       {id:'b',badge:'AGREE TO FLEX',text:'Give up part of this quarter\'s budget. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj appreciates the flexibility.'}},
       {id:'c',badge:'PROPOSE A TRADE',text:'Offer the flex in exchange for Raj\'s support on your next recommendation.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land, regardless of Trust zone.'},guaranteeNextRec:true}
      ]},
-    {id:'y1-d',shape:'resource_tradeoff',title:'The HRBP Survey Request',char:'delia',
-     scenario:'HR Business Partners want to add four questions to the survey covering topics outside the CoE\'s scope. Delia is sympathetic to them but defers to you.',
+    {id:'y1-d',shape:'resource_tradeoff',title:'The Values Gap',char:'delia',
+     scenario:'An HRBP points out, in a planning meeting, that the draft survey does not ask a single question tied to "People First" &#8212; the value posted on every break room wall in the company. Delia is sympathetic but defers to you on what to do about it.',
      opts:[
-      {id:'a',badge:'DECLINE',text:'Keep the survey focused. Explain why scope matters for data quality.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:1,note:'Participation holds steady. HRBPs are mildly annoyed.'}},
-      {id:'b',badge:'NEGOTIATE',text:'Accept two of their four questions in exchange for trimming two of your own.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A workable compromise.'}},
-      {id:'c',badge:'TRADE FOR INFLUENCE',text:'Accept their questions in exchange for HRBP support on your next recommendation.',slots:0,bud:0,pc:15,req:{pc:15},con:{trust:1,ap:0,part:-2,note:'Survey dilutes slightly, but your next recommendation is guaranteed to land.'},guaranteeNextRec:true}
+      {id:'a',badge:'DECLINE',text:'Keep the survey focused on what it already measures well. Explain why scope matters for data quality.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:1,note:'Participation holds steady. The HRBP is mildly annoyed the poster and the survey still don\'t match.'}},
+      {id:'b',badge:'NEGOTIATE',text:'Add one question that actually probes "People First" in exchange for trimming two less-useful ones.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A workable compromise. The survey and the wall poster finally say the same thing.'}},
+      {id:'c',badge:'TRADE FOR INFLUENCE',text:'Add the HRBP\'s full question set in exchange for their support on your next recommendation.',slots:0,bud:0,pc:15,req:{pc:15},con:{trust:1,ap:0,part:-2,note:'Survey dilutes slightly, but your next recommendation is guaranteed to land.'},guaranteeNextRec:true}
      ]},
     // DATA_INTEGRITY shape x2
     {id:'y1-e',shape:'data_integrity',title:'The Premature Announcement',char:'delia',
@@ -797,17 +826,17 @@ var YEAR_POOLS = {
       {id:'c',badge:'NAME MARCUS HER SUCCESSOR',text:'Formally position Marcus to carry her work forward.',slots:1,bud:0,pc:0,req:{node:'mgr-l2'},con:{trust:4,ap:3,part:0,note:'Marcus steps into a real leadership role. His arc accelerates.'}}
      ]},
     {id:'y2-b',shape:'relationship',title:'Yolanda Goes Public',char:'yolanda',
-     scenario:'Yolanda wants to post her team\'s raw scores on the Site B break room wall. Scores are good. She\'s proud and wants to be transparent.',
+     scenario:'Yolanda wants to post her team\'s raw scores on the Riverside break room wall. Scores are good. She\'s proud and wants to be transparent.',
      opts:[
       {id:'a',badge:'SUPPORT IT AS-IS',text:'Let her post the raw numbers. She knows her team.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:1,note:'Bold and effective, since her scores are good.'}},
       {id:'b',badge:'DECLINE',text:'Raw scores create comparison pressure across sites.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Cautious. Yolanda is a little disappointed.'}},
       {id:'c',badge:'HELP HER FRAME IT WELL',text:'Work with her to post themes and actions instead of raw numbers.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:1,note:'Sustainable, systemic, and Yolanda still gets her moment.'}}
      ]},
     {id:'y2-c',shape:'resource_tradeoff',title:'The ROI Spreadsheet',char:'raj',
-     scenario:'Raj asks in a leadership meeting what the measurable ROI of the listening program is. He has a spreadsheet. Your costs on one side. A blank column labeled "outcomes" on the other.',
+     scenario:'Raj asks in a leadership meeting what the measurable ROI of the listening program is. He has a spreadsheet. Your costs on one side. A blank column labeled "outcomes" on the other. Delia jumps in before you can answer: "You can\'t spreadsheet trust, Raj." He doesn\'t back down. They\'re not really arguing with each other anymore &#8212; they\'re both looking at you.',
      opts:[
-      {id:'a',badge:'ACKNOWLEDGE THE GAP',text:'Admit the measurement framework needs work. Commit to building one.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Honest. Doesn\'t resolve Raj\'s skepticism yet.'}},
-      {id:'b',badge:'SPEND TO BUILD THE CASE',text:'Commission a quick internal analysis connecting your data to retention trends.',slots:0,bud:2500,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj sees something concrete, even if imperfect.'}},
+      {id:'a',badge:'ACKNOWLEDGE THE GAP',text:'Admit the measurement framework needs work, siding with neither of them. Commit to building one.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Honest. Doesn\'t resolve Raj\'s skepticism yet, and Delia looks a little exposed for defending you.'}},
+      {id:'b',badge:'SPEND TO BUILD THE CASE',text:'Commission a quick internal analysis connecting your data to retention trends &#8212; give Raj something concrete without contradicting Delia.',slots:0,bud:2500,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Raj sees something concrete, even if imperfect. Delia\'s instinct is vindicated without anyone losing face.'}},
       {id:'c',badge:'TRADE FOR PATIENCE',text:'Ask Raj directly for one more year before judging ROI, in exchange for committing to deliver hard numbers next cycle.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land.'},guaranteeNextRec:true}
      ]},
     {id:'y2-d',shape:'resource_tradeoff',title:'The Survey Frequency Memo',char:'raj',
@@ -818,7 +847,7 @@ var YEAR_POOLS = {
       {id:'c',badge:'TRADE FOR THE WIN',text:'Use Political Capital to make this a non-issue.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:3,ap:0,part:0,note:'Annual cadence guaranteed. Resolved cleanly.'}}
      ]},
     {id:'y2-e',shape:'data_integrity',title:'Score Coaching',char:'marcus',
-     scenario:'A manager at Site A told his team to "fill in fives across the board" so they could finish the survey faster. Two employees told you independently.',
+     scenario:'A manager at Bell Creek told his team to "fill in fives across the board" so they could finish the survey faster. Two employees told you independently.',
      opts:[
       {id:'a',badge:'NOTE IT AND MONITOR',text:'Watch next year\'s data for patterns without confronting directly.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Avoids conflict. Data integrity risk persists.'},variance:true},
       {id:'b',badge:'ADDRESS IT DIRECTLY',text:'Talk to the manager and his plant director.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Politically costly, but the right call.'}},
@@ -895,11 +924,11 @@ var YEAR_POOLS = {
       {id:'c',badge:'FORMALIZE AS PART OF THE TREE',text:'Turn this into the foundation for Manager Cohort investment.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s initiative becomes systemic. Her arc nears completion.'}}
      ]},
     {id:'y3-c',shape:'resource_tradeoff',title:'The Budget Threat',char:'raj',
-     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Your program is the most expensive line item under review.',
+     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Raj is pushing it hard. Delia pushes back just as hard in the same meeting &#8212; "We spent two years building trust for this. You don\'t get that back once it\'s gone." Neither of them is wrong. They\'re waiting on you to break the tie.',
      opts:[
-      {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability.'}},
-      {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Agree to the change, but run it with far more rigor than expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows.'}},
-      {id:'c',badge:'FIGHT TO KEEP THE PROGRAM',text:'Present a detailed cost-reduction plan and make the case directly.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'High stakes. If it lands, the program is secured.'}}
+      {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made &#8212; buys Delia room without directly overruling Raj.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability. Neither exec gets a clean win.'}},
+      {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Side with Raj, but run it with far more rigor than he expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows. Delia notes you sided with Finance.'}},
+      {id:'c',badge:'FIGHT TO KEEP THE PROGRAM',text:'Side with Delia. Present a detailed cost-reduction plan and make the case directly to Raj.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'High stakes. If it lands, the program is secured and Delia\'s read on this was right.'}}
      ]},
     {id:'y3-d',shape:'resource_tradeoff',title:'The LinkedIn Problem',char:'delia',
      scenario:'A former employee posted that the survey is "theater" and nothing ever changes. Hundreds of likes. Two current employees commented in agreement. Delia forwarded it with a question mark.',
@@ -916,11 +945,11 @@ var YEAR_POOLS = {
       {id:'c',badge:'DEFEND WITH TREND DATA',text:'Build and present a full three-year data package with a specific Year 4-5 investment plan.',slots:2,bud:0,pc:0,req:{node:'infra-l2'},con:{trust:6,ap:2,part:0,note:'High risk, high reward. The data has to be solid.'},riskConsequence:{trust:-4}}
      ]},
     {id:'y3-f',shape:'data_integrity',title:'The Participation Plateau',char:null,
-     scenario:'Participation has been flat for two years despite communications investment. A vendor suggests gift cards for completing the survey.',
+     scenario:'Participation has been flat for two years despite communications investment. A vendor suggests gift cards for completing the survey. Someone on your own team asks, half-joking, whether that squares with "Integrity" &#8212; do right even when no one\'s checking the line.',
      opts:[
-      {id:'a',badge:'DECLINE',text:'Incentivized participation produces less honest data.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Data quality protected.'}},
-      {id:'b',badge:'PILOT AT ONE SITE',text:'Test it narrowly at the lowest-participation site only.',slots:1,bud:1200,pc:0,req:null,con:{trust:0,ap:0,part:2,note:'Experimental, contained.'}},
-      {id:'c',badge:'FIX THE ROOT CAUSE',text:'Invest in understanding why participation plateaued instead of incentivizing around it.',slots:1,bud:0,pc:0,req:{node:'comms-l2'},con:{trust:3,ap:1,part:3,note:'Slower, but addresses the actual problem.'}}
+      {id:'a',badge:'DECLINE',text:'Incentivized participation produces less honest data &#8212; not worth trading Integrity for a number.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Data quality protected.'}},
+      {id:'b',badge:'PILOT AT ONE SITE',text:'Test it narrowly at Prairie Junction, the lowest-participation plant, only.',slots:1,bud:1200,pc:0,req:null,con:{trust:0,ap:0,part:2,note:'Experimental, contained.'}},
+      {id:'c',badge:'FIX THE ROOT CAUSE',text:'Invest in understanding why participation plateaued instead of incentivizing around it.',slots:1,bud:0,pc:0,req:{node:'comms-l2'},con:{trust:3,ap:1,part:3,note:'Slower, but addresses the actual problem without cutting a corner.'}}
      ]},
     {id:'y3-g',shape:'capacity_mechanic',title:'The Executive Briefing Opportunity',char:null,
      scenario:'You\'re offered a quarterly slot in the leadership meeting to brief on listening data. One slot per quarter for the rest of the year.',
@@ -938,7 +967,7 @@ var YEAR_POOLS = {
      ]},
     // RELATIONSHIP shape x3
     {id:'y3-i',shape:'relationship',title:'The Quiet Mentor',char:null,
-     scenario:'A manager at Site C &#8212; never vocal, never a problem &#8212; has quietly been coaching two newer supervisors using ideas from your program. No one asked her to.',
+     scenario:'A manager at Prairie Junction &#8212; never vocal, never a problem &#8212; has quietly been coaching two newer supervisors using ideas from your program. No one asked her to.',
      opts:[
       {id:'a',badge:'APPROVE INFORMALLY',text:'Let her keep doing it without making it official.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Low cost, modest impact.'}},
       {id:'b',badge:'GIVE IT STRUCTURE',text:'Help her set a real cadence for the coaching.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'More likely to stick.'}},
@@ -1069,7 +1098,7 @@ var YEAR_POOLS = {
       {id:'c',badge:'MAKE IT THE CLOSING STORY',text:'Build the entire leadership review around Marcus\'s transformation.',slots:2,bud:0,pc:0,req:{node:'mgr-l4'},con:{trust:6,ap:3,part:0,note:'Marcus\'s arc becomes the program\'s defining proof point.'}}
      ]},
     {id:'y5-b',shape:'relationship',title:'Yolanda\'s Next Chapter',char:'yolanda',
-     scenario:'Yolanda is being considered for a regional role that would take her beyond Site B. She asks what you think.',
+     scenario:'Yolanda is being considered for a regional role that would take her beyond Riverside. She asks what you think.',
      opts:[
       {id:'a',badge:'ENCOURAGE HER TO GO',text:'She has outgrown what you can offer here. Tell her honestly.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Generous, even if it means losing her.'}},
       {id:'b',badge:'STAY NEUTRAL',text:'It is her decision. Offer support either way.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Respectful distance.'}},
@@ -1153,7 +1182,7 @@ var YEAR_POOLS = {
 };
 
 var YEAR_PRESURVEY = {
-  1: {prompt:'After last year\'s low Site C participation, how much do you push transparency about what changed?',
+  1: {prompt:'After last year\'s low Prairie Junction participation, how much do you push transparency about what changed?',
    opts:[
     {id:'a',badge:'SHOW WHAT CHANGED',text:'Lead the launch by naming specific things that happened because of last year\'s results.',req:{node:'comms-l1'},effect:{part:4,trust:2,note:'Concrete proof the survey mattered.'}},
     {id:'b',badge:'KEEP IT SIMPLE',text:'Standard launch messaging, no special framing.',req:null,effect:{part:0,note:'Standard launch.'}},
@@ -1193,7 +1222,7 @@ var POS_EVENTS = [
   {char:null,text:'Three managers signed up for the action planning roundtable before the reminder went out.',d:1,cond:{node:'mgr-l1'}},
   {char:null,text:'A line worker asked when the next survey was. First time anyone has asked proactively.',d:1,cond:null},
   {char:'delia',text:'Delia forwarded your results summary to the board with a note: "Good work."',d:2,cond:null},
-  {char:null,text:'Site B participation is the highest it has been. Word is spreading.',d:1,cond:{node:'comms-l1'}},
+  {char:null,text:'Riverside participation is the highest it has been. Word is spreading.',d:1,cond:{node:'comms-l1'}},
   {char:'marcus',text:'Marcus attended the data literacy workshop without being asked.',d:1,cond:{node:'mgr-l2'}}
 ];
 var NEG_EVENTS = [
@@ -1205,9 +1234,9 @@ var NEG_EVENTS = [
   {char:null,text:'Finance flagged the platform subscription as an area for cost review.',d:-2,cond:{node:'infra-l2'}}
 ];
 var PULSES = {
-  pos:['A manager at Site B asked more questions after the results summary. Something is shifting.','Yolanda sent a message at 7am: her team is already asking about the next survey.','Three managers from different sites were overheard comparing action planning approaches.','A new hire said during onboarding she\'d heard Meridian actually does something with its survey results.'],
-  neu:['Things feel steady at Site A. No news, which is its own kind of news.','The quarter is quiet. Hard to tell if that means things are good or people have stopped paying attention.','Managers are submitting action plans on time. Whether they\'re doing anything with them is harder to know.'],
-  neg:['Employees at Site C have not heard anything about the survey since it closed.','A manager mentioned the action plan was just something HR makes them do.','Someone wrote "nothing ever changes" on a break room whiteboard near the survey poster.','Participation in the mid-year pulse was low. Employees may be losing faith.']
+  pos:['A manager at Riverside asked more questions after the results summary. Something is shifting.','Yolanda sent a message at 7am: her team is already asking about the next survey.','Three managers from different sites were overheard comparing action planning approaches.','A new hire said during onboarding she\'d heard Meridian actually does something with its survey results.'],
+  neu:['Things feel steady at Bell Creek. No news, which is its own kind of news.','The quarter is quiet. Hard to tell if that means things are good or people have stopped paying attention.','Managers are submitting action plans on time. Whether they\'re doing anything with them is harder to know.'],
+  neg:['Employees at Prairie Junction have not heard anything about the survey since it closed.','A manager mentioned the action plan was just something HR makes them do.','Someone wrote "nothing ever changes" on a break room whiteboard near the survey poster.','Participation in the mid-year pulse was low. Employees may be losing faith.']
 };
 
 // ── STATE ──
@@ -1647,7 +1676,8 @@ var R = {
 
   diff:function(){
     var html='<div class="screen"><div><div class="g-title-main">Engagement <span class="amber">Unlocked</span></div><div class="g-title-sub">Listen and Lead</div></div>';
-    html+='<p class="diff-ctx">You lead the Employee Listening Center of Excellence at Meridian Foods — a food and beverage manufacturer with 3 sites and 1,400 employees. Five annual survey cycles. Make listening mean something.</p>';
+    html+='<p class="diff-ctx">You lead the Employee Listening Center of Excellence at Meridian Foods &#8212; makers of Meridian Crunch snack bars, running 3 plants (Bell Creek, Riverside, Prairie Junction) and 1,400 employees. Five annual survey cycles. Make listening mean something.</p>';
+    html+='<div style="text-align:center;margin-bottom:16px"><button class="tree-view-btn" onclick="C.openCompany()" style="background:none;border:none">About Meridian Foods &#8594;</button></div>';
     html+='<div class="diff-cards">';
     var keys=['easy','normal','hard'];
     for(var i=0;i<keys.length;i++){
@@ -1700,7 +1730,7 @@ var R = {
     var sit=S.sit;
     var html='<div class="game-shell">';
     // Top bar
-    html+='<div class="g-topbar"><div class="g-topbar-title">Engagement <span class="amber">Unlocked</span></div><div class="g-topbar-period">Year '+S.year+' &#183; Q'+S.q+(S.isTut?' &#183; Orientation':'')+'</div><div style="display:flex;gap:8px"><button onclick="C.showHelp()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">? Guide</button><button onclick="C.toggleSound()" id="snd-btn" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#128266; Sound</button><button onclick="C.restart()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#8635; New Game</button></div></div>';
+    html+='<div class="g-topbar"><div class="g-topbar-title">Engagement <span class="amber">Unlocked</span></div><div class="g-topbar-period">Year '+S.year+' &#183; Q'+S.q+(S.isTut?' &#183; Orientation':'')+'</div><div style="display:flex;gap:8px"><button onclick="C.openCompany()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#127970; Company</button><button onclick="C.showHelp()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">? Guide</button><button onclick="C.toggleSound()" id="snd-btn" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#128266; Sound</button><button onclick="C.restart()" style="background:transparent;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:10px;padding:3px 8px;cursor:pointer;font-family:var(--sans)">&#8635; New Game</button></div></div>';
     // Trust bar
     // Pending basket cost (for live feedback while selecting investments)
     var selIds=S.sel?Object.keys(S.sel):[];
@@ -1794,7 +1824,7 @@ var R = {
       var ch=CHARS[charId];
       var stage=S.charArcs[charId]||0;
       var stageInfo=arc.stages[stage];
-      html+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px">';
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer" onclick="C.openCompany()" title="View bio">';
       html+='<span style="font-size:18px;flex-shrink:0">'+ch.av+'</span>';
       html+='<div>';
       html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
@@ -2193,7 +2223,7 @@ var R = {
       var stage=S.charArcs[charId]||0;
       var stageInfo=arc.stages[stage];
       var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
-      html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start">';
+      html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start;cursor:pointer" onclick="C.openCompany()" title="View bio">';
       html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
       html+='<div>';
       html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
@@ -2481,6 +2511,65 @@ var R = {
     document.body.insertAdjacentHTML('beforeend',html);
   },
 
+  companyModal:function(){
+    var existing=this.$('company-modal');if(existing)existing.remove();
+    var ci=COMPANY_INFO;
+    var html='<div class="modal-ov" id="company-modal" onclick="C.closeCompany(event)">';
+    html+='<div class="modal-box">';
+    html+='<div class="modal-hdr"><div class="modal-title">About '+ci.name+'</div><button class="modal-close" onclick="C.closeCompany()">Close &#10005;</button></div>';
+    html+='<div style="border:1px solid var(--borderl);border-radius:var(--r-narr);padding:16px;background:color-mix(in srgb, var(--amber) 4%, transparent)">';
+    html+='<div style="font-family:var(--display);font-size:18px;color:var(--amber)">'+ci.name+'</div>';
+    html+='<div style="font-size:12px;color:var(--t2);margin-top:2px">'+ci.tagline+'</div>';
+    html+='<div style="font-size:11px;color:var(--tm);margin-top:8px;line-height:1.6">Founded '+ci.founded+'. Headquartered at '+ci.hq+'</div>';
+    html+='</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+    html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:14px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:6px">Mission</div>';
+    html+='<div style="font-size:13px;color:var(--t2);line-height:1.6">'+ci.mission+'</div>';
+    html+='</div>';
+    html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:14px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:6px">Vision</div>';
+    html+='<div style="font-size:13px;color:var(--t2);line-height:1.6">'+ci.vision+'</div>';
+    html+='</div>';
+    html+='</div>';
+    html+='<div>';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">Values</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    ci.values.forEach(function(v){
+      html+='<div style="border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;background:var(--card)">';
+      html+='<div style="font-size:12px;font-weight:700;color:var(--t2)">'+v.name+'</div>';
+      html+='<div style="font-size:11px;color:var(--tm);margin-top:2px;line-height:1.5">'+v.desc+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+    html+='<div>';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">History</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    ci.history.forEach(function(h){
+      html+='<div style="display:flex;gap:12px;align-items:flex-start">';
+      html+='<div style="font-family:var(--mono);font-size:11px;color:var(--amber);flex-shrink:0;width:36px">'+h.year+'</div>';
+      html+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+h.text+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+    html+='<div>';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:8px">Leadership</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    Object.keys(CHARS).forEach(function(charId){
+      var ch=CHARS[charId];
+      html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:12px;background:var(--card)">';
+      html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">';
+      html+='<span style="font-size:20px;color:var(--amber)">'+ch.av+'</span>';
+      html+='<div><div style="font-size:13px;font-weight:700;color:var(--t2)">'+ch.name+'</div><div style="font-size:10px;color:var(--tm)">'+ch.role+'</div></div>';
+      html+='</div>';
+      html+='<div style="font-size:11px;color:var(--tm);line-height:1.6">'+(ch.bio||'')+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+    html+='</div></div>';
+    document.body.insertAdjacentHTML('beforeend',html);
+  },
+
   animUnlock:function(id){
     // Keep node highlight animation only — built detail shown in resolve summary
     var el=this.$('node-'+id);
@@ -2717,6 +2806,11 @@ var C = {
     document.body.appendChild(overlay);
   },
 
+  openCompany:function(){R.companyModal();},
+  closeCompany:function(e){
+    if(e&&e.target&&e.target.id!=='company-modal')return;
+    var m=R.$('company-modal');if(m)m.remove();
+  },
   openTree:function(){R.treeModal(S.qPhase==='build');},
   toggleTreeDetails:function(trackId){
     S.treeDetailsOpen[trackId]=!S.treeDetailsOpen[trackId];

@@ -8,10 +8,10 @@ conflict rather than silently overriding it.
 
 A single-file, browser-based serious game (`index.html`, no dependencies, no build
 step) about leading an Employee Listening Center of Excellence at a fictional food
-manufacturer (Meridian Foods, 3 sites, 1,400 employees). The player runs five annual
-survey cycles (plus an optional Year 0 tutorial), making quarterly decisions,
-investing in a capability tree, and managing four resources. Deployed via GitHub
-Pages.
+manufacturer (Meridian Foods — Bell Creek, Riverside, and Prairie Junction plants,
+1,400 employees). The player runs five annual survey cycles (plus an optional Year 0
+tutorial), making quarterly decisions, investing in a capability tree, and managing
+four resources. Deployed via GitHub Pages.
 
 **This game is also an engine.** The architecture is deliberately content-agnostic:
 swapping the content layer (situations, characters, tree, metric names) should yield
@@ -153,6 +153,22 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   track investment (1 stage per 2 nodes) + key decision IDs. Stage changes swap
   ambient event pools. People panel (left panel + postsurvey grid) always shows
   all four with role + stage.
+- **Company identity / About page:** `COMPANY_INFO` (name, product tagline, founding
+  year, HQ blurb, mission, vision, 4 named values, history timeline) plus a `bio`
+  field per `CHARS` entry — pure content layer, swap this object (and the bios) to
+  reskin the game per the "this game is also an engine" rule at the top of this
+  file. Rendered by `R.companyModal()` / `C.openCompany()`, reachable from a button
+  on the difficulty-select screen, the in-game nav ("Company"), and by clicking any
+  entry in the People panel (left panel or postsurvey grid). The 4 stated values
+  (Integrity, People First, Continuous Improvement, Ownership) are referenced by
+  name in a couple of situations (`y1-d`, `y3-f`) so decisions occasionally cite the
+  company's own stated values directly, not just abstract trust/AP math — keep new
+  values-tie-in situations reusing an existing shape's cost/effect numbers, per the
+  situation-shape rule below, rather than inventing new mechanics for the callback.
+  Two situations (`y2-c`, `y3-c`) frame Raj and Delia disagreeing with each other in
+  the scenario text (not just with the player) — a lightweight way to make the exec
+  cast feel like they have relationships with each other, not just with the CoE
+  lead; the underlying options/numbers are unchanged from before the rewrite.
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by
