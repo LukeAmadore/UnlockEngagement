@@ -651,24 +651,11 @@ var CHAR_ARCS = {
   }
 };
 
-// Derived, display-only summary of a tier's arc progress — no separate trust
-// resource, just a plain-language read on the existing 0-3 stage numbers so
-// "Leadership" and "Plant Leadership" read as distinct groups, not one flat list.
+// Groups CHARS by tier so "Leadership" and "Plant Leadership" read as distinct
+// groups, not one flat list. (An earlier version also showed a derived
+// per-tier status label here — dropped, it read as unexplained jargon.)
 function tierIds(tier){
   return Object.keys(CHARS).filter(function(id){return CHARS[id].tier===tier;});
-}
-function groupStatusLabel(avgStage){
-  if(avgStage>=2.5)return 'Strong';
-  if(avgStage>=1.5)return 'Building';
-  if(avgStage>=0.5)return 'Mixed';
-  return 'Early';
-}
-function tierStatus(tier){
-  var ids=tierIds(tier);
-  if(!ids.length)return 'Early';
-  var sum=0;
-  for(var i=0;i<ids.length;i++)sum+=(S.charArcs[ids[i]]||0);
-  return groupStatusLabel(sum/ids.length);
 }
 
 
@@ -757,28 +744,28 @@ function getRecReason(dimId, ap, part, year, treeBuilt){
   if(dimId==='growth'){
     if(ap<55&&year>=2) return 'AP Optimism ('+ap+') is below the healthy line, and it\'s year '+year+' &#8212; this is the point that gap starts to matter.';
     if(ap<65) return 'AP Optimism ('+ap+') is trending soft, but not critical yet.';
-    return 'AP Optimism ('+ap+') is healthy &#8212; this isn\'t where the problem is.';
+    return '';
   }
   if(dimId==='recognition'){
     if(ap<52&&part>=65) return 'AP Optimism ('+ap+') is low even though Participation ('+part+'%) is solid &#8212; people show up but don\'t feel recognized for it.';
     if(ap<62) return 'AP Optimism ('+ap+') is soft; recognition could help, but it isn\'t the clear primary driver.';
-    return 'AP Optimism ('+ap+') is healthy &#8212; recognition isn\'t the gap right now.';
+    return '';
   }
   if(dimId==='comms'){
     if(part<68) return 'Participation ('+part+'%) is low &#8212; people aren\'t hearing what happened to their last round of feedback.';
     if(part<76) return 'Participation ('+part+'%) is trending soft.';
-    return 'Participation ('+part+'%) is healthy &#8212; this isn\'t the gap.';
+    return '';
   }
   if(dimId==='safety'){
     if(ap<50&&year<=3) return 'AP Optimism ('+ap+') is very low this early &#8212; that usually means people are still afraid to speak up.';
     if(ap<60) return 'AP Optimism ('+ap+') is soft, though not at the fear-driven range yet.';
-    return 'AP Optimism ('+ap+') is healthy &#8212; this isn\'t where trust is breaking down.';
+    return '';
   }
   if(dimId==='mgr'){
     var mgrBuilt2=Object.keys(treeBuilt||{}).filter(function(id){return id.indexOf('mgr')===0;}).length;
     if(mgrBuilt2<2&&year>=2) return 'Only '+mgrBuilt2+'/4 Manager Capacity nodes built by year '+year+' &#8212; managers don\'t have the tools yet.';
     if(mgrBuilt2<3) return mgrBuilt2+'/4 Manager Capacity nodes built &#8212; there is room to grow here.';
-    return 'Manager Capacity is well-built ('+mgrBuilt2+'/4) &#8212; this isn\'t the gap.';
+    return '';
   }
   return '';
 }
@@ -893,7 +880,7 @@ var YEAR_POOLS = {
      ]},
     // RESOURCE_TRADEOFF shape x3
     {id:'y1-j',shape:'resource_tradeoff',title:'The Shared Vendor Contract',char:'delia',
-     scenario:'Delia proposes sharing the listening program\'s survey vendor contract with a wellness initiative to split costs. Desmond pushes back in the same meeting: "Every shared contract I\'ve seen turns into nobody\'s priority within a year." Delia thinks he\'s being reflexively cautious. He thinks she\'s underestimating how these things actually go on the floor.',
+     scenario:'Delia proposes sharing the listening program\'s survey vendor contract with a wellness initiative to split costs. Desmond, the COO, pushes back in the same meeting: "Every shared contract I\'ve seen turns into nobody\'s priority within a year." Delia thinks he\'s being reflexively cautious. He thinks she\'s underestimating how these things actually go on the floor.',
      opts:[
       {id:'a',badge:'KEEP CONTRACTS SEPARATE',text:'Side with Desmond. Explain that shared scope creates dependency risk you\'d rather avoid.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. The contract stays yours. Desmond notes you took operational risk seriously.'}},
       {id:'b',badge:'AGREE TO SHARE',text:'Side with Delia. Split the contract. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Delia appreciates the flexibility. Desmond files this away as a data point.'}},
@@ -1024,7 +1011,7 @@ var YEAR_POOLS = {
       {id:'c',badge:'FORMALIZE AS PART OF THE TREE',text:'Turn this into the foundation for Manager Cohort investment.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s initiative becomes systemic. Her arc nears completion.'}}
      ]},
     {id:'y3-c',shape:'resource_tradeoff',title:'The Budget Threat',char:'raj',
-     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Raj is pushing it hard on pure cost grounds. Desmond, unexpectedly, pushes back &#8212; "The turnover numbers moved. I don\'t care why, I care that they moved." Neither of them is wrong. They\'re waiting on you to break the tie.',
+     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Raj is pushing it hard on pure cost grounds. Desmond, the COO, unexpectedly pushes back &#8212; "The turnover numbers moved. I don\'t care why, I care that they moved." Neither of them is wrong. They\'re waiting on you to break the tie.',
      opts:[
       {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made &#8212; buys Desmond room without directly overruling Raj.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability. Neither exec gets a clean win.'}},
       {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Side with Raj, but run it with far more rigor than he expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows. Desmond notes you sided with Finance over the floor data.'}},
@@ -1101,11 +1088,11 @@ var YEAR_POOLS = {
 
   4: [
     {id:'y4-a',shape:'relationship',title:'The Succession Question',char:'marcus',
-     scenario:'Delia tells you she\'s leaving Meridian in six months. The program\'s future depends partly on whether her replacement inherits credibility or a fight. Marcus offers to speak on the program\'s behalf if needed.',
+     scenario:'Delia mentions, almost in passing, that a recruiter reached out about a bigger role. She says she isn\'t looking, but it clearly got her thinking about who would carry this program if she ever left. Marcus offers to speak on the program\'s behalf, if that day ever comes.',
      opts:[
-      {id:'a',badge:'KEEP IT INTERNAL',text:'Handle the transition yourself without involving Marcus.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Contained, but misses a chance to show external support.'}},
-      {id:'b',badge:'ASK MARCUS TO BE READY',text:'Have him on standby if his perspective is useful.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Modest preparation.'}},
-      {id:'c',badge:'BRIEF MARCUS TO ADVOCATE',text:'Prepare him to speak directly to the new CHRO about what changed for his team.',slots:1,bud:0,pc:0,req:{node:'mgr-l4'},con:{trust:4,ap:0,part:0,note:'Marcus becomes a credible external voice for the program.'}}
+      {id:'a',badge:'KEEP IT INTERNAL',text:'Handle succession planning yourself without involving Marcus.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Contained, but misses a chance to show external support.'}},
+      {id:'b',badge:'ASK MARCUS TO BE READY',text:'Have him on standby if his perspective is ever useful.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Modest preparation.'}},
+      {id:'c',badge:'BRIEF MARCUS TO ADVOCATE',text:'Prepare him to speak directly to whoever eventually succeeds her about what changed for his team.',slots:1,bud:0,pc:0,req:{node:'mgr-l4'},con:{trust:4,ap:0,part:0,note:'Marcus becomes a credible voice for the program, whenever that transition actually comes.'}}
      ]},
     {id:'y4-b',shape:'relationship',title:'Yolanda Gets Recognized',char:'yolanda',
      scenario:'Yolanda\'s site has been cited in an internal newsletter as a model for engagement. She\'s being asked to present at a company-wide town hall.',
@@ -1115,7 +1102,7 @@ var YEAR_POOLS = {
       {id:'c',badge:'CO-PRESENT WITH HER',text:'Join her on stage, connecting her story to the broader program.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:4,ap:2,part:1,note:'Yolanda\'s arc reaches its peak. The program gets visible proof.'}}
      ]},
     {id:'y4-c',shape:'resource_tradeoff',title:'The Scope Expansion Temptation',char:null,
-     scenario:'Warren, rare for him, shows up to the planning meeting himself and pushes for the CoE to take on a broader culture measurement mandate &#8212; quarterly pulses, manager 360s, exit interview analysis. Delia pushes back in front of him, which visibly surprises them both: "We haven\'t finished proving the first mandate works." Warren doesn\'t back down, but he\'s listening.',
+     scenario:'Warren, the CEO, rare for him, shows up to the planning meeting himself and pushes for the CoE to take on a broader culture measurement mandate &#8212; quarterly pulses, manager 360s, exit interview analysis. Delia, the CHRO, pushes back in front of him, which visibly surprises them both: "We haven\'t finished proving the first mandate works." Warren doesn\'t back down, but he\'s listening.',
      opts:[
       {id:'a',badge:'DECLINE',text:'Side with Delia. Depth over breadth. Stay focused on listening and AP Optimism.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Program integrity maintained. Warren doesn\'t love hearing no, but he respects that you didn\'t just fold.'}},
       {id:'b',badge:'ACCEPT SELECTIVELY',text:'Offer a middle path both can live with: take on exit interview analysis only.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Smart, manageable expansion. Neither Warren nor Delia gets exactly what they wanted.'}},
@@ -1212,7 +1199,7 @@ var YEAR_POOLS = {
       {id:'c',badge:'BUILD THE FULL CASE',text:'Present a complete five-year cost-benefit model for continuation.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:5,ap:0,part:0,note:'Raj has everything he needs to make the case upward.'}}
      ]},
     {id:'y5-d',shape:'resource_tradeoff',title:'The Replacement Question',char:'delia',
-     scenario:'Delia wants to know if there is someone internal who could take over the program after you leave. Desmond, in the same conversation, argues the role itself should shrink back into a normal HR function once you\'re gone &#8212; "Every plant already has someone doing a version of this now. Maybe that\'s the actual win." Delia isn\'t ready to hear that yet.',
+     scenario:'Delia wants to know if there is someone internal who could take over the program after you leave. Desmond, the COO, argues in the same conversation that the role itself should shrink back into a normal HR function once you\'re gone &#8212; "Every plant already has someone doing a version of this now. Maybe that\'s the actual win." Delia isn\'t ready to hear that yet.',
      opts:[
       {id:'a',badge:'NAME SOMEONE INFORMALLY',text:'Mention a candidate without making it official &#8212; sidestep the bigger question for now.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A start, but not a plan. Neither Delia nor Desmond gets a real answer.'}},
       {id:'b',badge:'SAY YOU ARE NOT SURE YET',text:'Side with Delia\'s instinct. Honest. The bench is not as deep as it should be.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Candid, if not reassuring. Desmond isn\'t convinced this settles anything.'}},
@@ -1373,6 +1360,8 @@ var S = {
   soundOn:true,
   yearHistory:[], // [{year,ap,part,eng,grade}] snapshot at each year end
   showTrending:false,
+  mobPanelOpen:false, // tracked in state (not just DOM classList) so re-renders triggered
+                       // by other toggles (e.g. showTrending) don't silently close it
   treeDetailsOpen:{}, // {trackId:bool} — per-track "show descriptions" toggle in the tree modal
   ambEv:null,pulse:null,pulseV:null,
   pendingUnlocks:[],
@@ -1393,7 +1382,7 @@ var S = {
     this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0,priya:0,desmond:0,warren:0};
-    this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};
+    this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};this.mobPanelOpen=false;
     this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;this.recFallout=[];
     this.guaranteedAnchorId=EXEC_DISAGREEMENT_IDS[Math.floor(Math.random()*EXEC_DISAGREEMENT_IDS.length)];
     this.soundOn=true;
@@ -1878,7 +1867,7 @@ var R = {
     html+='<div class="res-strip-item"><span class="res-strip-lbl">CAPACITY</span><span class="res-strip-val">'+capDots+'</span></div>';
     html+='<div class="res-strip-item"><span class="res-strip-lbl">POLITICAL CAPITAL</span><span class="res-strip-val" style="color:var(--purple)">&#10024;'+S.polcap+' <span style="font-size:10px;color:'+z.color+'">+'+z.rate+'/qtr</span></span></div>';
     html+='</div>';
-    html+='<button class="mob-toggle" id="mob-toggle-btn" onclick="C.mobToggle()"><span>&#128202; Dashboard &#8212; scores, tree, people</span><span class="mob-toggle-chevron">&#9660;</span></button>';
+    html+='<button class="mob-toggle'+(S.mobPanelOpen?' open':'')+'" id="mob-toggle-btn" onclick="C.mobToggle()"><span>&#128202; Dashboard &#8212; scores, tree, people</span><span class="mob-toggle-chevron">&#9660;</span></button>';
     // Mobile score strip — always visible on mobile below resource strip
     html+='<div class="mob-strip">';
     html+='<div class="mob-strip-item"><span style="color:var(--amber);font-family:var(--mono);font-weight:600">'+S.ap+'</span><span style="font-size:9px;color:var(--tm)">&nbsp;AP</span></div>';
@@ -1886,7 +1875,7 @@ var R = {
     html+='<div class="mob-strip-item"><span style="font-family:var(--mono);font-weight:600">'+S.eng+'</span><span style="font-size:9px;color:var(--tm)">&nbsp;Eng</span></div>';
     html+='<div class="mob-strip-item" style="margin-left:auto"><span style="font-size:10px;color:var(--tm);font-family:var(--mono)">Y'+S.year+' Q'+S.q+'</span></div>';
     html+='</div>';
-    html+='<div class="game-body"><div class="panel-l" id="panel-l">'+this.leftPanel()+'</div>';
+    html+='<div class="game-body"><div class="panel-l'+(S.mobPanelOpen?' mob-show':'')+'" id="panel-l">'+this.leftPanel()+'</div>';
     html+='<div class="panel-r" id="panel-r">'+this.rightPanel()+'</div></div></div>';
     this.app().innerHTML=html;
     if(S.qPhase==='resolve'){
@@ -1943,11 +1932,11 @@ var R = {
     html+='</div><button class="tree-view-btn" onclick="C.openTree()">View full tree &#8594;</button></div>';
     // Characters section — replaces Resources. Grouped by tier (exec vs plant)
     // since a CFO and a plant manager aren't the same altitude, even though
-    // Trust itself stays one number — see tierStatus() for the derived read.
+    // Trust itself stays one number.
     html+='<div class="ls"><div class="ls-lbl">People</div>';
     [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp){
       var tier=grp[0],label=grp[1];
-      html+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">'+label+'</div><div style="font-size:10px;color:var(--tm)">'+tierStatus(tier)+'</div></div>';
+      html+='<div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">'+label+'</div>';
       tierIds(tier).forEach(function(charId){
         var arc=CHAR_ARCS[charId];
         var ch=CHARS[charId];
@@ -2132,15 +2121,19 @@ var R = {
       var c=S.qCons[i];
       if(!c.note&&!c.trust&&!c.ap&&!c.part)continue;
       anyItems=true;
+      // AP Optimism / Participation only ever move visibly at survey results —
+      // they still update underneath every quarter, but showing the tick here
+      // would break the "it's a survey, not a live dashboard" premise. Trust
+      // (an ongoing standing, not a survey metric) and PC still show.
       var parts=[];
       if(c.trust)parts.push('Trust '+(c.trust>0?'+':'')+c.trust);
-      if(c.ap)parts.push('AP '+(c.ap>0?'+':'')+c.ap);
-      if(c.part)parts.push('Part '+(c.part>0?'+':'')+c.part);
-      if(c.pc)parts.push('PC '+(c.pc>0?'+':'')+c.pc);
-      var allPos=c.trust>=0&&c.ap>=0&&c.part>=0&&(c.pc||0)>=0;
+      if(c.pc)parts.push('Political Capital '+(c.pc>0?'+':'')+c.pc);
+      var allPos=c.trust>=0&&(c.pc||0)>=0;
       var tagCls=c.source==='ambient'?'org':'dec';
       causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
-      causeHtml+='<span class="cause-tag '+tagCls+'" style="flex-shrink:0;margin-top:1px">'+c.badge+'</span>';
+      var tagLabel=c.badge;
+      if(c.char&&CHARS[c.char])tagLabel=CHARS[c.char].name.toUpperCase()+' &#183; '+CHARS[c.char].role.toUpperCase();
+      causeHtml+='<span class="cause-tag '+tagCls+'" style="flex-shrink:0;margin-top:1px">'+tagLabel+'</span>';
       causeHtml+='<div style="flex:1">';
       if(c.note)causeHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+c.note+'</div>';
       if(parts.length)causeHtml+='<div style="font-family:var(--mono);font-size:11px;color:'+(allPos?'var(--green)':'var(--red)')+';margin-top:3px">'+parts.join(' &#183; ')+'</div>';
@@ -2181,7 +2174,7 @@ var R = {
     // Pulse — sequential reveal
     html+='<div class="resolve-card" id="rc-pulse">';
     if(S.pulse){
-      html+='<div class="pulse-card '+vi+'"><span class="pulse-lbl">Pulse</span><span class="pulse-ind">'+picons[vi]+'</span><span class="pulse-txt">'+S.pulse+'</span></div>';
+      html+='<div class="pulse-card '+vi+'"><span class="pulse-lbl">Grapevine</span><span class="pulse-ind">'+picons[vi]+'</span><span class="pulse-txt">'+S.pulse+'</span></div>';
     }
     html+='</div>';
     html+=this.advBtn();
@@ -2350,7 +2343,7 @@ var R = {
     var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
     [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
       var tier=grp[0],label=grp[1];
-      html+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'"><div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">'+label+'</div><div style="font-size:10px;color:var(--tm)">'+tierStatus(tier)+'</div></div>';
+      html+='<div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'">'+label+'</div>';
       html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
       tierIds(tier).forEach(function(charId){
         var arc=CHAR_ARCS[charId];
@@ -2403,12 +2396,16 @@ var R = {
           html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:1px">'+dim.owner+'</div>';
           html+='<div style="font-size:10px;color:'+sigColors[signal]+';margin-top:2px">'+sigIcons[signal]+' '+tier.label+' &#183; '+tier.desc+'</div>';
-          html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.4">'+getRecReason(dim.id,S.ap,S.part,S.year,S.tree)+'</div>';
+          var recReason=getRecReason(dim.id,S.ap,S.part,S.year,S.tree);
+          if(recReason)html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.4">'+recReason+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:3px">If it lands: <strong style="color:var(--t2)">'+SCORE_LABELS[dim.score]+' +'+dim.delta+'</strong>'+(signal==='low'?', but a weak signal risks a Trust dip instead.':'.')+' If deprioritized'+(signal==='low'?', nothing is lost.':', expect the org to notice next year.')+'</div>';
           html+='</div>';
           html+='<div style="text-align:right;flex-shrink:0">';
           if(alreadyIssued){
+            html+='<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">';
             html+='<span style="font-size:11px;color:var(--green)">&#10003; Issued'+(issuedRec.guaranteed?' &#183; Guaranteed':'')+'</span>';
+            html+='<button data-dim="'+dim.id+'" onclick="C.unissueRec(this.getAttribute(\'data-dim\'))" title="Deselect and refund PC" style="background:none;border:1px solid var(--border);border-radius:var(--rs);color:var(--tm);font-size:11px;padding:2px 6px;cursor:pointer;font-family:var(--sans)">&#10005;</button>';
+            html+='</div>';
           } else {
             html+='<button data-dim="'+dim.id+'" onclick="C.issueRec(this.getAttribute(\'data-dim\'))" '+(canAfford?'':'disabled')+' style="background:'+(canAfford?'var(--panel)':'transparent')+';border:1px solid '+(canAfford?'var(--border)':'rgba(255,255,255,.1)')+';border-radius:var(--rs);padding:4px 10px;font-size:11px;color:'+(canAfford?'var(--t2)':'var(--tm)')+';cursor:'+(canAfford?'pointer':'default')+';font-family:var(--sans)">'+tier.cost+' PC</button>';
           }
@@ -2771,6 +2768,10 @@ var C = {
   },
 
   goToResolve:function(){
+    // Guards against a double-tap (or any double-fire) on Invest/Skip re-running
+    // genAmbient/applyQueued a second time for the same quarter — without this,
+    // a fast double-tap could apply the same ambient event and trust delta twice.
+    if(S.qPhase==='resolve')return;
     S.genAmbient();
     S.genPulse();
     // Stagnation check runs before applyQueued so its penalty (if any) is summed into the
@@ -2923,8 +2924,22 @@ var C = {
     S.polcap=Math.max(0,S.polcap-tier.cost);
     var guaranteed=S.guaranteedRec;
     if(guaranteed)S.guaranteedRec=false;
-    S.pendingRecs.push({dim:dimId,year:S.year,signal:signal,probMod:tier.probMod,guaranteed:guaranteed});
+    S.pendingRecs.push({dim:dimId,year:S.year,signal:signal,probMod:tier.probMod,guaranteed:guaranteed,cost:tier.cost});
     S.recsIssued++;
+    R.go();
+  },
+  unissueRec:function(dimId){
+    // Lets the player change their mind before the year locks in — refunds the
+    // exact PC spent and restores a consumed guaranteeNextRec trade, if any.
+    for(var i=0;i<S.pendingRecs.length;i++){
+      if(S.pendingRecs[i].dim!==dimId)continue;
+      var rec=S.pendingRecs[i];
+      S.polcap=Math.min(100,S.polcap+(rec.cost||0));
+      if(rec.guaranteed)S.guaranteedRec=true;
+      S.pendingRecs.splice(i,1);
+      S.recsIssued--;
+      break;
+    }
     R.go();
   },
   skipRecs:function(){
@@ -2975,8 +2990,8 @@ var C = {
   },
 
   mobToggle:function(){
-    var p=R.$('panel-l');if(p)p.classList.toggle('mob-show');
-    var b=R.$('mob-toggle-btn');if(b)b.classList.toggle('open');
+    S.mobPanelOpen=!S.mobPanelOpen;
+    R.go();
   }
 };
 
