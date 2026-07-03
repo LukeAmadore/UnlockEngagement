@@ -183,6 +183,18 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   feeds the trending table (left panel) and closing-screen SVG line charts.
 - **Sound:** three programmatic sounds, toggle in nav, never autoplay before a
   user gesture (AudioContext init on first interaction).
+- **Tree nodes are compact by default:** icon, name, cost/slot chips (or a lock
+  message), nothing else. A `Details ▾` toggle per track (`S.treeDetailsOpen`,
+  `C.toggleTreeDetails`) reveals each node's `unlocks` description text; built
+  nodes get a small top-right checkmark badge (`.tn-check`, reused from the
+  build-phase "selected" indicator — the two states are mutually exclusive so
+  sharing the class is safe) instead of an inline "&#10003; Built" line. This is
+  duplicated logic across two render sites — the inline build-phase tree
+  (`R.build`) and the "View full tree" modal (`R.treeModal`) — both read the
+  same `S.treeDetailsOpen` object, so a toggle made in one place is remembered
+  in the other. `C.toggleTreeDetails` must re-render whichever one is actually
+  on screen (`R.go()` for the inline tree, `R.treeModal()` if the modal element
+  exists) rather than unconditionally opening the modal — got this wrong once.
 
 ## UI/UX conventions
 

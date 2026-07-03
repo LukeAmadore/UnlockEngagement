@@ -208,7 +208,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .tn-name{font-size:11px;font-weight:600;line-height:1.3}
 .tn-unlocks{font-size:10px;color:var(--green);line-height:1.4;margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,.06)}
 .tn-costs{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
-.tn-built{font-size:9px;font-family:var(--mono);margin-top:2px}
 .tn-locked-msg{font-size:9px;color:var(--tm);font-family:var(--mono);margin-top:2px}
 .tn-cross{font-size:9px;color:var(--teal);font-family:var(--mono);margin-top:1px}
 .tn-blocked{font-size:10px;color:var(--red);font-family:var(--mono);margin-top:2px}
@@ -1236,6 +1235,7 @@ var S = {
   soundOn:true,
   yearHistory:[], // [{year,ap,part,eng,grade}] snapshot at each year end
   showTrending:false,
+  treeDetailsOpen:{}, // {trackId:bool} — per-track "show descriptions" toggle in the tree modal
   ambEv:null,pulse:null,pulseV:null,
   pendingUnlocks:[],
   yearTrustGained:0, // positive trust earned so far this year, against TRUST_ANNUAL_CAP
@@ -1255,7 +1255,7 @@ var S = {
     this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
-    this.yearHistory=[];this.showTrending=false;
+    this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};
     this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;this.recFallout=[];
     this.soundOn=true;
     this.ambEv=null; this.pulse=null; this.pulseV=null;
@@ -1552,8 +1552,11 @@ var S = {
       if(this.recFallout[fi].queuedQ!==this.q)continue;
       var fallout=this.recFallout.splice(fi,1)[0];
       var fd=REC_FALLOUT_TEXT[fallout.dim];
+      var falloutDim=null;
+      for(var dj=0;dj<REC_DIMENSIONS.length;dj++){if(REC_DIMENSIONS[dj].id===fallout.dim){falloutDim=REC_DIMENSIONS[dj];break;}}
+      var causeText=falloutDim?'The '+falloutDim.label+' recommendation was deprioritized last year despite the signal. ':'';
       this.ambEv=null;
-      this.qCons.push({trust:-1,ap:fd.ap||0,part:fd.part||0,pc:0,note:fd.text,badge:'UNADDRESSED',source:'ambient',char:null});
+      this.qCons.push({trust:-1,ap:fd.ap||0,part:fd.part||0,pc:0,note:causeText+fd.text,badge:'DEPRIORITIZED REC',source:'ambient',char:null});
       this.polcap=Math.min(100,this.polcap+z.rate);
       return;
     }
@@ -1891,9 +1894,13 @@ var R = {
     var trackOrder=['infra','mgr','comms','se'];
     for(var ti=0;ti<trackOrder.length;ti++){
       var tk=trackOrder[ti];var tr=TRACKS[tk];var nodes=ts[tk];
+      var detailsOpen=!!S.treeDetailsOpen[tk];
       html+='<div class="track-block" style="border-color:'+tr.color+'22">';
       html+='<div class="track-hdr" style="background:'+tr.color+'0D;border-bottom:2px solid '+tr.color+'44">';
-      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px">';
+      html+='<div style="display:flex;align-items:center;gap:8px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<button onclick="C.toggleTreeDetails(\''+tk+'\')" style="background:none;border:1px solid '+tr.color+'44;border-radius:var(--rs);padding:2px 8px;font-size:10px;color:'+tr.color+';cursor:pointer;font-family:var(--sans);flex-shrink:0">'+(detailsOpen?'Hide details &#9650;':'Details &#9660;')+'</button>';
+      html+='</div>';
       html+='<div class="track-focus" style="color:'+tr.color+'99">'+tr.focus+'</div>';
       html+='<div class="track-when">'+tr.when+'</div></div>';
       html+='<div class="track-nodes">';
@@ -1909,24 +1916,25 @@ var R = {
         var stateCls=n.built?'built':n.avail?(isSelected?'sel':canToggle?'avail':'dimmed'):'locked';
         var nodeStyle=isSelected?'style="border:2px solid '+tr.color+';background:'+tr.color+'15"':'';
         html+='<div class="tn '+stateCls+'" id="tn-'+n.id+'" '+nodeStyle+(n.avail?' onclick="C.toggleNode(\''+n.id+'\')"':'')+' title="'+n.name+'">';
-        if(isSelected)html+='<div class="tn-check" style="color:'+tr.color+'">&#10003;</div>';
+        if(n.built)html+='<div class="tn-check" style="color:'+tr.color+'">&#10003;</div>';
+        else if(isSelected)html+='<div class="tn-check" style="color:'+tr.color+'">&#10003;</div>';
         html+='<div class="tn-icon">'+n.icon+'</div>';
         html+='<div class="tn-name" style="'+(n.built?'color:'+tr.color:'')+'">'+n.name+'</div>';
-        html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
-        if(n.built){
-          html+='<div class="tn-built" style="color:'+tr.color+'">&#10003; Built</div>';
-        } else if(n.avail){
-          html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
-          if(crossDep)html+='<div class="tn-cross">&#8599; cross-track req</div>';
-          if(!canToggle&&!isSelected){
-            if(wouldExceedCap)html+='<div class="tn-blocked">No capacity</div>';
-            else if(wouldExceedBud)html+='<div class="tn-blocked">Need '+costStr+'</div>';
+        if(detailsOpen)html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
+        if(!n.built){
+          if(n.avail){
+            html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
+            if(crossDep)html+='<div class="tn-cross">&#8599; cross-track req</div>';
+            if(!canToggle&&!isSelected){
+              if(wouldExceedCap)html+='<div class="tn-blocked">No capacity</div>';
+              else if(wouldExceedBud)html+='<div class="tn-blocked">Need '+costStr+'</div>';
+            }
+          } else {
+            var missing=[];
+            for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
+            var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
+            html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
           }
-        } else {
-          var missing=[];
-          for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
-          var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
-          html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
         }
         html+='</div>';
       }
@@ -2432,9 +2440,13 @@ var R = {
     var trackOrder=['infra','mgr','comms','se'];
     for(var ti=0;ti<trackOrder.length;ti++){
       var tk=trackOrder[ti];var tr=TRACKS[tk];var nodes=ts[tk];
+      var detailsOpen=!!S.treeDetailsOpen[tk];
       html+='<div class="track-block" style="border-color:'+tr.color+'22">';
       html+='<div class="track-hdr" style="background:'+tr.color+'0D;border-bottom:2px solid '+tr.color+'44">';
-      html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px">';
+      html+='<div style="display:flex;align-items:center;gap:8px"><span>'+tr.icon+'</span><span class="track-name" style="color:'+tr.color+'">'+tr.name+'</span></div>';
+      html+='<button onclick="C.toggleTreeDetails(\''+tk+'\')" style="background:none;border:1px solid '+tr.color+'44;border-radius:var(--rs);padding:2px 8px;font-size:10px;color:'+tr.color+';cursor:pointer;font-family:var(--sans);flex-shrink:0">'+(detailsOpen?'Hide details &#9650;':'Details &#9660;')+'</button>';
+      html+='</div>';
       html+='<div class="track-focus" style="color:'+tr.color+'99">'+tr.focus+'</div>';
       html+='<div class="track-when">'+tr.when+'</div></div>';
       html+='<div class="track-nodes">';
@@ -2446,18 +2458,20 @@ var R = {
         var isSelected=investMode&&!!S.sel[n.id];
         var stateCls=n.built?'built':n.avail?'avail':'locked';
         html+='<div class="tn '+stateCls+'"'+(isSelected?' style="border:2px solid '+tr.color+'"':'')+'>';
+        if(n.built)html+='<div class="tn-check" style="color:'+tr.color+'">&#10003;</div>';
         html+='<div class="tn-icon">'+n.icon+'</div>';
         html+='<div class="tn-name" style="'+(n.built?'color:'+tr.color:'')+'">'+n.name+'</div>';
-        html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
-        if(n.built){html+='<div class="tn-built" style="color:'+tr.color+'">&#10003; Built</div>';}
-        else if(n.avail){
-          html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
-          if(crossDep)html+='<div class="tn-cross">&#8599; cross-track</div>';
-        } else {
-          var missing=[];
-          for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
-          var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
-          html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
+        if(detailsOpen)html+='<div class="tn-unlocks">'+n.unlocks+'</div>';
+        if(!n.built){
+          if(n.avail){
+            html+='<div class="tn-costs"><span class="cc bud">'+costStr+'</span><span class="cc slot">&#9679; slot</span></div>';
+            if(crossDep)html+='<div class="tn-cross">&#8599; cross-track</div>';
+          } else {
+            var missing=[];
+            for(var mi=0;mi<n.pre.length;mi++){if(!S.hasNode(n.pre[mi]))missing.push(NODES[n.pre[mi]]?NODES[n.pre[mi]].name:n.pre[mi]);}
+            var lockMsg=missing.length?missing.join(', '):('Available Year '+((n.phase||1)-1));
+            html+='<div class="tn-locked-msg">&#128274; '+lockMsg+'</div>';
+          }
         }
         html+='</div>';
       }
@@ -2704,6 +2718,13 @@ var C = {
   },
 
   openTree:function(){R.treeModal(S.qPhase==='build');},
+  toggleTreeDetails:function(trackId){
+    S.treeDetailsOpen[trackId]=!S.treeDetailsOpen[trackId];
+    // Re-render whichever tree view is actually on screen: the modal if it's open,
+    // otherwise the normal game screen (which includes the inline build-phase tree).
+    if(R.$('tree-modal'))R.treeModal(S.qPhase==='build');
+    else R.go();
+  },
   closeTree:function(e){
     if(e&&e.target&&e.target.id!=='tree-modal')return;
     var m=R.$('tree-modal');if(m)m.remove();
