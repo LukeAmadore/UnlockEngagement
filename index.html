@@ -2515,12 +2515,13 @@ var R = {
     html+='<div class="reveal-badge">FIVE YEARS COMPLETE</div>';
     html+='<h2 style="font-size:24px;font-weight:700">The program, as you built it.</h2>';
 
-    // Year-over-year trend charts — lead with the story, not just the endpoint
+    // Year-over-year trend charts — lead with the story, not just the endpoint.
+    // Fixed 2x2 grid (not flex-wrap) so 4 charts never wrap as an awkward 3-then-1.
     var hist=S.yearHistory||[];
     if(hist.length>1){
       html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
       html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Year-over-Year Trends</div>';
-      html+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
+      html+='<div class="stack-mobile" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
       html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.trust};}), 'var(--green)', 'Organizational Trust');
       html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
       html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
@@ -2528,8 +2529,9 @@ var R = {
       html+='</div></div>';
     }
 
-    // Final score — the headline number, kept simple since the chart above
-    // already tells the five-year story; no duplicate trust bar here.
+    // Final score — grade and trust live in the same card, with the trust bar
+    // directly underneath so the two headline numbers read as one connected
+    // statement instead of two separate, disconnected panels.
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
@@ -2539,7 +2541,7 @@ var R = {
     html+='</div>';
     html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:44px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
     html+='</div>';
-    html+='<div style="margin-top:14px;font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">Organizational Trust: '+z.label+'</div>';
+    html+='<div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border)">'+this.trustBarBlock(DIFF[S.diff].trust,'over five years')+'</div>';
     html+='</div>';
 
     // Visual tree - nodes as filled/empty boxes by track
