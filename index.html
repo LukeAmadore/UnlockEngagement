@@ -1890,6 +1890,44 @@ var R = {
     }
   },
 
+  // Shared line chart for a single stat across years — a trend is a
+  // continuous time series, so a line reads more naturally than bars.
+  // Used by both the in-game "show trending" drawer and the closing screen.
+  // Handles a single data point (n===1) by drawing just the one dot.
+  makeLineChart:function(data,color,label,unit){
+    unit=unit||'';
+    var W=180,H=90,pad=28,bpad=20;
+    var vals=data.map(function(d){return d.v;});
+    var minV=Math.max(0,Math.min.apply(null,vals)-5);
+    var maxV=Math.min(100,Math.max.apply(null,vals)+5);
+    var range=maxV-minV||1;
+    var n=data.length;
+    var pts=data.map(function(d,i){
+      var x=n>1?pad+(i/(n-1))*(W-pad-8):pad+(W-pad-8)/2;
+      var y=pad+(1-(d.v-minV)/range)*(H-pad-bpad);
+      return {x:x,y:y,v:d.v,yr:d.yr};
+    });
+    var path=pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+    var svg='<svg width="'+W+'" height="'+H+'" style="overflow:visible">';
+    svg+='<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
+    svg+='<line x1="'+pad+'" y1="'+(H-bpad)+'" x2="'+(W-8)+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
+    svg+='<text x="'+pad+'" y="14" fill="'+color+'" font-size="9" font-family="monospace" letter-spacing="1">'+label.toUpperCase()+'</text>';
+    if(n>1){
+      svg+='<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      var areaPath=path+' L'+pts[pts.length-1].x.toFixed(1)+','+(H-bpad)+' L'+pts[0].x.toFixed(1)+','+(H-bpad)+' Z';
+      svg+='<path d="'+areaPath+'" fill="'+color+'" opacity="0.08"/>';
+    }
+    pts.forEach(function(p,i){
+      svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="'+color+'"/>';
+      var anchor=i===0?'start':i===pts.length-1?'end':'middle';
+      var yOff=p.y<pad+12?12:-6;
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(p.y+yOff).toFixed(1)+'" fill="'+color+'" font-size="8" font-family="monospace" text-anchor="'+anchor+'">'+p.v+unit+'</text>';
+      svg+='<text x="'+p.x.toFixed(1)+'" y="'+(H-6)+'" fill="rgba(255,255,255,.3)" font-size="7" font-family="monospace" text-anchor="middle">Y'+p.yr+'</text>';
+    });
+    svg+='</svg>';
+    return svg;
+  },
+
   leftPanel:function(){
     var ts=S.treeStatus();
     var rem=S.remCap();
@@ -1914,12 +1952,11 @@ var R = {
     if(S.yearHistory&&S.yearHistory.length>0){
       html+='<button onclick="C.toggleTrending()" style="background:transparent;border:none;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--mono);margin-top:6px;padding:0">'+( S.showTrending?'&#9650; hide trending':'&#9660; show trending')+'</button>';
       if(S.showTrending){
-        html+='<table style="width:100%;border-collapse:collapse;margin-top:8px;font-family:var(--mono);font-size:10px">';
-        html+='<tr><td style="color:var(--tm);padding:2px 6px 2px 0">Yr</td><td style="color:var(--amber);padding:2px 4px">AP</td><td style="color:var(--blue);padding:2px 4px">Part</td><td style="color:var(--tm);padding:2px 4px">Eng</td><td style="color:var(--amber);padding:2px 4px">Grade</td></tr>';
-        S.yearHistory.forEach(function(h){
-          html+='<tr><td style="color:var(--tm);padding:2px 6px 2px 0">Y'+h.year+'</td><td style="color:var(--amber);padding:2px 4px">'+h.ap+'</td><td style="color:var(--blue);padding:2px 4px">'+h.part+'%</td><td style="color:var(--tm);padding:2px 4px">'+h.eng+'</td><td style="color:var(--amber);padding:2px 4px">'+h.grade+'</td></tr>';
-        });
-        html+='</table>';
+        html+='<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">';
+        html+=this.makeLineChart(S.yearHistory.map(function(h){return {yr:h.year,v:h.ap};}),'var(--amber)','AP');
+        html+=this.makeLineChart(S.yearHistory.map(function(h){return {yr:h.year,v:h.part};}),'var(--blue)','Part','%');
+        html+=this.makeLineChart(S.yearHistory.map(function(h){return {yr:h.year,v:h.eng};}),'#C7BFAE','Eng');
+        html+='</div>';
       }
     }
     html+='</div>';
@@ -2488,7 +2525,7 @@ var R = {
     html+='</div>';
     html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:44px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Grade</div></div>';
     html+='</div>';
-    html+='<div style="margin-top:14px;font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">Organizational Trust: '+z.label+'</div>';
+    html+='<div style="margin-top:16px">'+this.trustBarBlock(DIFF[S.diff].trust,'over five years')+'</div>';
     html+='</div>';
 
     // Visual tree - nodes as filled/empty boxes by track
@@ -2562,48 +2599,34 @@ var R = {
       html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Year-over-Year Trends</div>';
       html+='<div style="display:flex;gap:12px;flex-wrap:wrap">';
 
-      function makeLine(data, color, label, unit){
-        unit=unit||'';
-        var W=180,H=90,pad=28,bpad=20;
-        var vals=data.map(function(d){return d.v;});
-        var minV=Math.max(0,Math.min.apply(null,vals)-5);
-        var maxV=Math.min(100,Math.max.apply(null,vals)+5);
-        var range=maxV-minV||1;
-        var n=data.length;
-        var pts=data.map(function(d,i){
-          var x=pad+(i/(n-1))*(W-pad-8);
-          var y=pad+(1-(d.v-minV)/range)*(H-pad-bpad);
-          return {x:x,y:y,v:d.v,yr:d.yr};
-        });
-        var path=pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
-        var svg='<svg width="'+W+'" height="'+H+'" style="overflow:visible">';
-        // Grid lines
-        svg+='<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
-        svg+='<line x1="'+pad+'" y1="'+(H-bpad)+'" x2="'+(W-8)+'" y2="'+(H-bpad)+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
-        // Label
-        svg+='<text x="'+pad+'" y="14" fill="'+color+'" font-size="9" font-family="monospace" letter-spacing="1">'+label.toUpperCase()+'</text>';
-        // Line
-        svg+='<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-        // Area fill
-        var areaPath=path+' L'+pts[pts.length-1].x.toFixed(1)+','+(H-bpad)+' L'+pts[0].x.toFixed(1)+','+(H-bpad)+' Z';
-        svg+='<path d="'+areaPath+'" fill="'+color+'" opacity="0.08"/>';
-        // Data points and labels
-        pts.forEach(function(p,i){
-          svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3" fill="'+color+'"/>';
-          var anchor=i===0?'start':i===pts.length-1?'end':'middle';
-          var yOff=p.y<pad+12?12:-6;
-          svg+='<text x="'+p.x.toFixed(1)+'" y="'+(p.y+yOff).toFixed(1)+'" fill="'+color+'" font-size="8" font-family="monospace" text-anchor="'+anchor+'">'+p.v+unit+'</text>';
-          // Year label at bottom
-          svg+='<text x="'+p.x.toFixed(1)+'" y="'+(H-6)+'" fill="rgba(255,255,255,.3)" font-size="7" font-family="monospace" text-anchor="middle">Y'+p.yr+'</text>';
-        });
-        svg+='</svg>';
-        return svg;
-      }
-
-      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
-      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
-      html+=makeLine(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.trust};}), 'var(--green)', 'Organizational Trust');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.ap};}), 'var(--amber)', 'AP Optimism');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.part};}), 'var(--blue)', 'Participation', '%');
+      html+=this.makeLineChart(hist.map(function(h){return {yr:h.year,v:h.eng};}), '#C7BFAE', 'Engagement');
       html+='</div></div>';
+
+      // Per-leader movement: stage 0 (where everyone starts) vs where they ended.
+      html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+      html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:12px">Where People Ended Up</div>';
+      [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
+        var tier=grp[0],glabel=grp[1];
+        html+='<div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'">'+glabel+'</div>';
+        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+        tierIds(tier).forEach(function(charId){
+          var arc=CHAR_ARCS[charId];
+          var ch=CHARS[charId];
+          var finalStage=S.charArcs[charId]||0;
+          var startInfo=arc.stages[0];
+          var endInfo=arc.stages[finalStage];
+          html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start">';
+          html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
+          html+='<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+          html+='<div style="font-size:11px;margin-top:2px"><span style="color:var(--tm)">'+startInfo.label+'</span> <span style="color:var(--tm)">&#8594;</span> <span style="color:'+(finalStage>0?'var(--green)':'var(--tm)')+';font-weight:600">'+endInfo.label+'</span></div>';
+          html+='</div></div>';
+        });
+        html+='</div>';
+      });
+      html+='</div>';
     }
 
     html+='<button class="btn-p" onclick="C.restart()">Play Again</button>';
@@ -2888,7 +2911,7 @@ var C = {
         break;
       }
     }
-    S.yearHistory.push({year:S.year,ap:S.ap,part:S.part,eng:S.eng,grade:g});
+    S.yearHistory.push({year:S.year,ap:S.ap,part:S.part,eng:S.eng,grade:g,trust:S.trust});
     S.pendingRecs=[];
     S.recsIssued=0;
     S.phase='postsurvey';R.go();
