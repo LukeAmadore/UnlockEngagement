@@ -157,12 +157,24 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by
   zone: 20/40/58/75/90%. Explicit skip button with flavor note. Results resolve at
-  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state and picks the
-  high/medium/low signal; `getRecReason()` turns that signal into a plain-language
-  sentence citing the actual ap/part/year/node values behind it (e.g. "AP Optimism
-  (54) is trending soft, but not critical yet."), rendered under each dimension's
-  tier line so the recommendation panel explains itself instead of just labeling
-  a signal strength.
+  NEXT year's postsurvey. `getRecDiagnostic()` reads real game state (5-arg call:
+  `dimId, ap, part, year, treeBuilt` — an earlier version had a 6-arg signature with
+  an unused `charArcs` param that shifted `treeBuilt` out of alignment with both call
+  sites, silently zeroing the Manager Effectiveness dimension's signal; fixed, don't
+  reintroduce an unused param ahead of `treeBuilt`) and picks the high/medium/low
+  signal. Each dimension maps to a real stat + delta (`REC_DIMENSIONS[i].score/delta`
+  — e.g. Manager Effectiveness → AP +5); `getRecReason()` explains *why* the signal
+  is what it is in plain language citing actual ap/part/year/node values, and the
+  issue-time card also states the target stat/delta so the payoff is visible before
+  spending PC. Landed high/medium recs apply their real delta + trust +2 + PC +3;
+  landed low-signal recs apply nothing but trust −1; a **deprioritized (unlanded)
+  high/medium-signal rec queues into `S.recFallout`** and surfaces once, as a normal
+  cause-chip on the resolve screen of a random quarter the *following* year (via
+  `genAmbient()`, which checks `recFallout` before the regular ambient pool) — a
+  real, data-supported ask that went unaddressed has an in-game consequence (small
+  ap/part hit + trust −1, text keyed by dimension in `REC_FALLOUT_TEXT`), not just a
+  quieter number at postsurvey. The "Recommendation Results" card names the exact
+  stat/delta/trust/PC change per outcome instead of generic "scores improving" text.
 - **Stagnation:** if something was buildable but nothing was built → −1 trust; if
   the decision also cost zero slots → −2. Never fires in Year 0 or when nothing
   was affordable.

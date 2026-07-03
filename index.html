@@ -559,6 +559,8 @@ var REC_DIMENSIONS = [
   {id:'mgr',       label:'Manager Effectiveness', owner:'People Managers',score:'ap',    delta:5},
 ];
 
+var SCORE_LABELS = {ap:'AP Optimism', part:'Participation', eng:'Engagement'};
+
 var REC_LAND_PROB = {skeptical:0.20, cautious:0.40, building:0.58, engaged:0.75, champion:0.90};
 
 // Tiered recommendation costs based on diagnostic match
@@ -571,10 +573,21 @@ var REC_TIERS = {
   low:   {cost:6,  probMod:0.60, label:'Low Signal',   desc:'No clear evidence this is what employees need. Cheap, but risks backfiring if it lands without follow-through.'}
 };
 
+// If a high/medium-signal rec is deprioritized (not landed), the org feels it later:
+// genAmbient() delivers one of these as a one-time quarter event the following year
+// instead of the regular ambient roll (see S.recFallout).
+var REC_FALLOUT_TEXT = {
+  growth:      {text:'Employees mentioned in this year\'s survey that they wanted growth and development support. Nothing has happened since, and people have noticed.', ap:-1, part:-1},
+  recognition: {text:'The recognition gap raised in last year\'s survey still hasn\'t been addressed. A few strong performers have quietly stopped expecting to be noticed.', ap:-2},
+  comms:       {text:'People asked for better communication after last year\'s survey. The silence since then is doing its own kind of talking.', part:-2},
+  safety:      {text:'The psychological safety concerns from last year\'s survey were deprioritized. A few people have gone quiet again.', ap:-2},
+  mgr:         {text:'Managers asked for more support after last year\'s results. Without it, a few are visibly checked out.', ap:-3}
+};
+
 // Diagnostic signal: maps dimensions to which game conditions make them high/medium/low signal
 // Signal is computed at postsurvey review based on current game state
 // Returns 'high'|'medium'|'low' per dimension
-function getRecDiagnostic(dimId, ap, part, year, charArcs, treeBuilt){
+function getRecDiagnostic(dimId, ap, part, year, treeBuilt){
   // Growth & Development: high signal when AP is low AND we're mid-game (managers exist but aren't acting)
   if(dimId==='growth'){
     if(ap<55&&year>=2) return 'high';
@@ -1219,6 +1232,7 @@ var S = {
   recSkippedNote:'',
   recResults:[], // [{dim,landed,year}] resolved rec results for narrative
   recsIssued:0,  // how many recs issued this postsurvey review (max 2)
+  recFallout:[], // [{dim,signal,queuedQ}] deprioritized high/medium recs, delivered as a one-time quarter event next year
   soundOn:true,
   yearHistory:[], // [{year,ap,part,eng,grade}] snapshot at each year end
   showTrending:false,
@@ -1242,7 +1256,7 @@ var S = {
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0};
     this.yearHistory=[];this.showTrending=false;
-    this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;
+    this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;this.recFallout=[];
     this.soundOn=true;
     this.ambEv=null; this.pulse=null; this.pulseV=null;
     this.pendingUnlocks=[];
@@ -1532,6 +1546,17 @@ var S = {
 
   genAmbient:function(){
     var z=this.getZone();
+    // A deprioritized recommendation that carried a real signal surfaces here once, in
+    // whichever quarter it was queued for — takes priority over the regular ambient roll.
+    for(var fi=0;fi<this.recFallout.length;fi++){
+      if(this.recFallout[fi].queuedQ!==this.q)continue;
+      var fallout=this.recFallout.splice(fi,1)[0];
+      var fd=REC_FALLOUT_TEXT[fallout.dim];
+      this.ambEv=null;
+      this.qCons.push({trust:-1,ap:fd.ap||0,part:fd.part||0,pc:0,note:fd.text,badge:'UNADDRESSED',source:'ambient',char:null});
+      this.polcap=Math.min(100,this.polcap+z.rate);
+      return;
+    }
     var pw=z.id==='champion'?.65:z.id==='engaged'?.55:z.id==='building'?.50:z.id==='cautious'?.45:.20;
     var arcEvents=this.getCharAmbientEvents();
     var posPool=POS_EVENTS.concat(arcEvents.filter(function(e){return e.isPos;}));
@@ -2126,10 +2151,24 @@ var R = {
         var dim=null;
         for(var di=0;di<REC_DIMENSIONS.length;di++){if(REC_DIMENSIONS[di].id===r.dim){dim=REC_DIMENSIONS[di];break;}}
         if(!dim)return;
+        var msg,msgColor;
+        if(r.landed&&r.trustDip){
+          msg=dim.owner+' acted on it, but the signal was weak &#8212; nothing measurable moved. Trust -1.';
+          msgColor='var(--red)';
+        } else if(r.landed){
+          msg=dim.owner+' acted on it. '+r.scoreLabel+' +'+r.scoreDelta+', Trust +'+r.trustGain+', PC +'+r.pcGain+'.';
+          msgColor='var(--green)';
+        } else if(r.deferredFallout){
+          msg='Deprioritized. This was a real signal in the data &#8212; expect the organization to notice.';
+          msgColor='var(--amber)';
+        } else {
+          msg='Deprioritized. The signal was weak, so little was lost by waiting.';
+          msgColor='var(--tm)';
+        }
         html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
         html+='<span style="font-size:16px">'+(r.landed?'✅':'❌')+'</span>';
         html+='<div><div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
-        html+='<div style="font-size:11px;color:var(--tm)">'+(r.landed?'Landed &#8212; '+dim.owner+' acted on it. Scores improving.':'Deprioritized. The timing was not right.')+'</div></div>';
+        html+='<div style="font-size:11px;color:'+msgColor+'">'+msg+'</div></div>';
         html+='</div>';
       });
       html+='</div>';
@@ -2191,6 +2230,7 @@ var R = {
           html+='<div style="font-size:10px;color:var(--tm);margin-top:1px">'+dim.owner+'</div>';
           html+='<div style="font-size:10px;color:'+sigColors[signal]+';margin-top:2px">'+sigIcons[signal]+' '+tier.label+' &#183; '+tier.desc+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.4">'+getRecReason(dim.id,S.ap,S.part,S.year,S.tree)+'</div>';
+          html+='<div style="font-size:10px;color:var(--tm);margin-top:3px">If it lands: <strong style="color:var(--t2)">'+SCORE_LABELS[dim.score]+' +'+dim.delta+'</strong>'+(signal==='low'?', but a weak signal risks a Trust dip instead.':'.')+' If deprioritized'+(signal==='low'?', nothing is lost.':', expect the org to notice next year.')+'</div>';
           html+='</div>';
           html+='<div style="text-align:right;flex-shrink:0">';
           if(alreadyIssued){
@@ -2546,25 +2586,34 @@ var C = {
       var probMod=rec.probMod||1.0;
       var landed=rec.guaranteed||Math.random()<(landProb*probMod);
       var signal=rec.signal||'medium';
-      S.recResults.push({dim:rec.dim,landed:landed,year:rec.year,signal:signal});
-      if(landed){
-        for(var di=0;di<REC_DIMENSIONS.length;di++){
-          if(REC_DIMENSIONS[di].id===rec.dim){
-            var d=REC_DIMENSIONS[di];
-            if(signal==='low'){
-              // Low-signal rec: lands superficially but no real score movement, small trust dip next quarter
-              S.adjTrust(-1);
-              S.recResults[S.recResults.length-1].trustDip=true;
-            } else {
-              if(d.score==='ap')S.ap=Math.min(100,S.ap+d.delta);
-              else if(d.score==='part')S.part=Math.min(100,S.part+d.delta);
-              else if(d.score==='eng')S.eng=Math.min(100,S.eng+d.delta);
-              S.applyCappedTrust(2);
-              S.polcap=Math.min(100,S.polcap+3);
-            }
-            break;
+      var result={dim:rec.dim,landed:landed,year:rec.year,signal:signal};
+      S.recResults.push(result);
+      for(var di=0;di<REC_DIMENSIONS.length;di++){
+        if(REC_DIMENSIONS[di].id!==rec.dim)continue;
+        var d=REC_DIMENSIONS[di];
+        if(landed){
+          if(signal==='low'){
+            // Low-signal rec: lands superficially but no real score movement, small trust dip next quarter
+            S.adjTrust(-1);
+            result.trustDip=true;
+          } else {
+            if(d.score==='ap')S.ap=Math.min(100,S.ap+d.delta);
+            else if(d.score==='part')S.part=Math.min(100,S.part+d.delta);
+            else if(d.score==='eng')S.eng=Math.min(100,S.eng+d.delta);
+            S.applyCappedTrust(2);
+            S.polcap=Math.min(100,S.polcap+3);
+            result.scoreLabel=SCORE_LABELS[d.score];
+            result.scoreDelta=d.delta;
+            result.trustGain=2;
+            result.pcGain=3;
           }
+        } else if(signal==='high'||signal==='medium'){
+          // A real, data-supported problem got deprioritized. The organization feels this
+          // later — queued as a one-time ambient event next year (see S.genAmbient).
+          S.recFallout.push({dim:rec.dim,signal:signal,queuedQ:Math.floor(Math.random()*4)+1});
+          result.deferredFallout=true;
         }
+        break;
       }
     }
     S.yearHistory.push({year:S.year,ap:S.ap,part:S.part,eng:S.eng,grade:g});
