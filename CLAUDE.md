@@ -113,11 +113,13 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 - **`anchor:true` on a situation guarantees it draws that year** — `drawYearSituations`
   pulls all anchors first, then shuffles the remaining pool to fill out to 4, then
   shuffles final quarter order so the anchor doesn't always land in Q1. Currently
-  used for the one exec-disagreement beat per year (`y2-c`, `y3-c`) so that moment
-  isn't left to the 4-of-12 lottery (~2/3 chance per year of NOT being drawn
-  otherwise). Keep at most 1 anchor per year — the mechanism doesn't limit this,
-  but stacking multiple guaranteed situations in one draw crowds out the variety
-  the random pool exists for.
+  used for one exec-disagreement beat per year, all 5 years (`y1-j` Delia/Desmond,
+  `y2-c` Raj/Delia, `y3-c` Raj/Desmond, `y4-c` Warren/Delia, `y5-d` Desmond/Delia)
+  so that moment isn't left to the 4-of-12 lottery (~2/3 chance per year of NOT
+  being drawn otherwise) — and so the pairing rotates rather than always being the
+  same two people. Keep at most 1 anchor per year — the mechanism doesn't limit
+  this, but stacking multiple guaranteed situations in one draw crowds out the
+  variety the random pool exists for.
 - Pre-survey decision per year (`YEAR_PRESURVEY`); consequence revealed AFTER the
   choice, never before. Each year's best option also carries a small `effect.trust`
   (routed through `S.applyCappedTrust`) so the presurvey choice visibly connects to
@@ -192,10 +194,13 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   company's own stated values directly, not just abstract trust/AP math — keep new
   values-tie-in situations reusing an existing shape's cost/effect numbers, per the
   situation-shape rule below, rather than inventing new mechanics for the callback.
-  Two situations (`y2-c`, `y3-c`) frame Raj and Delia disagreeing with each other in
-  the scenario text (not just with the player) — a lightweight way to make the exec
-  cast feel like they have relationships with each other, not just with the CoE
-  lead; the underlying options/numbers are unchanged from before the rewrite.
+  The 5 anchor situations (see `anchor:true` above) frame two execs disagreeing
+  with each other in the scenario text (not just with the player), rotating the
+  pairing each year rather than reusing the same two people — a lightweight way
+  to make the exec cast feel like they have relationships with each other, not
+  just with the CoE lead; the underlying options/numbers are unchanged from
+  before each rewrite. If adding more, keep rotating pairings rather than
+  defaulting back to Raj/Delia every time.
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by

@@ -478,10 +478,10 @@ var CHARS = {
     bio:'CEO since the 2004 acquisition &#8212; the only executive left who remembers the company before the holding company owned it. Rarely in the room for anything below a board-level number, which makes it worse when he is. Asks one blunt question and expects a straight answer, not a deck.'},
   marcus: {name:'Marcus', role:'Bell Creek Plant Manager', tier:'plant', av:II('<path d="M4 15a8 8 0 0 1 16 0z"/><path d="M2 15h20M9 15V9M15 15V9"/>'),
     bio:'Nineteen years at Bell Creek, the last six as plant manager &#8212; he started on the line himself. Two previous "engagement initiatives" went nowhere and cost him credibility with his own team for championing them, which is exactly why he\'s slow to trust this one. Coaches a rec-league softball team and will absolutely tell you about it.'},
-  yolanda:{name:'Yolanda',role:'Riverside Supervisor', tier:'plant', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
-    bio:'Youngest supervisor at Riverside, promoted early after she started running her own informal listening sessions without waiting for permission. Ambitious in a way she doesn\'t hide, and still refreshingly unjaded about org politics. Sees this program as her chance to be visible beyond one plant.'},
-  priya:  {name:'Priya',  role:'Prairie Junction Supervisor', tier:'plant', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
-    bio:'Promoted to supervisor eight months ago &#8212; Prairie Junction\'s fast, understaffed launch back in 2016 left the role sitting empty more often than filled. Transferred in from a completely different industry and is still learning which battles are worth fighting. First supervisor here to show up to a listening session voluntarily.'}
+  yolanda:{name:'Yolanda',role:'Riverside Plant Manager', tier:'plant', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
+    bio:'Youngest plant manager at Riverside, promoted early after she started running her own informal listening sessions without waiting for permission. Ambitious in a way she doesn\'t hide, and still refreshingly unjaded about org politics. Sees this program as her chance to be visible beyond one plant.'},
+  priya:  {name:'Priya',  role:'Prairie Junction Plant Manager', tier:'plant', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
+    bio:'Promoted to plant manager eight months ago &#8212; Prairie Junction\'s fast, understaffed launch back in 2016 left the role sitting empty more often than filled. Transferred in from a completely different industry and is still learning which battles are worth fighting. First plant manager here to show up to a listening session voluntarily.'}
 };
 
 // ============================================================
@@ -562,7 +562,7 @@ var CHAR_ARCS = {
     ]
   },
   yolanda: {
-    name:'Yolanda', role:'Riverside Supervisor', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
+    name:'Yolanda', role:'Riverside Plant Manager', av:II('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/>'),
     stages:[
       {label:'Interested', desc:'Yolanda is curious about the program and doing small things proactively.'},
       {label:'Active',     desc:'Yolanda runs her own listening sessions. She asks good questions.'},
@@ -584,7 +584,7 @@ var CHAR_ARCS = {
     ]
   },
   priya: {
-    name:'Priya', role:'Prairie Junction Supervisor', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
+    name:'Priya', role:'Prairie Junction Plant Manager', av:II('<rect x="6" y="4" width="12" height="16" rx="1.5"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1M9 12l2 2 4-4"/>'),
     stages:[
       {label:'Uncertain', desc:'Priya is still learning the plant and the role. She has not pushed back on the program, but she has not pushed for it either.'},
       {label:'Trying',    desc:'Priya started running short check-ins with her shift leads, unevenly but genuinely.'},
@@ -596,7 +596,7 @@ var CHAR_ARCS = {
       [],
       [{text:"Priya ran her first shift check-in without being asked to.",d:2}],
       [{text:"Priya's participation numbers at Prairie Junction closed most of the gap with Riverside.",d:2}],
-      [{text:"Priya was asked to help onboard the next new supervisor, using her own listening approach.",d:3}]
+      [{text:"Priya was asked to help onboard the next new plant manager, using her own listening approach.",d:3}]
     ],
     negEvents:[
       [{text:"Priya seemed unsure how to talk about the survey with her team. Participation stayed flat.",d:-1}],
@@ -832,10 +832,10 @@ var YEAR_POOLS = {
       {id:'c',badge:'FACILITATE TOGETHER',text:'Bring Marcus and the manager together. Slower, but builds his standing as a leader.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'Marcus leads the conversation. His confidence grows.'}}
      ]},
     {id:'y1-b',shape:'relationship',title:'Yolanda\'s Unsolicited Initiative',char:'yolanda',
-     scenario:'Yolanda ran her own mini listening session with her team — without asking you first. The results were good, but it wasn\'t sanctioned, and another supervisor is asking why Yolanda gets to "make up her own process."',
+     scenario:'Yolanda ran her own mini listening session with her team — without asking you first. The results were good, but it wasn\'t sanctioned, and another plant manager is asking why Yolanda gets to "make up her own process."',
      opts:[
-      {id:'a',badge:'ADDRESS THE OTHER SUPERVISOR',text:'Explain why Yolanda\'s initiative is a good thing, directly to the supervisor.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Smooths the tension but centers you, not Yolanda.'}},
-      {id:'b',badge:'LET IT PLAY OUT',text:'Don\'t intervene. Let the supervisors work it out themselves.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Low effort. Slight risk Yolanda feels unsupported.'}},
+      {id:'a',badge:'ADDRESS THE OTHER MANAGER',text:'Explain why Yolanda\'s initiative is a good thing, directly to the other plant manager.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Smooths the tension but centers you, not Yolanda.'}},
+      {id:'b',badge:'LET IT PLAY OUT',text:'Don\'t intervene. Let the managers work it out themselves.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Low effort. Slight risk Yolanda feels unsupported.'}},
       {id:'c',badge:'FORMALIZE WHAT SHE DID',text:'Turn Yolanda\'s approach into something other sites can use too.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s arc advances. Her approach becomes the model.'}}
      ]},
     // RESOURCE_TRADEOFF shape x2
@@ -892,12 +892,12 @@ var YEAR_POOLS = {
       {id:'c',badge:'BUILD HIS CONFIDENCE PROPERLY',text:'Pair him with a manager who\'s been through this before.',slots:1,bud:0,pc:0,req:{node:'mgr-l1'},con:{trust:4,ap:2,part:0,note:'He arrives at his first action-planning session prepared, not blindsided.'}}
      ]},
     // RESOURCE_TRADEOFF shape x3
-    {id:'y1-j',shape:'resource_tradeoff',title:'The Shared Vendor Contract',char:'delia',
-     scenario:'Delia asks whether the listening program can share its survey vendor\'s contract with a wellness initiative to split costs, but it means coordinating scope with another team.',
+    {id:'y1-j',shape:'resource_tradeoff',title:'The Shared Vendor Contract',char:'delia',anchor:true,
+     scenario:'Delia proposes sharing the listening program\'s survey vendor contract with a wellness initiative to split costs. Desmond pushes back in the same meeting: "Every shared contract I\'ve seen turns into nobody\'s priority within a year." Delia thinks he\'s being reflexively cautious. He thinks she\'s underestimating how these things actually go on the floor.',
      opts:[
-      {id:'a',badge:'KEEP CONTRACTS SEPARATE',text:'Explain that shared scope creates dependency risk you\'d rather avoid.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. The contract stays yours.'}},
-      {id:'b',badge:'AGREE TO SHARE',text:'Split the contract. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Delia appreciates the flexibility.'}},
-      {id:'c',badge:'PROPOSE A TRADE',text:'Offer to share it in exchange for Delia\'s support on your next recommendation.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land, regardless of Trust zone.'},guaranteeNextRec:true}
+      {id:'a',badge:'KEEP CONTRACTS SEPARATE',text:'Side with Desmond. Explain that shared scope creates dependency risk you\'d rather avoid.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Reasonable. The contract stays yours. Desmond notes you took operational risk seriously.'}},
+      {id:'b',badge:'AGREE TO SHARE',text:'Side with Delia. Split the contract. Costs money, buys goodwill.',slots:0,bud:2000,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Delia appreciates the flexibility. Desmond files this away as a data point.'}},
+      {id:'c',badge:'PROPOSE A TRADE',text:'Offer to share it in exchange for Delia\'s support on your next recommendation &#8212; sidestepping the disagreement entirely.',slots:0,bud:0,pc:20,req:{pc:20},con:{trust:1,ap:0,part:0,note:'Your next recommendation is guaranteed to land, regardless of Trust zone.'},guaranteeNextRec:true}
      ]},
     // DATA_INTEGRITY shape x3
     {id:'y1-k',shape:'data_integrity',title:'The Early Leak',char:'raj',
@@ -1024,11 +1024,11 @@ var YEAR_POOLS = {
       {id:'c',badge:'FORMALIZE AS PART OF THE TREE',text:'Turn this into the foundation for Manager Cohort investment.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:4,ap:2,part:0,note:'Yolanda\'s initiative becomes systemic. Her arc nears completion.'}}
      ]},
     {id:'y3-c',shape:'resource_tradeoff',title:'The Budget Threat',char:'raj',anchor:true,
-     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Raj is pushing it hard. Delia pushes back just as hard in the same meeting &#8212; "We spent two years building trust for this. You don\'t get that back once it\'s gone." Neither of them is wrong. They\'re waiting on you to break the tie.',
+     scenario:'Finance proposes replacing the survey program with a quarterly pulse run by HR generalists to cut costs. Raj is pushing it hard on pure cost grounds. Desmond, unexpectedly, pushes back &#8212; "The turnover numbers moved. I don\'t care why, I care that they moved." Neither of them is wrong. They\'re waiting on you to break the tie.',
      opts:[
-      {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made &#8212; buys Delia room without directly overruling Raj.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability. Neither exec gets a clean win.'}},
-      {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Side with Raj, but run it with far more rigor than he expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows. Delia notes you sided with Finance.'}},
-      {id:'c',badge:'FIGHT TO KEEP THE PROGRAM',text:'Side with Delia. Present a detailed cost-reduction plan and make the case directly to Raj.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'High stakes. If it lands, the program is secured and Delia\'s read on this was right.'}}
+      {id:'a',badge:'REQUEST MORE TIME',text:'Ask for six months to prove ROI before any decision is made &#8212; buys Desmond room without directly overruling Raj.',slots:1,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'Buys time, creates accountability. Neither exec gets a clean win.'}},
+      {id:'b',badge:'ACCEPT THE PULSE FRAMEWORK',text:'Side with Raj, but run it with far more rigor than he expected.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Adaptive, but scope narrows. Desmond notes you sided with Finance over the floor data.'}},
+      {id:'c',badge:'FIGHT TO KEEP THE PROGRAM',text:'Side with Desmond. Present a detailed cost-reduction plan and make the case directly to Raj.',slots:0,bud:0,pc:30,req:{pc:30},con:{trust:5,ap:0,part:0,note:'High stakes. If it lands, the program is secured and Desmond\'s read on this was right.'}}
      ]},
     {id:'y3-d',shape:'resource_tradeoff',title:'The LinkedIn Problem',char:'delia',
      scenario:'A former employee posted that the survey is "theater" and nothing ever changes. Hundreds of likes. Two current employees commented in agreement. Delia forwarded it with a question mark.',
@@ -1114,12 +1114,12 @@ var YEAR_POOLS = {
       {id:'b',badge:'HELP HER PREPARE',text:'Coach her on the framing so the message lands well.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:1,part:0,note:'Polished, supported.'}},
       {id:'c',badge:'CO-PRESENT WITH HER',text:'Join her on stage, connecting her story to the broader program.',slots:1,bud:0,pc:0,req:{node:'se-l3'},con:{trust:4,ap:2,part:1,note:'Yolanda\'s arc reaches its peak. The program gets visible proof.'}}
      ]},
-    {id:'y4-c',shape:'resource_tradeoff',title:'The Scope Expansion Temptation',char:null,
-     scenario:'HR leadership wants the CoE to take on a broader culture measurement mandate — quarterly pulses, manager 360s, exit interview analysis. It would double the team\'s scope.',
+    {id:'y4-c',shape:'resource_tradeoff',title:'The Scope Expansion Temptation',char:null,anchor:true,
+     scenario:'Warren, rare for him, shows up to the planning meeting himself and pushes for the CoE to take on a broader culture measurement mandate &#8212; quarterly pulses, manager 360s, exit interview analysis. Delia pushes back in front of him, which visibly surprises them both: "We haven\'t finished proving the first mandate works." Warren doesn\'t back down, but he\'s listening.',
      opts:[
-      {id:'a',badge:'DECLINE',text:'Depth over breadth. Stay focused on listening and AP Optimism.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Program integrity maintained.'}},
-      {id:'b',badge:'ACCEPT SELECTIVELY',text:'Take on exit interview analysis only — it directly feeds your strategy.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Smart, manageable expansion.'}},
-      {id:'c',badge:'ACCEPT THE FULL MANDATE',text:'Take it all on. More influence, more budget, more risk to the core mission.',slots:0,bud:0,pc:0,req:{zone:'engaged'},con:{trust:4,ap:-2,part:0,note:'Capacity is stretched thin. Core work may suffer.'}}
+      {id:'a',badge:'DECLINE',text:'Side with Delia. Depth over breadth. Stay focused on listening and AP Optimism.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Principled. Program integrity maintained. Warren doesn\'t love hearing no, but he respects that you didn\'t just fold.'}},
+      {id:'b',badge:'ACCEPT SELECTIVELY',text:'Offer a middle path both can live with: take on exit interview analysis only.',slots:1,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Smart, manageable expansion. Neither Warren nor Delia gets exactly what they wanted.'}},
+      {id:'c',badge:'ACCEPT THE FULL MANDATE',text:'Side with Warren. Take it all on. More influence, more budget, more risk to the core mission.',slots:0,bud:0,pc:0,req:{zone:'engaged'},con:{trust:4,ap:-2,part:0,note:'Capacity is stretched thin. Core work may suffer. Warren is pleased; Delia is worried.'}}
      ]},
     {id:'y4-d',shape:'resource_tradeoff',title:'The Measurement Challenge',char:'raj',
      scenario:'Raj asks you to prove that your Manager Capacity investment directly caused the AP Optimism improvement. He wants a causal link, not a correlation.',
@@ -1211,12 +1211,12 @@ var YEAR_POOLS = {
       {id:'b',badge:'GIVE THE REAL NUMBER',text:'Be honest about what it actually takes.',slots:0,bud:0,pc:0,req:null,con:{trust:2,ap:0,part:0,note:'Credible, even if it is a harder ask.'}},
       {id:'c',badge:'BUILD THE FULL CASE',text:'Present a complete five-year cost-benefit model for continuation.',slots:2,bud:0,pc:0,req:{node:'infra-l3'},con:{trust:5,ap:0,part:0,note:'Raj has everything he needs to make the case upward.'}}
      ]},
-    {id:'y5-d',shape:'resource_tradeoff',title:'The Replacement Question',char:'delia',
-     scenario:'Delia wants to know if there is someone internal who could take over the program after you leave.',
+    {id:'y5-d',shape:'resource_tradeoff',title:'The Replacement Question',char:'delia',anchor:true,
+     scenario:'Delia wants to know if there is someone internal who could take over the program after you leave. Desmond, in the same conversation, argues the role itself should shrink back into a normal HR function once you\'re gone &#8212; "Every plant already has someone doing a version of this now. Maybe that\'s the actual win." Delia isn\'t ready to hear that yet.',
      opts:[
-      {id:'a',badge:'NAME SOMEONE INFORMALLY',text:'Mention a candidate without making it official.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A start, but not a plan.'}},
-      {id:'b',badge:'SAY YOU ARE NOT SURE YET',text:'Honest. The bench is not as deep as it should be.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Candid, if not reassuring.'}},
-      {id:'c',badge:'PROPOSE A FORMAL HANDOFF PLAN',text:'Lay out exactly how a transition would work, with a named successor.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:3,ap:0,part:0,note:'Delia feels the program will outlast any one person.'}}
+      {id:'a',badge:'NAME SOMEONE INFORMALLY',text:'Mention a candidate without making it official &#8212; sidestep the bigger question for now.',slots:0,bud:0,pc:0,req:null,con:{trust:1,ap:0,part:0,note:'A start, but not a plan. Neither Delia nor Desmond gets a real answer.'}},
+      {id:'b',badge:'SAY YOU ARE NOT SURE YET',text:'Side with Delia\'s instinct. Honest. The bench is not as deep as it should be.',slots:0,bud:0,pc:0,req:null,con:{trust:0,ap:0,part:0,note:'Candid, if not reassuring. Desmond isn\'t convinced this settles anything.'}},
+      {id:'c',badge:'PROPOSE A FORMAL HANDOFF PLAN',text:'Lay out exactly how a transition would work, with a named successor &#8212; answering Delia without dismissing Desmond\'s point.',slots:1,bud:0,pc:0,req:{node:'mgr-l3'},con:{trust:3,ap:0,part:0,note:'Delia feels the program will outlast any one person. Desmond notes it\'s smaller than what he proposed, and that\'s fine by him.'}}
      ]},
     {id:'y5-e',shape:'data_integrity',title:'The Five-Year Question',char:null,
      scenario:'Someone in leadership asks, simply: "Did this work?" Not hostile. Genuinely curious, after five years.',
@@ -1929,7 +1929,7 @@ var R = {
     }
     html+='</div><button class="tree-view-btn" onclick="C.openTree()">View full tree &#8594;</button></div>';
     // Characters section — replaces Resources. Grouped by tier (exec vs plant)
-    // since a CFO and a plant supervisor aren't the same altitude, even though
+    // since a CFO and a plant manager aren't the same altitude, even though
     // Trust itself stays one number — see tierStatus() for the derived read.
     html+='<div class="ls"><div class="ls-lbl">People</div>';
     [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp){
