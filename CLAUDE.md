@@ -110,6 +110,14 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 - Year 0: 4 hardcoded tutorial situations (`SITS`), consequences visible in Q1 only.
 - Years 1–5: `YEAR_POOLS[year]` of 12 situations each; Fisher-Yates draw of 4 per
   playthrough. Year 5 pool is legacy-themed.
+- **`anchor:true` on a situation guarantees it draws that year** — `drawYearSituations`
+  pulls all anchors first, then shuffles the remaining pool to fill out to 4, then
+  shuffles final quarter order so the anchor doesn't always land in Q1. Currently
+  used for the one exec-disagreement beat per year (`y2-c`, `y3-c`) so that moment
+  isn't left to the 4-of-12 lottery (~2/3 chance per year of NOT being drawn
+  otherwise). Keep at most 1 anchor per year — the mechanism doesn't limit this,
+  but stacking multiple guaranteed situations in one draw crowds out the variety
+  the random pool exists for.
 - Pre-survey decision per year (`YEAR_PRESURVEY`); consequence revealed AFTER the
   choice, never before. Each year's best option also carries a small `effect.trust`
   (routed through `S.applyCappedTrust`) so the presurvey choice visibly connects to
@@ -154,12 +162,14 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   ambient event pools. People panel (left panel + postsurvey grid) always shows
   all four with role + stage.
 - **Company identity / About page:** `COMPANY_INFO` (name, product tagline, founding
-  year, HQ blurb, mission, vision, 4 named values, history timeline) plus a `bio`
-  field per `CHARS` entry — pure content layer, swap this object (and the bios) to
-  reskin the game per the "this game is also an engine" rule at the top of this
-  file. Rendered by `R.companyModal()` / `C.openCompany()`, reachable from a button
-  on the difficulty-select screen, the in-game nav ("Company"), and by clicking any
-  entry in the People panel (left panel or postsurvey grid). The 4 stated values
+  year, HQ blurb, mission, vision, 4 named values, history timeline, `plants` array
+  with one entry per site — opened year + personality blurb, rendered in a
+  "Locations" section) plus a `bio` field per `CHARS` entry — pure content layer,
+  swap this object (and the bios) to reskin the game per the "this game is also an
+  engine" rule at the top of this file. Rendered by `R.companyModal()` /
+  `C.openCompany()`, reachable from a button on the difficulty-select screen, the
+  in-game nav ("Company"), and by clicking any entry in the People panel (left
+  panel or postsurvey grid). The 4 stated values
   (Integrity, People First, Continuous Improvement, Ownership) are referenced by
   name in a couple of situations (`y1-d`, `y3-f`) so decisions occasionally cite the
   company's own stated values directly, not just abstract trust/AP math — keep new
