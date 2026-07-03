@@ -161,6 +161,13 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 8. **Anything shown while a basket selection is pending must display real values
    plus pending as a separate annotation** — never pre-subtract (caused the
    "phantom $1K budget" confusion).
+9. **Don't write situation text that makes a specific, timed promise the game
+   structurally can't pay off.** `y4-a` originally said "Delia is leaving in six
+   months" — but characters never actually leave or get replaced, so that
+   promise could never resolve regardless of which quarter the situation drew
+   in. Reworded to an open-ended succession conversation instead. If a beat
+   needs a hard external event (a departure, a swap, a deadline), either build
+   the mechanism to honor it or keep the fiction open-ended.
 
 ## Systems added late (know they exist before "adding" them)
 
@@ -232,12 +239,41 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   ap/part hit + trust −1, text keyed by dimension in `REC_FALLOUT_TEXT`), not just a
   quieter number at postsurvey. The "Recommendation Results" card names the exact
   stat/delta/trust/PC change per outcome instead of generic "scores improving" text.
+  A rec can be **deselected** after issuing (`C.unissueRec`) before the year locks
+  in — refunds the exact PC spent (stored as `cost` on the pendingRec entry) and
+  restores a consumed `guaranteeNextRec` trade if one was used.
 - **Stagnation:** if something was buildable but nothing was built → −1 trust; if
   the decision also cost zero slots → −2. Never fires in Year 0 or when nothing
   was affordable.
 - **Engagement** recalculates quarterly: `round(ap*0.55 + part*0.45)`.
-- **yearHistory** snapshots `{year, ap, part, eng, grade}` at each postsurvey —
-  feeds the trending table (left panel) and closing-screen SVG line charts.
+- **yearHistory** snapshots `{year, ap, part, eng, grade, trust}` at each
+  postsurvey — feeds the in-game "show trending" line charts (left panel) and
+  the closing-screen line charts (`R.makeLineChart`, shared by both).
+- **Quarterly resolve screen only shows Trust and Political Capital movement,
+  never AP/Participation.** AP Optimism and Participation still update under the
+  hood every quarter (needed for calculations), but displaying their per-quarter
+  ticks broke the "this is a survey, not a live dashboard" premise — those two
+  only visibly move at annual survey results. Don't add ap/part back into the
+  resolve screen's cause-chip `parts` array. Also spell out "Political Capital",
+  not "PC", in that same chip — the abbreviation read as an unexplained shorthand.
+- **`goToResolve()` guards against being called twice for the same quarter**
+  (`if(S.qPhase==='resolve')return;` at the top) — a fast double-tap on Invest/
+  Skip before the DOM re-renders and disables the button could otherwise re-run
+  `genAmbient`/`applyQueued` and double-apply that quarter's ambient event and
+  trust delta. Don't remove this guard when touching that function.
+- **Any UI toggle whose state needs to survive a full re-render must live in `S`,
+  not just a DOM classList.** `S.mobPanelOpen` tracks the mobile dashboard
+  drawer for this reason — it used to be a bare `classList.toggle('mob-show')`
+  in `C.mobToggle`, which worked until another toggle (`toggleTrending`) called
+  `R.go()` and regenerated `panel-l` from scratch without the class, silently
+  closing the drawer. Same pattern as `S.treeDetailsOpen`/`S.peopleDetailsOpen`.
+- **Shared trust-bar-with-movement helper:** `R.trustBarBlock(tBefore, suffix)`
+  renders the header/bar/trail/zone-label block (reads `S.trust` and
+  `S.getZone()` for the "after" side), used on the resolve screen ("this
+  quarter"), postsurvey ("this year", diffed against `S.trustAtYearStart`), and
+  the closing screen ("over five years", diffed against `DIFF[S.diff].trust`).
+  Keep any future trust-bar styling changes in this one function so the three
+  screens can't silently drift apart.
 - **Sound:** three programmatic sounds, toggle in nav, never autoplay before a
   user gesture (AudioContext init on first interaction).
 - **Tree nodes are compact by default:** icon, name, cost/slot chips (or a lock
@@ -252,6 +288,13 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   in the other. `C.toggleTreeDetails` must re-render whichever one is actually
   on screen (`R.go()` for the inline tree, `R.treeModal()` if the modal element
   exists) rather than unconditionally opening the modal — got this wrong once.
+- **Postsurvey layout order is fixed and was deliberately reordered:** trust bar
+  w/ movement → scores/grade → People → year-end consequences → where to focus
+  → rec results → new rec picker. People sits right after scores/grade (moved
+  up from near the bottom) because it's core context, not an appendix. It uses
+  the same Details-toggle pattern as the tree (`S.peopleDetailsOpen`,
+  `C.togglePeopleDetails`, per tier not per person) to hide each character's
+  longer stage description by default.
 
 ## UI/UX conventions
 
@@ -289,9 +332,22 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   `--panel` values (not eyeballed) if either changes again.
 - Resource strip (Budget / Capacity dots / PC) always visible under the trust bar.
   Mobile additionally gets the score strip (AP/Part/Eng + Y·Q) — hidden on desktop
-  via `@media(max-width:680px)` only.
+  via `@media(max-width:680px)` only. On mobile, the resource strip AND the build
+  screen's invest basket card both go `position:sticky` (`.res-strip` at `top:0`,
+  `.basket` at `top:47px` to stack directly beneath it) so both stay visible while
+  scrolling a long tree — desktop is untouched since this is scoped inside the
+  `@media(max-width:680px)` block.
 - Minimal reading: resolve screen = trust bar + one-line consequence chips +
-  compact BUILT chip + pulse. No toasts/popups duplicating summary info.
+  compact BUILT chip + grapevine line. No toasts/popups duplicating summary info.
+  The ambient flavor-text card is labeled "Grapevine," not "Pulse" — "Pulse" reads
+  as a real pulse-survey instrument, which this isn't (it's just ambient texture).
+- **Don't restate a character's full title next to their name in repeating UI
+  chrome** (e.g. the resolve screen's per-event cause-chip tag). Tried showing
+  "NAME · FULL ROLE" there once — reads as tacky/redundant since the role is
+  already visible in the People panel and mobile dashboard every time. Chips
+  like this should show just the name; save full "Name, the Role" phrasing for
+  one-time prose mentions inside situation scenario text, where it reads as
+  introduction rather than repetition.
 - Nav: `? Guide` (reopens onboarding as overlay), sound toggle, `⟳ New Game`.
 - Reveal screen exists for Year 0 only; Years 1–5 go straight to postsurvey.
 - Year 5 postsurvey button routes to `closing` (never "Begin Year 6").
