@@ -44,7 +44,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .diff-ctx{font-size:13px;color:var(--t2);text-align:center;line-height:1.7}
 .diff-cards{display:flex;flex-direction:column;gap:14px}
 .diff-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);padding:22px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:14px}
-.diff-card:hover{border-color:var(--borderl);background:var(--card)}
 .diff-hdr{display:flex;align-items:center;gap:10px}
 .diff-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .diff-lbl{font-weight:600;font-size:14px}
@@ -63,6 +62,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .ob-mn{font-size:12px;color:var(--t2);font-weight:600;margin-bottom:6px}
 .ob-md{font-size:12px;color:var(--tm);line-height:1.5;margin-top:6px}
 .ob-trust{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.ob-trust-hero{border-color:var(--amberd);padding:18px}
 .ob-trust-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .ob-trust-nm{font-size:12px;font-weight:600;color:var(--t2)}
 .ob-trust-zn{font-family:var(--mono);font-size:11px;font-weight:600}
@@ -103,7 +103,9 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .res-strip-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--tm);text-transform:uppercase}
 .res-strip-val{font-family:var(--mono);font-size:13px;font-weight:600}
 .cap-dot.pending{color:var(--amber)}
-.mob-toggle{display:none;margin:8px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--t2);cursor:pointer;width:calc(100% - 32px)}
+.mob-toggle{display:none;margin:14px 16px 4px;background:color-mix(in srgb, var(--amber) 8%, var(--card));border:1px solid var(--amberd);border-radius:var(--rs);padding:8px 12px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--amber);cursor:pointer;width:calc(100% - 32px);align-items:center;justify-content:space-between}
+.mob-toggle-chevron{transition:transform .2s}
+.mob-toggle.open .mob-toggle-chevron{transform:rotate(180deg)}
 .game-body{display:grid;grid-template-columns:220px 1fr;flex:1}
 .panel-l{border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;max-height:100vh;overflow-y:auto}
 .ls{padding:12px 14px;border-bottom:1px solid var(--border)}
@@ -117,7 +119,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .score-val{font-family:var(--mono);font-size:15px;font-weight:600}
 .score-warn{color:var(--amber);font-size:11px}
 .tip{position:relative;display:inline-block}
-.tip:hover .tip-box{opacity:1;pointer-events:auto;transform:translateY(0)}
 .tip-box{position:absolute;bottom:calc(100% + 6px);left:0;background:#322C1F;border:1px solid var(--borderl);border-radius:var(--rs);padding:8px 10px;font-size:11px;color:var(--t2);line-height:1.5;min-width:200px;max-width:240px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:50;transform:translateY(4px);font-family:var(--sans);font-weight:400}
 
 /* TREE SUMMARY */
@@ -157,7 +158,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .sit-scenario{font-size:13px;color:var(--t2);line-height:1.65}
 .sit-opts{display:flex;flex-direction:column;gap:9px}
 .sit-opt{background:var(--card);border:1px solid var(--border);border-radius:var(--r-narr-s);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:7px}
-.sit-opt:hover:not(.lk){border-color:var(--amber);background:var(--hover)}
 .sit-opt.lk{opacity:.5;cursor:not-allowed}
 .opt-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .opt-badge{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;color:var(--amber);background:color-mix(in srgb, var(--amber) 10%, transparent);border:1px solid color-mix(in srgb, var(--amber) 25%, transparent);border-radius:3px;padding:2px 7px;white-space:nowrap}
@@ -177,7 +177,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .build-hdr{display:flex;justify-content:space-between;align-items:center}
 .build-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase}
 .build-skip{background:transparent;color:var(--t2);border:1px solid var(--border);border-radius:var(--rs);padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--sans);transition:border-color .15s}
-.build-skip:hover{border-color:var(--borderl);color:var(--t1)}
 .build-done{font-size:13px;color:var(--green)}
 
 /* BASKET */
@@ -185,11 +184,9 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .basket-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1}
 .basket-empty{font-size:11px;color:var(--tm);font-style:italic}
 .basket-chip{font-size:11px;background:color-mix(in srgb, var(--amber) 12%, transparent);color:var(--amber);border:1px solid color-mix(in srgb, var(--amber) 30%, transparent);border-radius:3px;padding:2px 7px;cursor:pointer}
-.basket-chip:hover{background:color-mix(in srgb, var(--amber) 20%, transparent)}
 .basket-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .basket-cost{font-family:var(--mono);font-size:11px;color:var(--t2)}
 .btn-commit{background:var(--amber);color:#1E1B16;border:none;border-radius:var(--rs);padding:6px 14px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
-.btn-commit:hover:not([disabled]){background:#D4A052}
 .btn-commit[disabled]{opacity:.4;cursor:not-allowed;background:var(--amber)}
 
 /* TRACKS GRID */
@@ -203,7 +200,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .tn{background:var(--panel);padding:10px 8px;display:flex;flex-direction:column;gap:5px;transition:background .15s;position:relative}
 .tn.built{background:color-mix(in srgb, var(--amberd) 10%, transparent)}
 .tn.avail{cursor:pointer}
-.tn.avail:hover{background:var(--hover)}
 .tn.sel{cursor:pointer}
 .tn.dimmed{opacity:.35}
 .tn.locked{opacity:.35;cursor:not-allowed}
@@ -249,7 +245,6 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 /* ADVANCE */
 .adv-wrap{padding-top:2px}
 .btn-adv{background:var(--card);color:var(--amber);border:1px solid var(--amber);border-radius:var(--r);padding:10px 18px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;letter-spacing:.05em;width:100%}
-.btn-adv:hover{background:color-mix(in srgb, var(--amber) 10%, transparent)}
 
 /* REVEAL */
 .reveal-badge{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase}
@@ -277,22 +272,37 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
 .modal-hdr{display:flex;justify-content:space-between;align-items:center}
 .modal-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase}
 .modal-close{background:none;border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);font-size:12px;padding:4px 10px;cursor:pointer;font-family:var(--sans)}
-.modal-close:hover{border-color:var(--borderl);color:var(--t1)}
 
 /* BUTTONS */
 .btn-p{background:var(--amber);color:#1E1B16;border:none;border-radius:var(--r);padding:10px 20px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
-.btn-p:hover{background:#D4A052}
 .btn-g{background:transparent;color:var(--t2);border:1px solid var(--border);border-radius:var(--r);padding:10px 18px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:border-color .15s,color .15s}
-.btn-g:hover{border-color:var(--borderl);color:var(--t1)}
 
 /* MOBILE */
+
+/* Hover feedback only for pointer devices that actually support it — touch
+   devices synthesize a lingering :hover on tap (the last-touched screen
+   coordinate stays "hovered" until the next tap elsewhere), which made
+   whatever re-rendered into that spot after a tap look selected. */
+@media (hover:hover) and (pointer:fine){
+.diff-card:hover{border-color:var(--borderl);background:var(--card)}
+.tip:hover .tip-box{opacity:1;pointer-events:auto;transform:translateY(0)}
+.sit-opt:hover:not(.lk){border-color:var(--amber);background:var(--hover)}
+.build-skip:hover{border-color:var(--borderl);color:var(--t1)}
+.basket-chip:hover{background:color-mix(in srgb, var(--amber) 20%, transparent)}
+.btn-commit:hover:not([disabled]){background:#D4A052}
+.tn.avail:hover{background:var(--hover)}
+.btn-adv:hover{background:color-mix(in srgb, var(--amber) 10%, transparent)}
+.modal-close:hover{border-color:var(--borderl);color:var(--t1)}
+.btn-p:hover{background:#D4A052}
+.btn-g:hover{border-color:var(--borderl);color:var(--t1)}
+}
 @media(max-width:680px){
   .mob-strip{display:flex;gap:14px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
   .mob-strip-item{font-size:11px;color:var(--t2);display:flex;align-items:center;gap:4px}
   .game-body{grid-template-columns:1fr}
   .panel-l{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border);display:none}
   .panel-l.mob-show{display:flex}
-  .mob-toggle{display:block}
+  .mob-toggle{display:flex}
   .track-nodes{grid-template-columns:repeat(2,1fr)}
   .reveal-scores{gap:20px}
   .rv-val{font-size:38px}
@@ -1224,10 +1234,6 @@ var S = {
       }
       this.yearTrustGained+=Math.min(positiveTotal,remaining);
     }
-    if(this.trustCappedThisQ){
-      this.qCons.push({trust:0,ap:0,part:0,pc:0,badge:'PACED',source:'ambient',
-        note:'Credibility builds slowly. Only part of what this quarter earned shows up right away.'});
-    }
 
     // Trust is summed and applied as ONE adjTrust call (not one per entry) so the floor/ceiling
     // clamp only ever happens once per quarter — otherwise a bad quarter's later entries could
@@ -1435,28 +1441,34 @@ var R = {
     this.app().innerHTML=html;
   },
 
-  onboard:function(){
+  onboard:function(){ return this.onboardContent(true); },
+
+  // Shared by the real onboarding screen and the in-game Guide overlay
+  // (showHelp). includeActions=false strips the Start Year 1 / tutorial
+  // buttons for the overlay, since those only make sense pre-game.
+  onboardContent:function(includeActions){
     var z=S.getZone();
     var html='<div class="screen">';
     html+='<div class="ob-badge">YEAR 0 &#8212; ORIENTATION</div>';
     html+='<h2 class="ob-title">Before the first survey</h2>';
-    html+='<p class="ob-body">You\'re learning the organization and it is learning you. Three metrics define whether you succeed. One resource determines what you can do. The first decision shows you consequences openly &#8212; after that, read the room.</p>';
-    html+='<div class="ob-metrics">';
-    html+='<div class="ob-metric"><div class="ob-mv amber">'+S.ap+'</div><div class="ob-mn">AP Optimism</div><div class="ob-md">Your north star. Do employees believe leadership will act on survey results?</div></div>';
-    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.part+'%</div><div class="ob-mn">Participation</div><div class="ob-md">The prerequisite. Below 65% data gets noisy; below 50% it is unreliable.</div></div>';
-    html+='<div class="ob-metric"><div class="ob-mv">'+S.eng+'</div><div class="ob-mn">Engagement</div><div class="ob-md">Summary metric. Moves gradually as AP Optimism and Participation improve.</div></div>';
-    html+='<div class="ob-metric"><div class="ob-mv amber">$'+S.budget/1000+'K</div><div class="ob-mn">Budget</div><div class="ob-md">Annual allocation for investments and decisions. Grows with strong grades, shrinks with weak ones.</div></div>';
-    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.cap+'</div><div class="ob-mn">Capacity</div><div class="ob-md">Slots per quarter. Each decision or tree investment costs one. Hard mode has fewer &#8212; every choice matters.</div></div>';
-    html+='</div>';
-    html+='<div class="ob-trust">';
+    html+='<p class="ob-body">You\'re learning the organization and it is learning you. Here is what you are really managing.</p>';
+    html+='<div class="ob-trust ob-trust-hero">';
     html+='<div class="ob-trust-hdr"><div class="ob-trust-nm">ORGANIZATIONAL TRUST &#8212; your standing</div><div class="ob-trust-zn" style="color:'+z.color+'">'+z.label+'</div></div>';
     html+='<div class="ob-bar"><div class="ob-bar-fill" style="width:'+S.trust+'%;background:'+ZONE_FLUID[z.id]+'"></div></div>';
     html+='<div class="ob-zones"><span class="ob-zl">Skeptical</span><span class="ob-zl">Cautious</span><span class="ob-zl">Engaged</span><span class="ob-zl">Champion</span></div>';
     html+='<div class="ob-trust-desc">Trust is your credibility with leadership. It determines which options are available, whether recommendations land, and how much budget you get next year. Cannot be spent &#8212; only built or lost.<br><br><strong style="color:var(--t2)">Political Capital (&#10024;'+S.polcap+')</strong> is spendable. Use it for high-leverage situation options and recommendations to other functions. Saving it for the right moment matters more than spending it fast. <em>'+z.label+'</em> earns +'+z.rate+' PC per quarter; grade bonuses add more at year end.<br><br><strong style="color:var(--t2)">Navigation:</strong> Budget, Capacity, and PC are always visible in the strip below the Trust bar. Current survey scores appear below that on mobile. The left panel (Dashboard) shows scores, last survey results, your investment tree, and the four people whose arcs respond to your decisions.</div>';
     html+='</div>';
-    html+='<div class="ob-actions"><button class="btn-p" onclick="C.skipY0()">Start Year 1 &#8594;</button><button class="btn-g" onclick="C.startY0()">Run tutorial first</button></div>';
+    html+='<div class="ob-metrics">';
+    html+='<div class="ob-metric"><div class="ob-mv amber">'+S.ap+'</div><div class="ob-mn">Action Plan (AP) Optimism</div><div class="ob-md">Your north star. Do employees believe leadership will act on survey results?</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.part+'%</div><div class="ob-mn">Participation</div><div class="ob-md">The prerequisite. Below 65% data gets noisy; below 50% it is unreliable.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv">'+S.eng+'</div><div class="ob-mn">Engagement</div><div class="ob-md">Summary metric. Moves gradually as AP Optimism and Participation improve.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv amber">$'+S.budget/1000+'K</div><div class="ob-mn">Budget</div><div class="ob-md">Annual allocation for investments and decisions. Grows with strong grades, shrinks with weak ones.</div></div>';
+    html+='<div class="ob-metric"><div class="ob-mv blue">'+S.cap+'</div><div class="ob-mn">Capacity</div><div class="ob-md">Slots per quarter. Each decision or tree investment costs one. Hard mode has fewer &#8212; every choice matters.</div></div>';
     html+='</div>';
-    this.app().innerHTML=html;
+    if(includeActions)html+='<div class="ob-actions"><button class="btn-p" onclick="C.skipY0()">Start Year 1 &#8594;</button><button class="btn-g" onclick="C.startY0()">Run tutorial first</button></div>';
+    html+='</div>';
+    if(includeActions)this.app().innerHTML=html;
+    return html;
   },
 
   game:function(){
@@ -1488,7 +1500,7 @@ var R = {
     html+='<div class="res-strip-item"><span class="res-strip-lbl">CAPACITY</span><span class="res-strip-val">'+capDots+'</span></div>';
     html+='<div class="res-strip-item"><span class="res-strip-lbl">POLITICAL CAPITAL</span><span class="res-strip-val" style="color:var(--purple)">&#10024;'+S.polcap+' <span style="font-size:10px;color:'+z.color+'">+'+z.rate+'/qtr</span></span></div>';
     html+='</div>';
-    html+='<button class="mob-toggle" onclick="C.mobToggle()">&#128202; Dashboard</button>';
+    html+='<button class="mob-toggle" id="mob-toggle-btn" onclick="C.mobToggle()"><span>&#128202; Dashboard &#8212; scores, tree, people</span><span class="mob-toggle-chevron">&#9660;</span></button>';
     // Mobile score strip — always visible on mobile below resource strip
     html+='<div class="mob-strip">';
     html+='<div class="mob-strip-item"><span style="color:var(--amber);font-family:var(--mono);font-weight:600">'+S.ap+'</span><span style="font-size:9px;color:var(--tm)">&nbsp;AP</span></div>';
@@ -1513,7 +1525,7 @@ var R = {
     for(var i=0;i<S.cap;i++)dots+='<span class="cap-dot '+(i<rem?'full':'empty')+'">&#9679;</span>';
     var trackOrder=['infra','mgr','comms','se'];
     var html='<div class="ls"><div class="ls-lbl">Survey Scores</div>';
-    html+='<div class="score-row"><span class="score-name"><span class="tip">AP Optimism<span class="tip-box">Do employees believe leadership will act on results? Your north star metric &#8212; weighted 40% in your annual grade.</span></span></span><span class="score-val amber">'+S.ap+'</span>'+(S.ap<50?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 50 &#8212; employees do not believe leadership will act. This is the critical threshold.</span></span>':'')+'</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">AP Optimism<span class="tip-box">Action Plan Optimism. Do employees believe leadership will act on results? Your north star metric &#8212; weighted 40% in your annual grade.</span></span></span><span class="score-val amber">'+S.ap+'</span>'+(S.ap<50?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 50 &#8212; employees do not believe leadership will act. This is the critical threshold.</span></span>':'')+'</div>';
     html+='<div class="score-row"><span class="score-name"><span class="tip">Participation<span class="tip-box">How many employees completed the survey. Below 65% data gets noisy. Below 50% results are unreliable.</span></span></span><span class="score-val blue">'+S.part+'%</span>'+(S.part<65?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 65% &#8212; data reliability drops. Below 50% results are unreliable.</span></span>':'')+'</div>';
     html+='<div class="score-row"><span class="score-name"><span class="tip">Engagement<span class="tip-box">Summary metric. Context only &#8212; moves when AP Optimism and Participation improve consistently.</span></span></span><span class="score-val">'+S.eng+'</span></div>';
     html+='</div>';
@@ -1807,7 +1819,7 @@ var R = {
     var html='<div class="screen" style="justify-content:center;align-items:center;text-align:center">';
     html+='<div class="reveal-badge">'+(isOrientation?'YEAR 0 COMPLETE':'YEAR '+S.year+' SURVEY RESULTS')+'</div>';
     html+='<div class="reveal-scores">';
-    html+='<div class="rv-item"><div class="rv-val amber">'+S.ap+'</div><div class="rv-lbl">AP Optimism</div></div>';
+    html+='<div class="rv-item"><div class="rv-val amber">'+S.ap+'</div><div class="rv-lbl">Action Plan (AP) Optimism</div></div>';
     html+='<div class="rv-item"><div class="rv-val blue">'+S.part+'%</div><div class="rv-lbl">Participation</div></div>';
     html+='<div class="rv-item"><div class="rv-val">'+S.eng+'</div><div class="rv-lbl">Engagement</div></div>';
     html+='</div>';
@@ -1881,7 +1893,7 @@ var R = {
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
-    html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">AP Optimism</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(apD)+';margin-top:3px">'+dStr(apD)+' vs last year</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Action Plan (AP) Optimism</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(apD)+';margin-top:3px">'+dStr(apD)+' vs last year</div></div>';
     html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;color:var(--blue);line-height:1">'+S.part+'%</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Participation</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(partD)+';margin-top:3px">'+dStr(partD)+' vs last year</div></div>';
     html+='<div><div style="font-family:var(--mono);font-size:40px;font-weight:600;line-height:1">'+S.eng+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Engagement</div><div style="font-family:var(--mono);font-size:11px;color:'+dCol(engD)+';margin-top:3px">'+dStr(engD)+' vs last year</div></div>';
     html+='</div>';
@@ -2044,7 +2056,7 @@ var R = {
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
-    html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final AP Optimism</div></div>';
+    html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--amber);line-height:1">'+S.ap+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Action Plan (AP) Optimism</div></div>';
     html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;color:var(--blue);line-height:1">'+S.part+'%</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Participation</div></div>';
     html+='<div><div style="font-family:var(--mono);font-size:36px;font-weight:600;line-height:1">'+S.eng+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Final Engagement</div></div>';
     html+='</div>';
@@ -2429,23 +2441,16 @@ var C = {
     if(S.soundOn)AUDIO.nodeClick(); // little confirmation ping
   },
   showHelp:function(){
-    // Re-render the onboarding screen as a modal overlay
-    var prev=S.phase;
+    // Guide overlay reuses the onboarding content, without its Start Year 1 /
+    // tutorial buttons (those only make sense before the game has started).
     var overlay=document.createElement('div');
     overlay.id='help-overlay';
     overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px';
     overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
-    // Temporarily switch phase to render onboarding, capture HTML, restore
-    var savedPhase=S.phase;
-    S.phase='ob';
-    R.go();
-    var obHTML=document.getElementById('app').innerHTML;
-    S.phase=savedPhase;
-    R.go();
+    var obHTML=R.onboardContent(false);
     var box=document.createElement('div');
     box.style.cssText='max-width:680px;width:100%;background:var(--bg);border-radius:12px;padding:8px;position:relative';
     box.innerHTML='<button onclick="document.getElementById(\'help-overlay\').remove()" style="position:absolute;top:12px;right:12px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--t2);font-size:12px;padding:4px 10px;cursor:pointer;font-family:var(--sans);z-index:1">Close &#10005;</button>'+obHTML;
-    // Remove the action buttons from the help version
     overlay.appendChild(box);
     document.body.appendChild(overlay);
   },
@@ -2458,6 +2463,7 @@ var C = {
 
   mobToggle:function(){
     var p=R.$('panel-l');if(p)p.classList.toggle('mob-show');
+    var b=R.$('mob-toggle-btn');if(b)b.classList.toggle('open');
   }
 };
 
