@@ -304,6 +304,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px
   .mob-toggle{display:flex}
   .track-nodes{grid-template-columns:repeat(2,1fr)}
   .stack-mobile{grid-template-columns:1fr!important}
+  .res-strip{position:sticky;top:0;z-index:6}
+  .basket{top:47px}
   .reveal-scores{gap:20px}
   .rv-val{font-size:38px}
   .game-shell{padding-bottom:32px}
@@ -1347,6 +1349,7 @@ var S = {
   sel:null,
   qCons:[],qTree:[],
   trustAtQStart:0,
+  trustAtYearStart:0,
   apAtYearStart:0,partAtYearStart:0,engAtYearStart:0,
   decisionLog:[], // [{year,q,title,badge,note}] full game history for closing summary
   charArcs:{marcus:0,delia:0,raj:0,yolanda:0,priya:0,desmond:0,warren:0}, // arc stage per character 0-3
@@ -1363,6 +1366,7 @@ var S = {
   mobPanelOpen:false, // tracked in state (not just DOM classList) so re-renders triggered
                        // by other toggles (e.g. showTrending) don't silently close it
   treeDetailsOpen:{}, // {trackId:bool} — per-track "show descriptions" toggle in the tree modal
+  peopleDetailsOpen:{}, // {tier:bool} — per-tier "show stage descriptions" toggle on the postsurvey People section
   ambEv:null,pulse:null,pulseV:null,
   pendingUnlocks:[],
   yearTrustGained:0, // positive trust earned so far this year, against TRUST_ANNUAL_CAP
@@ -1379,10 +1383,11 @@ var S = {
     this.sit=null; this.sitDone=false; this.qPhase='decision';
     this.sel={}; this.qCons=[]; this.qTree=[];
     this.trustAtQStart=d.trust;
+    this.trustAtYearStart=d.trust;
     this.apAtYearStart=d.ap;this.partAtYearStart=d.part;this.engAtYearStart=d.eng;
     this.decisionLog=[];
     this.charArcs={marcus:0,delia:0,raj:0,yolanda:0,priya:0,desmond:0,warren:0};
-    this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};this.mobPanelOpen=false;
+    this.yearHistory=[];this.showTrending=false;this.treeDetailsOpen={};this.mobPanelOpen=false;this.peopleDetailsOpen={};
     this.pendingRecs=[];this.recResults=[];this.recsIssued=0;this.guaranteedRec=false;this.recFallout=[];
     this.guaranteedAnchorId=EXEC_DISAGREEMENT_IDS[Math.floor(Math.random()*EXEC_DISAGREEMENT_IDS.length)];
     this.soundOn=true;
@@ -2093,19 +2098,16 @@ var R = {
     return html;
   },
 
-  resolveMode:function(){
+  // Shared trust-bar-with-movement block, used on the resolve, postsurvey, and
+  // closing screens so a trust delta always reads the same way everywhere.
+  trustBarBlock:function(tBefore,suffix){
     var z=S.getZone();
-    var tBefore=S.trustAtQStart;
     var tAfter=S.trust;
     var tDelta=tAfter-tBefore;
     var deltaPos=tDelta>=0;
     var deltaStr=(deltaPos?'+':'')+tDelta;
-    var vi=S.pulseV||'neu';
-    var picons={pos:'&#8593;',neu:'&#8594;',neg:'&#8595;'};
-    var html='<div class="resolve-card" id="rc-main">';
-    // Trust bar with trailing region
-    html+='<div class="resolve-trust-hdr"><span class="resolve-trust-lbl">Organizational Trust</span>';
-    html+='<span class="resolve-trust-delta" style="color:'+(deltaPos?'var(--green)':'var(--red)')+'">'+deltaStr+' this quarter</span></div>';
+    var html='<div class="resolve-trust-hdr"><span class="resolve-trust-lbl">Organizational Trust</span>';
+    html+='<span class="resolve-trust-delta" style="color:'+(deltaPos?'var(--green)':'var(--red)')+'">'+deltaStr+' '+suffix+'</span></div>';
     html+='<div class="resolve-bar">';
     if(tDelta!==0){
       var trailLeft=Math.min(tBefore,tAfter);
@@ -2114,6 +2116,14 @@ var R = {
     html+='<div class="resolve-bar-fill" style="width:'+tAfter+'%;background:'+ZONE_FLUID[z.id]+'"></div>';
     html+='</div>';
     html+='<div class="resolve-zone-lbl" style="color:'+z.color+'">'+z.label+'</div>';
+    return html;
+  },
+
+  resolveMode:function(){
+    var vi=S.pulseV||'neu';
+    var picons={pos:'&#8593;',neu:'&#8594;',neg:'&#8595;'};
+    var html='<div class="resolve-card" id="rc-main">';
+    html+=this.trustBarBlock(S.trustAtQStart,'this quarter');
     // Causal narrative — what happened and why, one line each
     var anyItems=false;
     var causeHtml='<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">';
@@ -2131,8 +2141,10 @@ var R = {
       var allPos=c.trust>=0&&(c.pc||0)>=0;
       var tagCls=c.source==='ambient'?'org':'dec';
       causeHtml+='<div style="display:flex;gap:9px;align-items:flex-start">';
-      var tagLabel=c.badge;
-      if(c.char&&CHARS[c.char])tagLabel=CHARS[c.char].name.toUpperCase()+' &#183; '+CHARS[c.char].role.toUpperCase();
+      // Just the name, not the full title — the role is already visible in the
+      // People panel and mobile dashboard, so spelling it out here again read as
+      // repetitive/"tacky" rather than helpful.
+      var tagLabel=(c.char&&CHARS[c.char])?CHARS[c.char].name.toUpperCase():c.badge;
       causeHtml+='<span class="cause-tag '+tagCls+'" style="flex-shrink:0;margin-top:1px">'+tagLabel+'</span>';
       causeHtml+='<div style="flex:1">';
       if(c.note)causeHtml+='<div style="font-size:12px;color:var(--t2);line-height:1.5">'+c.note+'</div>';
@@ -2272,6 +2284,9 @@ var R = {
     function dCol(d){return d>0?'var(--green)':d<0?'var(--red)':'var(--tm)';}
     var html='<div class="screen" style="max-width:640px">';
     html+='<div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase">YEAR '+S.year+' &#8212; SURVEY RESULTS</div>';
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:18px">';
+    html+=this.trustBarBlock(S.trustAtYearStart,'this year');
+    html+='</div>';
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r-rep);padding:22px">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
     html+='<div style="display:flex;gap:28px;flex-wrap:wrap">';
@@ -2281,6 +2296,40 @@ var R = {
     html+='</div>';
     html+='<div style="text-align:center;flex-shrink:0"><div style="font-family:var(--mono);font-size:52px;font-weight:700;color:'+gc+';line-height:1">'+g+'</div><div style="font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;margin-top:4px">Grade</div></div>';
     html+='</div></div>';
+
+    // People — grouped by tier (Leadership vs Plant Leadership), each always
+    // showing every character in that group with current stage. Per-group
+    // Details toggle (mirrors the tree's Details toggle) hides the longer
+    // stage description by default so this reads compact at a glance.
+    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
+    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
+    var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
+    [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
+      var tier=grp[0],label=grp[1];
+      var detailsOpen=!!S.peopleDetailsOpen[tier];
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'">';
+      html+='<div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em">'+label+'</div>';
+      html+='<button onclick="C.togglePeopleDetails(\''+tier+'\')" style="background:none;border:1px solid var(--border);border-radius:var(--rs);padding:2px 8px;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--sans)">'+(detailsOpen?'Hide details &#9650;':'Details &#9660;')+'</button>';
+      html+='</div>';
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+      tierIds(tier).forEach(function(charId){
+        var arc=CHAR_ARCS[charId];
+        var ch=CHARS[charId];
+        var stage=S.charArcs[charId]||0;
+        var stageInfo=arc.stages[stage];
+        html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start;cursor:pointer" onclick="C.openCompany()" title="View bio">';
+        html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
+        html+='<div>';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
+        html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
+        html+='<div style="font-size:10px;color:'+stageColors[stage]+';margin-top:2px;font-weight:600">'+stageInfo.label+'</div>';
+        if(detailsOpen)html+='<div style="font-size:10px;color:var(--tm);margin-top:2px;line-height:1.4">'+stageInfo.desc+'</div>';
+        html+='</div></div>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
+
     html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:2px">Year-End Consequences</div>';
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
@@ -2295,10 +2344,7 @@ var R = {
     html+='</div></div>';
     html+='<div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)">$'+Math.floor(nb/1000)+'K</div>';
     html+='</div>';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--card);border-radius:var(--rs)">';
-    html+='<div><div style="font-size:12px;font-weight:600">Organizational Trust</div><div style="font-size:11px;color:var(--tm);margin-top:2px">Current standing</div></div>';
-    html+='<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:'+z.color+'">'+z.label+'</div>';
-    html+='</div></div>';
+    html+='</div>';
     html+='<div style="border:1px solid var(--borderl);border-radius:var(--r);padding:16px;background:color-mix(in srgb, var(--amber) 3%, transparent)">';
     html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;margin-bottom:8px">Where to Focus</div>';
     html+='<div style="font-size:13px;color:var(--t2);line-height:1.7">'+focus+'</div>';
@@ -2334,34 +2380,6 @@ var R = {
       });
       html+='</div>';
     }
-
-    // Character arc moments - show if anyone advanced this year
-    // People — grouped by tier (Leadership vs Plant Leadership), each always
-    // showing every character in that group with current stage.
-    html+='<div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px">';
-    html+='<div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--tm);text-transform:uppercase;margin-bottom:10px">People</div>';
-    var stageColors=['var(--red)','var(--amber)','var(--blue)','var(--green)'];
-    [['exec','Leadership'],['plant','Plant Leadership']].forEach(function(grp,gi){
-      var tier=grp[0],label=grp[1];
-      html+='<div style="font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px'+(gi>0?';margin-top:14px':'')+'">'+label+'</div>';
-      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-      tierIds(tier).forEach(function(charId){
-        var arc=CHAR_ARCS[charId];
-        var ch=CHARS[charId];
-        var stage=S.charArcs[charId]||0;
-        var stageInfo=arc.stages[stage];
-        html+='<div style="background:var(--card);border-radius:var(--rs);padding:10px;display:flex;gap:8px;align-items:flex-start;cursor:pointer" onclick="C.openCompany()" title="View bio">';
-        html+='<span style="font-size:20px;flex-shrink:0">'+ch.av+'</span>';
-        html+='<div>';
-        html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+ch.name+'</div>';
-        html+='<div style="font-size:10px;color:var(--tm)">'+ch.role+'</div>';
-        html+='<div style="font-size:10px;color:'+stageColors[stage]+';margin-top:2px;font-weight:600">'+stageInfo.label+'</div>';
-        html+='<div style="font-size:10px;color:var(--tm);margin-top:2px;line-height:1.4">'+stageInfo.desc+'</div>';
-        html+='</div></div>';
-      });
-      html+='</div>';
-    });
-    html+='</div>';
 
     // Recommendations UI — tiered costs, diagnostic signals, skip option
     if(S.year<5){
@@ -2888,7 +2906,7 @@ var C = {
     S.budget=S.nextBudget||d.budget;
     S.capUsed=0;S.sel={};S.qCons=[];S.qTree=[];
     S.ambEv=null;S.pulse=null;S.pulseV=null;
-    S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
+    S.trustAtQStart=S.trust;S.trustAtYearStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
     S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
     S.yearTrustGained=0;
     S.drawYearSituations(1);
@@ -2904,7 +2922,7 @@ var C = {
     S.budget=S.nextBudget;
     S.capUsed=0;S.sel={};S.qCons=[];S.qTree=[];
     S.ambEv=null;S.pulse=null;S.pulseV=null;
-    S.trustAtQStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
+    S.trustAtQStart=S.trust;S.trustAtYearStart=S.trust;S.grade=null;S.preSurveyNote='';S.recSkippedNote='';
     S.apAtYearStart=S.ap;S.partAtYearStart=S.part;S.engAtYearStart=S.eng;
     S.yearTrustGained=0;
     S.drawYearSituations(S.year);
@@ -2983,6 +3001,10 @@ var C = {
     // otherwise the normal game screen (which includes the inline build-phase tree).
     if(R.$('tree-modal'))R.treeModal(S.qPhase==='build');
     else R.go();
+  },
+  togglePeopleDetails:function(tier){
+    S.peopleDetailsOpen[tier]=!S.peopleDetailsOpen[tier];
+    R.go();
   },
   closeTree:function(e){
     if(e&&e.target&&e.target.id!=='tree-modal')return;
