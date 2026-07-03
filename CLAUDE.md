@@ -171,7 +171,10 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
 - **Org tiers, deliberately NOT a second trust resource:** `CHARS[id].tier` is
   `'exec'` (Delia CHRO, Raj CFO, Desmond COO, Warren CEO) or `'plant'` (Marcus/
   Bell Creek, Yolanda/Riverside, Priya/Prairie Junction — one rep per location).
-  Organizational Trust stays the single tracked resource; do not fork it per tier
+  All 3 plant reps share the same title, **Plant Manager** (Yolanda and Priya
+  were originally "Supervisor," a level below Marcus — retitled so the tier
+  reads as peers, not a mixed rank). Organizational Trust stays the single
+  tracked resource; do not fork it per tier
   or per character — that would require re-deriving the whole balance model
   (zones, budget formula, PC rates, rec landing odds all key off the one number)
   and was explicitly rejected in favor of this lighter approach. `tierIds(tier)` /
@@ -180,7 +183,7 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   stage* of that tier's characters — nothing new is tracked, it's a read of
   existing `S.charArcs` values. People panel (both renders) and the Company modal's
   Leadership section all group by tier with this derived label in the header, so a
-  CFO and a plant supervisor read as different altitudes without a second gauge.
+  CFO and a plant manager read as different altitudes without a second gauge.
   `priya`/`desmond`/`warren` currently have empty `advanceOn.decisions` arrays (no
   situations reference them by id yet, so their arcs only advance via passive tree
   investment through `checkTreeArcAdvance`) — a future situations pass could give
@@ -199,14 +202,14 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   company's own stated values directly, not just abstract trust/AP math — keep new
   values-tie-in situations reusing an existing shape's cost/effect numbers, per the
   situation-shape rule below, rather than inventing new mechanics for the callback.
-  The 5 anchor situations (see `EXEC_DISAGREEMENT_IDS` above) frame two execs
-  disagreeing with each other in the scenario text (not just with the player),
-  rotating the pairing each year rather than reusing the same two people — a
-  lightweight way to make the exec cast feel like they have relationships with
-  each other, not just with the CoE lead; the underlying options/numbers are
-  unchanged from
-  before each rewrite. If adding more, keep rotating pairings rather than
-  defaulting back to Raj/Delia every time.
+  The 5 candidate situations in `EXEC_DISAGREEMENT_IDS` (see Situation system
+  above) frame two execs disagreeing with each other in the scenario text (not
+  just with the player), rotating the pairing by id rather than reusing the
+  same two people every time — a lightweight way to make the exec cast feel
+  like they have relationships with each other, not just with the CoE lead;
+  the underlying options/numbers are unchanged from before each rewrite. If
+  adding more candidates, keep rotating pairings rather than defaulting back
+  to Raj/Delia every time.
 - **Recommendations:** postsurvey review, max 2/year, tiered PC cost by diagnostic
   signal — high 18 PC (full land prob), medium 12 (×0.85), low 6 (×0.60 **and**
   trust dip if it lands: acting on the wrong signal backfires). Landing prob by
