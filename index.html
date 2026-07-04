@@ -739,40 +739,6 @@ function getRecDiagnostic(dimId, ap, part, year, treeBuilt){
   return 'medium';
 }
 
-// Plain-language version of the same conditions above, naming the actual
-// number that drove the signal instead of an abstract tier — shown every
-// postsurvey so the mechanic teaches itself by repetition across 5 years.
-function getRecReason(dimId, ap, part, year, treeBuilt){
-  if(dimId==='growth'){
-    if(ap<55&&year>=2) return 'AP Optimism ('+ap+') is below the healthy line, and it\'s year '+year+' &#8212; this is the point that gap starts to matter.';
-    if(ap<65) return 'AP Optimism ('+ap+') is trending soft, but not critical yet.';
-    return '';
-  }
-  if(dimId==='recognition'){
-    if(ap<52&&part>=65) return 'AP Optimism ('+ap+') is low even though Participation ('+part+'%) is solid &#8212; people show up but don\'t feel recognized for it.';
-    if(ap<62) return 'AP Optimism ('+ap+') is soft; recognition could help, but it isn\'t the clear primary driver.';
-    return '';
-  }
-  if(dimId==='comms'){
-    if(part<68) return 'Participation ('+part+'%) is low &#8212; people aren\'t hearing what happened to their last round of feedback.';
-    if(part<76) return 'Participation ('+part+'%) is trending soft.';
-    return '';
-  }
-  if(dimId==='safety'){
-    if(ap<50&&year<=3) return 'AP Optimism ('+ap+') is very low this early &#8212; that usually means people are still afraid to speak up.';
-    if(ap<60) return 'AP Optimism ('+ap+') is soft, though not at the fear-driven range yet.';
-    return '';
-  }
-  if(dimId==='mgr'){
-    var mgrBuilt2=Object.keys(treeBuilt||{}).filter(function(id){return id.indexOf('mgr')===0;}).length;
-    if(mgrBuilt2<2&&year>=2) return 'Only '+mgrBuilt2+'/4 Manager Capacity nodes built by year '+year+' &#8212; managers don\'t have the tools yet.';
-    if(mgrBuilt2<3) return mgrBuilt2+'/4 Manager Capacity nodes built &#8212; there is room to grow here.';
-    return '';
-  }
-  return '';
-}
-
-
 var SITS = [
   {id:'y0-q1',q:1,tut:true,title:'The Floor Supervisor Question',char:'delia',
    scenario:'Delia forwarded an email from a Riverside floor supervisor asking why last year\'s survey "went nowhere." She added one line: "Worth addressing?"',
@@ -1934,20 +1900,15 @@ var R = {
     var dots='';
     for(var i=0;i<S.cap;i++)dots+='<span class="cap-dot '+(i<rem?'full':'empty')+'">&#9679;</span>';
     var trackOrder=['infra','mgr','comms','se'];
+    // Shows the LAST survey's numbers, not the live under-the-hood values —
+    // AP/Participation/Engagement only ever visibly move at survey results,
+    // same rule as the resolve screen. S.apAtYearStart/etc. are frozen at
+    // postsurvey and don't change again until the next one.
     var html='<div class="ls"><div class="ls-lbl">Survey Scores</div>';
-    html+='<div class="score-row"><span class="score-name"><span class="tip">AP Optimism<span class="tip-box">Action Plan Optimism. Do employees believe leadership will act on results? Your north star metric &#8212; weighted 40% in your annual grade.</span></span></span><span class="score-val amber">'+S.ap+'</span>'+(S.ap<50?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 50 &#8212; employees do not believe leadership will act. This is the critical threshold.</span></span>':'')+'</div>';
-    html+='<div class="score-row"><span class="score-name"><span class="tip">Participation<span class="tip-box">How many employees completed the survey. Below 65% data gets noisy. Below 50% results are unreliable.</span></span></span><span class="score-val blue">'+S.part+'%</span>'+(S.part<65?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 65% &#8212; data reliability drops. Below 50% results are unreliable.</span></span>':'')+'</div>';
-    html+='<div class="score-row"><span class="score-name"><span class="tip">Engagement<span class="tip-box">Summary metric. Context only &#8212; moves when AP Optimism and Participation improve consistently.</span></span></span><span class="score-val">'+S.eng+'</span></div>';
-    html+='</div>';
-    // Last survey — always visible
-    html+='<div class="ls">';
-    html+='<div class="ls-lbl">Last Survey</div>';
-    html+='<div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap">';
-    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--amber)">'+S.apAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">AP</div></div>';
-    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--blue)">'+S.partAtYearStart+'%</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Part</div></div>';
-    html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600">'+S.engAtYearStart+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Eng</div></div>';
-    if(S.grade)html+='<div><div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--amber)">'+S.grade+'</div><div style="font-size:9px;color:var(--tm);text-transform:uppercase">Grade</div></div>';
-    html+='</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">AP Optimism<span class="tip-box">Action Plan Optimism. Do employees believe leadership will act on results? Your north star metric &#8212; weighted 40% in your annual grade.</span></span></span><span class="score-val amber">'+S.apAtYearStart+'</span>'+(S.apAtYearStart<50?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 50 &#8212; employees do not believe leadership will act. This is the critical threshold.</span></span>':'')+'</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">Participation<span class="tip-box">How many employees completed the survey. Below 65% data gets noisy. Below 50% results are unreliable.</span></span></span><span class="score-val blue">'+S.partAtYearStart+'%</span>'+(S.partAtYearStart<65?'<span class="score-warn tip">&#9888;<span class="tip-box">Below 65% &#8212; data reliability drops. Below 50% results are unreliable.</span></span>':'')+'</div>';
+    html+='<div class="score-row"><span class="score-name"><span class="tip">Engagement<span class="tip-box">Summary metric. Context only &#8212; moves when AP Optimism and Participation improve consistently.</span></span></span><span class="score-val">'+S.engAtYearStart+'</span></div>';
+    if(S.grade)html+='<div class="score-row"><span class="score-name">Last Grade</span><span class="score-val amber">'+S.grade+'</span></div>';
     // Trending toggle
     if(S.yearHistory&&S.yearHistory.length>0){
       html+='<button onclick="C.toggleTrending()" style="background:transparent;border:none;font-size:10px;color:var(--tm);cursor:pointer;font-family:var(--mono);margin-top:6px;padding:0">'+( S.showTrending?'&#9650; hide trending':'&#9660; show trending')+'</button>';
@@ -2451,8 +2412,6 @@ var R = {
           html+='<div style="font-size:12px;font-weight:600;color:var(--t2)">'+dim.label+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:1px">'+dim.owner+'</div>';
           html+='<div style="font-size:10px;color:'+sigColors[signal]+';margin-top:2px">'+sigIcons[signal]+' '+tier.label+' &#183; '+tier.desc+'</div>';
-          var recReason=getRecReason(dim.id,S.ap,S.part,S.year,S.tree);
-          if(recReason)html+='<div style="font-size:10px;color:var(--tm);margin-top:3px;line-height:1.4">'+recReason+'</div>';
           html+='<div style="font-size:10px;color:var(--tm);margin-top:3px">If it lands: <strong style="color:var(--t2)">'+SCORE_LABELS[dim.score]+' +'+dim.delta+'</strong>'+(signal==='low'?', but a weak signal risks a Trust dip instead.':'.')+' If deprioritized'+(signal==='low'?', nothing is lost.':', expect the org to notice next year.')+'</div>';
           html+='</div>';
           html+='<div style="text-align:right;flex-shrink:0">';
