@@ -227,10 +227,12 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   sites, silently zeroing the Manager Effectiveness dimension's signal; fixed, don't
   reintroduce an unused param ahead of `treeBuilt`) and picks the high/medium/low
   signal. Each dimension maps to a real stat + delta (`REC_DIMENSIONS[i].score/delta`
-  — e.g. Manager Effectiveness → AP +5); `getRecReason()` explains *why* the signal
-  is what it is in plain language citing actual ap/part/year/node values, and the
-  issue-time card also states the target stat/delta so the payoff is visible before
-  spending PC. Landed high/medium recs apply their real delta + trust +2 + PC +3;
+  — e.g. Manager Effectiveness → AP +5); the issue-time card states the target
+  stat/delta so the payoff is visible before spending PC. (A `getRecReason()`
+  helper once added a plain-language "why" line citing the actual ap/part value
+  under each dimension card — removed per feedback as too much text once the
+  tier label/color/icon already communicate the signal; don't reintroduce a
+  per-dimension reason line here.) Landed high/medium recs apply their real delta + trust +2 + PC +3;
   landed low-signal recs apply nothing but trust −1; a **deprioritized (unlanded)
   high/medium-signal rec queues into `S.recFallout`** and surfaces once, as a normal
   cause-chip on the resolve screen of a random quarter the *following* year (via
@@ -256,6 +258,14 @@ Communications (teal #26C6DA), Stakeholder Engagement (purple #B39DDB).
   only visibly move at annual survey results. Don't add ap/part back into the
   resolve screen's cause-chip `parts` array. Also spell out "Political Capital",
   not "PC", in that same chip — the abbreviation read as an unexplained shorthand.
+  This rule also covers the persistent left-panel dashboard's "Survey Scores"
+  block — it originally read live `S.ap`/`S.part`/`S.eng` and ticked every
+  quarter, which was the same "live dashboard" leak as the resolve screen just
+  in a different spot. It now reads `S.apAtYearStart`/`S.partAtYearStart`/
+  `S.engAtYearStart` (already frozen at each postsurvey for the delta math on
+  the postsurvey screen itself), so it only changes when a new survey lands.
+  The old separate "Last Survey" mini-block that duplicated those same frozen
+  numbers was folded into this one section instead of kept alongside it.
 - **`goToResolve()` guards against being called twice for the same quarter**
   (`if(S.qPhase==='resolve')return;` at the top) — a fast double-tap on Invest/
   Skip before the DOM re-renders and disables the button could otherwise re-run
